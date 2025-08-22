@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import Dashboard from './pages/admin/Dashboard';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
           <Route path="/entertainment" element={<div className="p-8 text-center">Urupapuro rw'Ibikorwa ruzakorwa vuba</div>} />
           <Route path="/celebrity" element={<div className="p-8 text-center">Urupapuro rw'Abakinnyi ruzakorwa vuba</div>} />
           <Route path="/article/:id" element={<div className="p-8 text-center">Urupapuro rw'inkuru ruzakorwa vuba</div>} />
-          <Route path="*" element={<div className="p-8 text-center">Urupapuro ntiruboneka</div>} />
+          {/* Admin Dashboard Route */}
+          
         </Routes>
       </Layout>
     </Router>

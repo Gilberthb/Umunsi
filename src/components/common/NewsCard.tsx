@@ -39,50 +39,40 @@ const NewsCard = ({
     return colors[cat] || 'bg-gray-100 text-gray-800';
   };
 
-  const sizeClasses = {
-    small: layout === 'horizontal' ? 'flex space-x-3' : 'block',
-    medium: layout === 'horizontal' ? 'flex space-x-4' : 'block',
-    large: 'block'
+  const cardClasses = layout === 'horizontal' ? 'flex items-center space-x-4' : 'block';
+
+  // Adjusted image classes for smaller sizes and mobile responsiveness
+  const imageClasses = () => {
+    if (layout === 'horizontal') {
+      return 'w-24 h-16 flex-shrink-0 sm:w-20 sm:h-14 md:w-24 md:h-16 lg:w-28 lg:h-18';
+    } else {
+      switch (size) {
+        case 'small': return 'w-full h-32 sm:h-28 md:h-36 lg:h-40';
+        case 'medium': return 'w-full h-40 sm:h-36 md:h-48 lg:h-56';
+        case 'large': return 'w-full h-56 sm:h-48 md:h-64 lg:h-80';
+        default: return 'w-full h-40 sm:h-36 md:h-48 lg:h-56';
+      }
+    }
   };
 
-  const imageClasses = {
-    small: layout === 'horizontal' ? 'w-20 h-16' : 'w-full h-32',
-    medium: layout === 'horizontal' ? 'w-24 h-20' : 'w-full h-48',
-    large: 'w-full h-64'
-  };
-
-  const titleClasses = {
-    small: 'text-sm font-semibold',
-    medium: 'text-base font-semibold',
-    large: 'text-xl font-bold'
+  // Adjusted title classes for smaller sizes and mobile responsiveness
+  const titleClasses = () => {
+    switch (size) {
+      case 'small': return 'text-sm font-semibold leading-tight sm:text-xs md:text-sm lg:text-base';
+      case 'medium': return 'text-base font-semibold leading-tight sm:text-sm md:text-base lg:text-lg';
+      case 'large': return 'text-xl font-bold leading-tight sm:text-lg md:text-xl lg:text-2xl';
+      default: return 'text-base font-semibold leading-tight sm:text-sm md:text-base lg:text-lg';
+    }
   };
 
   return (
-    <article className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden ${sizeClasses[size]}`}>
-      <Link to={`/article/${id}`} className="block">
+    <article className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden ${cardClasses}`}>
+      <Link to={`/article/${id}`} className={`block ${layout === 'horizontal' ? 'flex w-full' : ''}`}>
         {/* Image */}
-        <div className={`${imageClasses[size]} ${layout === 'horizontal' ? 'flex-shrink-0' : ''} bg-gray-200 overflow-hidden`}>
-          <img
-            src={image}
-            alt={title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-          />
-        </div>
-
+        <div className={`${imageClasses()} bg-gray-200 overflow-hidden`}><img src={image} alt={title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"/></div>
         {/* Content */}
-        <div className={`p-3 ${layout === 'horizontal' ? 'flex-1' : ''}`}>
-          {/* Category Badge */}
-          <div className="flex items-center justify-between mb-2">
-            <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
-              {category}
-            </span>
-            {size === 'large' && (
-              <div className="flex items-center text-xs text-gray-500 space-x-2">
-                <Clock size={12} />
-                <span>{publishedAt}</span>
-              </div>
-            )}
-          </div>
+        <div className={`p-3 ${layout === 'horizontal' ? 'flex-1 flex flex-col justify-center' : ''}`}>
+          <div className="flex items-center justify-between mb-1 sm:mb-0.5"><span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium sm:text-xxs ${getCategoryColor(category)}`}>{category}</span>{size === 'large' && (<div className="flex items-center text-xs text-gray-500 space-x-1 sm:text-xxs"><Clock size={10}/><span>{publishedAt}</span></div>)}</div>
 
           {/* Title */}
           <h3 className={`${titleClasses[size]} text-gray-900 line-clamp-2 hover:text-green-600 transition-colors mb-2`}>
@@ -90,16 +80,12 @@ const NewsCard = ({
           </h3>
 
           {/* Excerpt - only for medium and large */}
-          {excerpt && (size === 'medium' || size === 'large') && (
-            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-              {excerpt}
-            </p>
-          )}
+          {excerpt && (size === 'medium' || size === 'large') && (<p className="text-sm text-gray-600 line-clamp-2 mb-2 sm:text-xs">
+              {excerpt}</p>)}
 
           {/* Meta info */}
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center space-x-1">
-              <User size={12} />
+          <div className="flex items-center justify-between text-xs text-gray-500 sm:text-xxs">
+            <div className="flex items-center space-x-1"><User size={10}/>
               <span>{author}</span>
             </div>
             {size !== 'large' && (

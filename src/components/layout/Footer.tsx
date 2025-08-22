@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Send, Newspaper } from 'lucide-react';
-
+import { useState } from 'react';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -52,21 +52,21 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white text-sm">
       {/* Newsletter Section */}
-      <div className="bg-gradient-to-r from-green-600 via-green-500 to-yellow-500 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center">
+      <div className="newsletter-section">
+        <div className="container mx-auto px-4">
+          <div className="text-center newsletter-content">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
                 <Newspaper size={28} />
               </div>
-              <h3 className="text-3xl font-bold">Kwandikisha Inyandiko</h3>
+              <h3 className="newsletter-title">Kwandikisha Inyandiko</h3>
             </div>
-            <p className="text-green-50 text-lg mb-8 font-medium">Bona amakuru mashya kuri email yawe buri munsi</p>
+            <p className="text-green-50 text-sm mb-8 font-medium">Bona amakuru mashya kuri email yawe buri munsi</p>
 
             <div className="flex flex-col sm:flex-row max-w-lg mx-auto gap-4">
-              <input
+              <input id="newsletter-input"
                 type="email"
                 placeholder="Andika email yawe..."
                 className="flex-1 px-6 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/30 font-medium shadow-lg"
@@ -75,26 +75,20 @@ const Footer = () => {
                 <span>Kwiyandikisha</span>
                 <Send size={18} />
               </button>
-            </div>
+             </div>
           </div>
         </div>
       </div>
 
       {/* Main Footer Content */}
-      <div className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+      <div className="main-footer-content">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
             {/* Logo and Description */}
-            <div className="lg:col-span-1">
-              <Link to="/" className="flex items-center space-x-3 mb-6">
-                <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-3 rounded-xl shadow-lg">
-                  <div className="w-6 h-6 bg-white rounded opacity-90"></div>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Umunsi</h2>
-                  <p className="text-sm text-gray-400">Amakuru y'u Rwanda</p>
-                </div>
-              </Link>
+            <div className="lg:col-span-1 footer-logo-section mb-8 md:mb-0">
+              <Link to="/" className="block mb-6">
+ <img src="/images/logo.png" alt="Umunsi Logo" className="h-10" />
+             </Link>
 
               <p className="text-gray-400 text-sm mb-8 leading-relaxed">
                 Ikinyamakuru gikuru cy'u Rwanda gitanga amakuru y'ukuri, y'igihe n'y'ingenzi ku buryo busobanutse.
@@ -123,10 +117,10 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Footer Links */}
+            {/* Footer Links Sections */}
             {Object.entries(footerSections).map(([key, section]) => (
               <div key={key}>
-                <h3 className="font-bold text-white mb-6 text-lg">{section.title}</h3>
+                <h3 className="font-bold text-white mb-4 text-base">{section.title}</h3>
                 <ul className="space-y-3">
                   {section.links.map((link) => (
                     <li key={link.name}>
@@ -146,11 +140,11 @@ const Footer = () => {
       </div>
 
       {/* Bottom Footer */}
-      <div className="border-t border-gray-700 py-8 bg-gray-900/50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+      <div className="bottom-footer">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center bottom-footer-content">
             {/* Copyright */}
-            <div className="text-gray-400 text-sm mb-6 md:mb-0">
+            <div className="copyright text-xs mb-4 md:mb-0">
               © {currentYear} Umunsi. Uburenganzira bwose bucunguwe.
             </div>
 
@@ -202,3 +196,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

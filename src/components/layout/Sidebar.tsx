@@ -86,7 +86,7 @@ const Sidebar = () => {
 
   return (
     <aside className="w-full lg:w-80">
-      {/* Latest News Header */}
+      {/* Latest News Header - Mobile: smaller padding/fonts, Desktop: larger */}
       <div className="bg-gradient-to-br from-green-600 via-green-500 to-yellow-500 text-white p-6 rounded-t-xl shadow-lg">
         <div className="flex items-center space-x-3 mb-2">
           <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -100,14 +100,14 @@ const Sidebar = () => {
       {/* News List */}
       <div className="bg-white border-x border-gray-100 shadow-lg">
         {latestNews.map((article, index) => (
-          <Link
+          <Link // Mobile: denser spacing, smaller image/text, Desktop: more padding, larger image/text
             key={article.id}
             to={`/article/${article.id}`}
-            className={`flex items-start space-x-4 p-5 hover:bg-gradient-to-r hover:from-green-25 hover:to-yellow-25 transition-all duration-200 border-b border-gray-100 group ${
+            className={`flex items-start space-x-3 p-4 md:space-x-4 md:p-5 hover:bg-gradient-to-r hover:from-green-25 hover:to-yellow-25 transition-all duration-200 border-b border-gray-100 group ${
               index === latestNews.length - 1 ? 'border-b-0' : ''
             }`}
           >
-            {/* Article Image */}
+            {/* Article Image - Mobile: smaller, Desktop: larger */}
             <div className="flex-shrink-0 relative">
               <img
                 src={article.image}
@@ -119,12 +119,12 @@ const Sidebar = () => {
 
             {/* Article Content */}
             <div className="flex-1 min-w-0">
-              {/* Category and Time */}
-              <div className="flex items-center space-x-3 mb-2">
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getCategoryColor(article.category)}`}>
+              {/* Category and Time - Mobile: smaller font, Desktop: slightly larger */}
+              <div className="flex items-center space-x-2 mb-1 md:space-x-3 md:mb-2">
+                <span className={`text-xs font-semibold px-2 py-0.5 md:py-1 rounded-full border ${getCategoryColor(article.category)}`}>
                   {article.category}
                 </span>
-                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                <div className="flex items-center space-x-1 text-xs text-gray-500 md:text-sm">
                   <Clock size={12} />
                   <span>{article.publishedAt}</span>
                 </div>

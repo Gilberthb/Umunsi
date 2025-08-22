@@ -64,9 +64,9 @@ const NewsSection = ({
 
   const renderGridLayout = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {articles.map((article) => (
+      {articles.map((article, index) => (
         <NewsCard
-          key={article.id}
+ key={article.id || `grid-article-${index}`} // Added fallback key
           {...article}
           size="medium"
           layout="vertical"
@@ -79,7 +79,7 @@ const NewsSection = ({
     <div className="space-y-4">
       {articles.map((article) => (
         <NewsCard
-          key={article.id}
+ key={article.id || `list-article-${article.title}`} // Added fallback key
           {...article}
           size="small"
           layout="horizontal"
@@ -93,7 +93,7 @@ const NewsSection = ({
       {/* Main featured article */}
       <div className="lg:col-span-2">
         {articles[0] && (
-          <NewsCard
+ <NewsCard // Added key prop here
             {...articles[0]}
             size="large"
             layout="vertical"
@@ -105,7 +105,7 @@ const NewsSection = ({
       <div className="space-y-6">
         {articles.slice(1, 4).map((article) => (
           <NewsCard
-            key={article.id}
+ key={article.id || `mixed-article-${article.title}`} // Added fallback key
             {...article}
             size="small"
             layout="horizontal"
@@ -128,33 +128,34 @@ const NewsSection = ({
 
   return (
     <section className={`${backgroundColor} py-12 lg:py-16`}>
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center space-x-4">
-            {/* Icon and decorative line */}
-            <div className="flex items-center space-x-4">
-              <div className={`bg-gradient-to-r ${getSectionGradient()} p-3 rounded-xl shadow-lg`}>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10">
+          <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-0">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className={`bg-gradient-to-r ${getSectionGradient()} p-2 sm:p-3 rounded-xl shadow-lg`}>
                 {getSectionIcon()}
               </div>
-              <div>
-                <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-1">
+              <div className="flex-1 min-w-0"> {/* Added flex-1 and min-w-0 */}
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-1">
                   {title}
                 </h2>
                 {subtitle && (
-                  <p className="text-gray-600 text-lg font-medium">{subtitle}</p>
+                  <p className="text-gray-600 text-sm sm:text-base font-medium">{subtitle}</p>
                 )}
               </div>
             </div>
+
           </div>
 
+          {/* Desktop View All Button */}
           <Link
             to={viewAllLink}
-            className="flex items-center space-x-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 group"
+            className="hidden lg:flex items-center space-x-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-5 py-2.5 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:-translate-y-1 group"
           >
             <span>Reba Byose</span>
             <ArrowRight
-              size={18}
+              size={16}
               className="group-hover:translate-x-1 transition-transform"
             />
           </Link>
@@ -164,13 +165,13 @@ const NewsSection = ({
         {getLayoutComponent()}
 
         {/* Mobile View All Button */}
-        <div className="mt-10 lg:hidden">
+        <div className="mt-8 lg:hidden">
           <Link
-            to={viewAllLink}
-            className="block w-full text-center py-4 px-6 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-bold text-lg shadow-lg"
+            to={viewAllLink} // Removed key here
+            className="block w-full text-center py-3 px-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-bold text-base shadow-lg" // Adjusted padding, font size
           >
-            <div className="flex items-center justify-center space-x-2">
-              <span>Reba Amakuru Yose ya {title}</span>
+            <div className="flex items-center justify-center space-x-1.5">
+              <span>Reba Byose</span>
               <ArrowRight size={20} />
             </div>
           </Link>

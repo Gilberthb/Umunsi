@@ -164,7 +164,7 @@ const Home = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Main Content Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Sidebar - Left */}
           <div className="lg:col-span-1 order-2 lg:order-1">
             <Sidebar />
