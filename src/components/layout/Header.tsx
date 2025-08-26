@@ -7,8 +7,7 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const navigationItems = [
-    { name: 'Televiziyo', href: '/tv', color: 'text-blue-600' },
-    { name: 'Amashusho', href: '/movies', color: 'text-purple-600' },
+    { name: 'Iyobokamana', href: '/religion', color: 'text-blue-600' },
     { name: 'Umuziki', href: '/music', color: 'text-pink-600' },
     { name: 'Ibikorwa', href: '/entertainment', color: 'text-indigo-600' },
     { name: 'Abakinnyi', href: '/celebrity', color: 'text-yellow-600' },

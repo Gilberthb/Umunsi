@@ -1,9 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
-import Dashboard from './pages/admin/Dashboard';
+import AdminLayout from '/home/user/Umunsi/src/components/layout/AdminLayout';
+import AdminDashboard from '/home/user/Umunsi/src/pages/admin/AdminDashboard';
+import Articles from '/home/user/Umunsi/src/pages/admin/Articles';
+import Users from '/home/user/Umunsi/src/pages/admin/Users';
 
-function App() {
+function App() { // Changed to use BrowserRouter instead of Router
   return (
     <Router>
       <Layout>
@@ -20,9 +23,15 @@ function App() {
           <Route path="/celebrity" element={<div className="p-8 text-center">Urupapuro rw'Abakinnyi ruzakorwa vuba</div>} />
           <Route path="/article/:id" element={<div className="p-8 text-center">Urupapuro rw'inkuru ruzakorwa vuba</div>} />
           {/* Admin Dashboard Route */}
-          
         </Routes>
       </Layout>
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="articles" element={<Articles />} />
+          <Route path="users" element={<Users />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }
