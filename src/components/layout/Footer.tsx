@@ -1,194 +1,79 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, Send, Newspaper } from 'lucide-react';
-import { useState } from 'react';
+import { Mail, Phone, Facebook, Twitter, Instagram, Youtube, Heart } from 'lucide-react';
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  const footerSections = {
-    categories: {
-      title: 'Ibice by\'Amakuru',
-      links: [
-        { name: 'Politiki', href: '/politics' },
-        { name: 'Ubukungu', href: '/economy' },
-        { name: 'Siporo', href: '/sports' },
-        { name: 'Umuziki', href: '/music' },
-        { name: 'Televiziyo', href: '/tv' },
-        { name: 'Amashusho', href: '/movies' },
-        { name: 'Ubuzima', href: '/health' },
-        { name: 'Tekinoroji', href: '/technology' }
-      ]
-    },
-    services: {
-      title: 'Serivisi',
-      links: [
-        { name: 'Inyandiko', href: '/newsletter' },
-        { name: 'Kwishura', href: '/subscribe' },
-        { name: 'Kureba Digital', href: '/digital' },
-        { name: 'Amafoto', href: '/photos' },
-        { name: 'Video', href: '/videos' },
-        { name: 'Podcast', href: '/podcast' }
-      ]
-    },
-    company: {
-      title: 'Ikigo',
-      links: [
-        { name: 'Twebere', href: '/about' },
-        { name: 'Abakozi', href: '/team' },
-        { name: 'Akazi', href: '/careers' },
-        { name: 'Kwamamaza', href: '/advertise' },
-        { name: 'Ubufatanye', href: '/partnerships' },
-        { name: 'Ibigenga', href: '/contact' }
-      ]
-    },
-    legal: {
-      title: 'Amategeko',
-      links: [
-        { name: 'Amabanga y\'Ubuzima', href: '/privacy' },
-        { name: 'Ibikubiye', href: '/terms' },
-        { name: 'Amabwiriza', href: '/guidelines' },
-        { name: 'Inyandiko za RSS', href: '/rss' }
-      ]
-    }
-  };
-
   return (
-    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white text-sm">
-      {/* Newsletter Section */}
-      <div className="newsletter-section">
-        <div className="container mx-auto px-4">
-          <div className="text-center newsletter-content">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                <Newspaper size={28} />
-              </div>
-              <h3 className="newsletter-title">Kwandikisha Inyandiko</h3>
-            </div>
-            <p className="text-green-50 text-sm mb-8 font-medium">Bona amakuru mashya kuri email yawe buri munsi</p>
+    <footer className="bg-green-800 text-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          {/* Logo and basic info */}
+          <div className="mb-4 md:mb-0 text-center md:text-left">
+            <Link to="/" className="inline-block mb-2">
+              <img src="/images/logo.png" alt="Umunsi Logo" className="h-8" />
+            </Link>
+            <p className="text-green-100 text-xs">
+              Amakuru y'ukuri, y'igihe
+            </p>
+          </div>
 
-            <div className="flex flex-col sm:flex-row max-w-lg mx-auto gap-4">
-              <input id="newsletter-input"
-                type="email"
-                placeholder="Andika email yawe..."
-                className="flex-1 px-6 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/30 font-medium shadow-lg"
-              />
-              <button className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 px-8 py-4 rounded-xl font-bold hover:from-yellow-400 hover:to-yellow-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center space-x-2">
-                <span>Kwiyandikisha</span>
-                <Send size={18} />
-              </button>
-             </div>
+          {/* Quick links */}
+          <div className="flex flex-wrap justify-center gap-4 mb-4 md:mb-0">
+            <Link to="/about" className="text-green-100 hover:text-white text-xs transition-colors">
+              Twebwe
+            </Link>
+            <Link to="/contact" className="text-green-100 hover:text-white text-xs transition-colors">
+              Twandikire
+            </Link>
+            <Link to="/privacy" className="text-green-100 hover:text-white text-xs transition-colors">
+              Amabanga
+            </Link>
+            <Link to="/terms" className="text-green-100 hover:text-white text-xs transition-colors">
+              Amategeko
+            </Link>
+          </div>
+
+          {/* Social media */}
+          <div className="flex items-center space-x-2">
+            <a
+              href="https://facebook.com/umunsi"
+              className="p-2 text-green-100 hover:text-white hover:bg-green-700 transition-all duration-200 rounded"
+              aria-label="Facebook"
+            >
+              <Facebook size={16} />
+            </a>
+            <a
+              href="https://twitter.com/umunsi"
+              className="p-2 text-green-100 hover:text-white hover:bg-green-700 transition-all duration-200 rounded"
+              aria-label="Twitter"
+            >
+              <Twitter size={16} />
+            </a>
+            <a
+              href="https://instagram.com/umunsi"
+              className="p-2 text-green-100 hover:text-white hover:bg-green-700 transition-all duration-200 rounded"
+              aria-label="Instagram"
+            >
+              <Instagram size={16} />
+            </a>
+            <a
+              href="https://youtube.com/umunsi"
+              className="p-2 text-green-100 hover:text-white hover:bg-green-700 transition-all duration-200 rounded"
+              aria-label="YouTube"
+            >
+              <Youtube size={16} />
+            </a>
           </div>
         </div>
-      </div>
 
-      {/* Main Footer Content */}
-      <div className="main-footer-content">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
-            {/* Logo and Description */}
-            <div className="lg:col-span-1 footer-logo-section mb-8 md:mb-0">
-              <Link to="/" className="block mb-6">
- <img src="/images/logo.png" alt="Umunsi Logo" className="h-10" />
-             </Link>
-
-              <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                Ikinyamakuru gikuru cy'u Rwanda gitanga amakuru y'ukuri, y'igihe n'y'ingenzi ku buryo busobanutse.
-              </p>
-
-              {/* Contact Info */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-sm text-gray-400">
-                  <div className="bg-green-600/20 p-2 rounded-lg">
-                    <MapPin size={16} />
-                  </div>
-                  <span>KG 5 Ave, Kigali, Rwanda</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-400">
-                  <div className="bg-green-600/20 p-2 rounded-lg">
-                    <Phone size={16} />
-                  </div>
-                  <span>+250 788 123 456</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm text-gray-400">
-                  <div className="bg-green-600/20 p-2 rounded-lg">
-                    <Mail size={16} />
-                  </div>
-                  <span>info@umunsi.rw</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer Links Sections */}
-            {Object.entries(footerSections).map(([key, section]) => (
-              <div key={key}>
-                <h3 className="font-bold text-white mb-4 text-base">{section.title}</h3>
-                <ul className="space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        to={link.href}
-                        className="text-gray-400 hover:text-green-400 transition-colors text-sm font-medium hover:translate-x-1 transform duration-200 block"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Footer */}
-      <div className="bottom-footer">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center bottom-footer-content">
-            {/* Copyright */}
-            <div className="copyright text-xs mb-4 md:mb-0">
-              © {currentYear} Umunsi. Uburenganzira bwose bucunguwe.
-            </div>
-
-            {/* Social Media */}
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-sm mr-4 font-medium">Tukurikire:</span>
-              <a
-                href="https://facebook.com/umunsi"
-                className="p-3 text-gray-400 hover:text-white bg-gray-800 hover:bg-green-600 transition-all duration-200 rounded-lg hover:scale-110"
-                aria-label="Facebook"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Facebook size={20} />
-              </a>
-              <a
-                href="https://twitter.com/umunsi"
-                className="p-3 text-gray-400 hover:text-white bg-gray-800 hover:bg-green-600 transition-all duration-200 rounded-lg hover:scale-110"
-                aria-label="Twitter"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Twitter size={20} />
-              </a>
-              <a
-                href="https://instagram.com/umunsi"
-                className="p-3 text-gray-400 hover:text-white bg-gray-800 hover:bg-green-600 transition-all duration-200 rounded-lg hover:scale-110"
-                aria-label="Instagram"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="https://youtube.com/umunsi"
-                className="p-3 text-gray-400 hover:text-white bg-gray-800 hover:bg-green-600 transition-all duration-200 rounded-lg hover:scale-110"
-                aria-label="YouTube"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Youtube size={20} />
-              </a>
-            </div>
-          </div>
+        {/* Copyright */}
+        <div className="text-center mt-6 pt-4 border-t border-green-700/50">
+          <p className="text-green-200 text-xs flex items-center justify-center">
+            © {currentYear} Umunsi 
+            <Heart size={10} className="mx-1 text-yellow-300" /> 
+            Uburenganzira bwose bucunguwe
+          </p>
         </div>
       </div>
     </footer>
@@ -196,4 +81,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
