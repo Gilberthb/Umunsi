@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Clock, User, Share2, Bookmark, PlayCircle, ArrowRight, MessageCircle, Eye } from 'lucide-react';
+import { Clock, User, Share2, Bookmark, ArrowRight, MessageCircle, Eye } from 'lucide-react';
 
 const HeroSection = () => {
   // Updated featured article structure to potentially hold more data for the EW.com layout
@@ -86,13 +86,6 @@ const HeroSection = () => {
                 {/* Overlay Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-                    <PlayCircle size={48} className="text-white" />
-                  </div>
-                </div>
-
                 {/* Content Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white md:p-6 lg:p-8">
                   {/* Category */}
@@ -140,16 +133,16 @@ const HeroSection = () => {
                       <Bookmark size={18} />
                     </button>
                   </div>
-                  
-                  {/* Added more meta/engagement info */}
-                  <div className="mt-4 text-xs text-gray-400 flex items-center space-x-4">
+
+                  {/* View and Comment Count */}
+                  <div className="mt-4 text-xs text-gray-300 flex items-center space-x-4">
                     <div className="flex items-center space-x-1">
                       <Eye size={12} />
-                      <span>{featuredArticle.views} Views</span>
+                      <span>{featuredArticle.views} Abasomyi</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <MessageCircle size={12} />
-                      <span>{featuredArticle.comments} Comments</span>
+                      <span>{featuredArticle.comments} Ibyakozwe</span>
                     </div>
                   </div>
                 </div>
