@@ -13,7 +13,8 @@ const Header = () => {
     { name: 'Abakinnyi', href: '/celebrity', color: 'text-yellow-600' },
     { name: 'Siporo', href: '/sports', color: 'text-orange-600' },
     { name: 'Politiki', href: '/politics', color: 'text-red-600' },
-    { name: 'Ubuzima', href: '/health', color: 'text-emerald-600' }
+    { name: 'Ubuzima', href: '/health', color: 'text-emerald-600' },
+    { name: 'Amashusho', href: '/images', color: 'text-purple-600' }
   ];
 
   return (

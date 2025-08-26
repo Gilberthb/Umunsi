@@ -75,7 +75,7 @@ const NewsCard = ({
           <div className="flex items-center justify-between mb-1 sm:mb-0.5"><span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium sm:text-xxs ${getCategoryColor(category)}`}>{category}</span>{size === 'large' && (<div className="flex items-center text-xs text-gray-500 space-x-1 sm:text-xxs"><Clock size={10}/><span>{publishedAt}</span></div>)}</div>
 
           {/* Title */}
-          <h3 className={`${titleClasses[size]} text-gray-900 line-clamp-2 hover:text-green-600 transition-colors mb-2`}>
+          <h3 className={`${titleClasses()} text-gray-900 line-clamp-2 hover:text-green-600 transition-colors mb-2`}>
             {title}
           </h3>
 
