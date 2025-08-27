@@ -36,9 +36,9 @@ const Header = () => {
               <span>Inyandiko</span>
 
             </Link>
-            <Link to="/subscribe" className="hover:text-yellow-200 transition-colors flex items-center space-x-1">
+            <Link to="/login" className="hover:text-yellow-200 transition-colors flex items-center space-x-1">
               <User size={14} />
-              <span>Kwishura</span>
+              <span>Kwinjira</span>
             </Link>
           </div>
         </div>
