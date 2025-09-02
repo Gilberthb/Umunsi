@@ -12,8 +12,11 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  ArrowRight,
+  MoreHorizontal
 } from 'lucide-react';
+import { apiClient } from '../services/api';
 
 interface DashboardStats {
   totalUsers: number;
@@ -74,78 +77,46 @@ const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // In a real app, you would fetch from your API
-      // const response = await fetch('/api/admin/dashboard', {
-      //   headers: {
-      //     'Authorization': `Bearer ${token}`
-      //   }
-      // });
-      // const data = await response.json();
+      const [statsData, articlesData, usersData, topArticlesData] = await Promise.all([
+        apiClient.getDashboardStats(),
+        apiClient.getArticles({ limit: 5, status: 'PUBLISHED' }),
+        apiClient.getUsers({ limit: 5 }),
+        apiClient.getArticles({ limit: 5, status: 'PUBLISHED' })
+      ]);
 
-      // Mock data for demonstration
       const mockData = {
-        overview: {
-          totalUsers: 1247,
-          totalArticles: 89,
-          totalCategories: 7,
-          totalComments: 234,
-          userGrowthPercentage: 12.5,
-          articleGrowthPercentage: 8.3
-        },
-        recentArticles: [
-          {
-            id: '1',
-            title: 'Umunsi wa Kinyarwanda 2024: Abanyarwanda basanze mu minsi 30',
-            viewCount: 1250,
-            likeCount: 89,
-            commentCount: 23,
-            author: { username: 'author1', firstName: 'John', lastName: 'Doe' },
-            category: { name: 'Siporo', color: '#EF4444' }
+        overview: statsData,
+        recentArticles: articlesData.data.map(article => ({
+          id: article.id,
+          title: article.title,
+          viewCount: article.viewCount,
+          likeCount: article.likeCount,
+          commentCount: article.commentCount,
+          author: { 
+            username: article.author.username, 
+            firstName: article.author.firstName, 
+            lastName: article.author.lastName 
           },
-          {
-            id: '2',
-            title: 'Imyemeramikire yo mu Rwanda ikomeje guteza imbere amahoro n\'ubumwe',
-            viewCount: 856,
-            likeCount: 67,
-            commentCount: 15,
-            author: { username: 'author2', firstName: 'Jane', lastName: 'Smith' },
-            category: { name: 'Iyobokamana', color: '#3B82F6' }
+          category: { 
+            name: article.category.name, 
+            color: article.category.color 
           }
-        ],
-        recentUsers: [
-          {
-            id: '1',
-            username: 'newuser1',
-            email: 'user1@example.com',
-            role: 'USER',
-            createdAt: '2024-01-15T10:30:00Z'
-          },
-          {
-            id: '2',
-            username: 'newuser2',
-            email: 'user2@example.com',
-            role: 'USER',
-            createdAt: '2024-01-14T15:45:00Z'
-          }
-        ],
-        topArticles: [
-          {
-            id: '1',
-            title: 'Umunsi wa Kinyarwanda 2024',
-            viewCount: 1250,
-            likeCount: 89,
-            commentCount: 23,
-            author: { username: 'author1' }
-          },
-          {
-            id: '2',
-            title: 'Imyemeramikire yo mu Rwanda',
-            viewCount: 856,
-            likeCount: 67,
-            commentCount: 15,
-            author: { username: 'author2' }
-          }
-        ]
+        })),
+        recentUsers: usersData.data.map(user => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          createdAt: user.createdAt
+        })),
+        topArticles: topArticlesData.data.map(article => ({
+          id: article.id,
+          title: article.title,
+          viewCount: article.viewCount,
+          likeCount: article.likeCount,
+          commentCount: article.commentCount,
+          author: { username: article.author.username }
+        }))
       };
 
       setStats(mockData.overview);
@@ -185,29 +156,25 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage your news website and monitor performance</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <Activity className="w-4 h-4" />
-                <span>Last updated: {new Date().toLocaleTimeString()}</span>
-              </div>
-            </div>
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+            <p className="text-gray-600 text-sm sm:text-base">Welcome back! Here's what's happening with your site.</p>
+          </div>
+          <div className="mt-4 sm:mt-0 flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
+            <Activity className="w-4 h-4" />
+            <span>Last updated: {new Date().toLocaleTimeString()}</span>
           </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8">
+      {/* Navigation Tabs - Mobile Scrollable */}
+      <div className="mb-6 sm:mb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-1">
+          <nav className="flex space-x-1 overflow-x-auto scrollbar-hide">
             {[
               { id: 'overview', name: 'Overview', icon: BarChart3 },
               { id: 'users', name: 'Users', icon: Users },
@@ -220,10 +187,10 @@ const AdminDashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`flex items-center space-x-2 py-2 px-3 rounded-md font-medium text-sm whitespace-nowrap transition-colors ${
                     activeTab === tab.id
-                      ? 'border-green-500 text-green-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-green-100 text-green-700'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -236,244 +203,209 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'overview' && (
-          <div className="space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Users className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Users</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.totalUsers.toLocaleString()}</p>
-                    <p className="text-sm text-green-600 flex items-center">
-                      <TrendingUp className="w-4 h-4 mr-1" />
-                      +{stats?.userGrowthPercentage}%
-                    </p>
-                  </div>
+      {activeTab === 'overview' && (
+        <div className="space-y-6 sm:space-y-8">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <FileText className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Articles</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.totalArticles}</p>
-                    <p className="text-sm text-green-600 flex items-center">
-                      <TrendingUp className="w-4 h-4 mr-1" />
-                      +{stats?.articleGrowthPercentage}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <BarChart3 className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Categories</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.totalCategories}</p>
-                    <p className="text-sm text-gray-500">Active</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <Eye className="w-6 h-6 text-yellow-600" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Comments</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.totalComments}</p>
-                    <p className="text-sm text-gray-500">Total</p>
-                  </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalUsers?.toLocaleString() || 0}</p>
+                  <p className="text-xs sm:text-sm text-green-600 flex items-center">
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    +{stats?.userGrowthPercentage || 0}%
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Recent Articles */}
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Recent Articles</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {recentArticles.map((article) => (
-                      <div key={article.id} className="flex items-start space-x-4">
-                        <div className="flex-shrink-0">
-                          <div 
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: article.category.color }}
-                          ></div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {article.title}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            by {article.author.firstName} {article.author.lastName}
-                          </p>
-                          <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
-                            <span className="flex items-center">
-                              <Eye className="w-3 h-3 mr-1" />
-                              {article.viewCount}
-                            </span>
-                            <span>•</span>
-                            <span>{article.category.name}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Users */}
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Recent Users</h3>
-                </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {recentUsers.map((user) => (
-                      <div key={user.id} className="flex items-center space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-700">
-                              {user.username.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{user.username}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
-                        <div className="flex-shrink-0">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                            {user.role}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Articles</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalArticles || 0}</p>
+                  <p className="text-xs sm:text-sm text-green-600 flex items-center">
+                    <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    +{stats?.articleGrowthPercentage || 0}%
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Top Articles */}
-            <div className="bg-white rounded-lg shadow">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Top Performing Articles</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Categories</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalCategories || 0}</p>
+                </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Article
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Author
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Views
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Likes
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Comments
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {topArticles.map((article) => (
-                      <tr key={article.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{article.title}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{article.author.username}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{article.viewCount.toLocaleString()}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{article.likeCount}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{article.commentCount}</div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Comments</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalComments || 0}</p>
+                </div>
               </div>
             </div>
           </div>
-        )}
 
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-900">User Management</h3>
-                <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2">
-                  <UserPlus className="w-4 h-4" />
-                  <span>Add User</span>
+          {/* Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            {/* Recent Articles */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-4 sm:p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Recent Articles</h3>
+                  <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                    View all
+                  </button>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="space-y-4">
+                  {recentArticles.slice(0, 5).map((article) => (
+                    <div key={article.id} className="flex items-start space-x-3">
+                      <div 
+                        className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
+                        style={{ backgroundColor: article.category.color }}
+                      ></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {article.title}
+                        </p>
+                        <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
+                          <span>{article.author.firstName} {article.author.lastName}</span>
+                          <span>•</span>
+                          <span>{article.viewCount} views</span>
+                          <span>•</span>
+                          <span>{formatDate(article.createdAt || new Date().toISOString())}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Users */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="p-4 sm:p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Recent Users</h3>
+                  <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                    View all
+                  </button>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="space-y-4">
+                  {recentUsers.slice(0, 5).map((user) => (
+                    <div key={user.id} className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-green-600">
+                          {user.firstName?.[0] || user.username[0]}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
+                        {user.role}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Articles */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-4 sm:p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Top Performing Articles</h3>
+                <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                  View all
                 </button>
               </div>
             </div>
-            <div className="p-6">
-              <p className="text-gray-500">User management interface will be implemented here.</p>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Article
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Author
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Views
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Likes
+                    </th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Comments
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {topArticles.slice(0, 5).map((article) => (
+                    <tr key={article.id} className="hover:bg-gray-50">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                          {article.title}
+                        </div>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{article.author.username}</div>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{article.viewCount.toLocaleString()}</div>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{article.likeCount}</div>
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{article.commentCount}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {activeTab === 'content' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Content Management</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-500">Content management interface will be implemented here.</p>
-            </div>
+      {/* Other tabs content */}
+      {activeTab !== 'overview' && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+            <p className="text-gray-500">This section is under development.</p>
           </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Analytics</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-500">Analytics dashboard will be implemented here.</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">System Settings</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-500">System settings interface will be implemented here.</p>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
