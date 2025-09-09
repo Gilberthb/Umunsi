@@ -1,5 +1,5 @@
 // API Base Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5003/api';
 
 // API Response Types
 export interface ApiResponse<T = any> {
@@ -34,6 +34,8 @@ export interface RegisterData {
 }
 
 export interface AuthResponse {
+  success: boolean;
+  message: string;
   user: {
     id: string;
     username: string;
@@ -42,6 +44,7 @@ export interface AuthResponse {
     lastName: string;
     role: string;
     isActive: boolean;
+    lastLogin?: string;
   };
   token: string;
 }
@@ -57,6 +60,7 @@ export interface Article {
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   isFeatured: boolean;
   isBreaking: boolean;
+  isTrending: boolean;
   viewCount: number;
   likeCount: number;
   commentCount: number;
@@ -88,7 +92,14 @@ export interface Category {
   slug: string;
   description?: string;
   color: string;
-  articleCount: number;
+  icon?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  articleCount?: number;
+  _count?: {
+    news: number;
+  };
 }
 
 // User Types
@@ -100,11 +111,75 @@ export interface User {
   lastName: string;
   role: 'ADMIN' | 'EDITOR' | 'AUTHOR' | 'USER';
   isActive: boolean;
+  isVerified: boolean;
+  avatar?: string;
+  bio?: string;
+  phone?: string;
   lastLogin?: string;
   createdAt: string;
+  updatedAt: string;
   _count: {
-    articles: number;
-    comments: number;
+    news: number;
+    posts: number;
+  };
+}
+
+// Media Types
+export interface MediaFile {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  url: string;
+  thumbnailUrl?: string;
+  category: string;
+  tags: string[];
+  description?: string;
+  uploadedBy: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  featuredImage?: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED';
+  publishedAt?: string;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  isFeatured: boolean;
+  isPinned: boolean;
+  allowComments: boolean;
+  tags: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    avatar?: string;
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+    color?: string;
   };
 }
 
@@ -114,6 +189,8 @@ export interface DashboardStats {
   totalArticles: number;
   totalCategories: number;
   totalComments: number;
+  totalMedia: number;
+  totalPosts: number;
   userGrowthPercentage: number;
   articleGrowthPercentage: number;
 }
@@ -153,20 +230,27 @@ class ApiClient {
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('authToken');
+    this.token = localStorage.getItem('umunsi_token');
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
     retryCount = 0
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
+    const headers: HeadersInit = {};
+
+    // Only set Content-Type for non-FormData requests
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    // Add any custom headers from options
+    if (options.headers) {
+      Object.assign(headers, options.headers);
+    }
 
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`;
@@ -181,7 +265,7 @@ class ApiClient {
       const data = await response.json();
 
       // Handle token expiration
-      if (response.status === 401 && retryCount === 0) {
+      if (response.status === 401 && retryCount === 0 && this.token) {
         try {
           // Try to refresh the token
           await this.refreshToken();
@@ -190,10 +274,14 @@ class ApiClient {
         } catch (refreshError) {
           // If refresh fails, clear token and redirect to login
           this.token = null;
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('umunsi_token');
           window.location.href = '/login';
           throw new Error('Session expired. Please login again.');
         }
+      } else if (response.status === 401 && !this.token) {
+        // No token available, redirect to login
+        window.location.href = '/login';
+        throw new Error('Authentication required. Please login.');
       }
 
       if (!response.ok) {
@@ -214,9 +302,9 @@ class ApiClient {
       body: JSON.stringify(credentials),
     });
     
-    if (response.token) {
+    if (response.success && response.token) {
       this.token = response.token;
-      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('umunsi_token', response.token);
     }
     
     return response;
@@ -228,9 +316,9 @@ class ApiClient {
       body: JSON.stringify(userData),
     });
     
-    if (response.token) {
+    if (response.success && response.token) {
       this.token = response.token;
-      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('umunsi_token', response.token);
     }
     
     return response;
@@ -243,7 +331,7 @@ class ApiClient {
       console.error('Logout error:', error);
     } finally {
       this.token = null;
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('umunsi_token');
     }
   }
 
@@ -253,14 +341,34 @@ class ApiClient {
   }
 
   async refreshToken(): Promise<void> {
+    if (!this.token) {
+      throw new Error('No token available to refresh');
+    }
+    
     const response = await this.request<{ token: string }>('/auth/refresh', {
       method: 'POST'
     });
     
-    if (response.token) {
+    if (response.success && response.token) {
       this.token = response.token;
-      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('umunsi_token', response.token);
     }
+  }
+
+  // Token management methods
+  setToken(token: string): void {
+    this.token = token;
+    localStorage.setItem('umunsi_token', token);
+  }
+
+  clearToken(): void {
+    this.token = null;
+    localStorage.removeItem('umunsi_token');
+  }
+
+  // Health check method
+  async healthCheck(): Promise<any> {
+    return await this.request('/health');
   }
 
   // News Methods
@@ -292,11 +400,20 @@ class ApiClient {
     return response;
   }
 
-  async createArticle(articleData: Partial<Article>): Promise<Article> {
-    const response = await this.request<Article>('/news', {
-      method: 'POST',
-      body: JSON.stringify(articleData),
-    });
+  async createArticle(articleData: Partial<Article> | FormData): Promise<Article> {
+    let options: RequestInit = { method: 'POST' };
+    
+    if (articleData instanceof FormData) {
+      // Handle file upload with FormData
+      options.body = articleData;
+      // Don't set Content-Type header for FormData (browser sets it automatically with boundary)
+    } else {
+      // Handle regular JSON data
+      options.body = JSON.stringify(articleData);
+      options.headers = { 'Content-Type': 'application/json' };
+    }
+
+    const response = await this.request<Article>('/news', options);
     return response;
   }
 
@@ -315,7 +432,8 @@ class ApiClient {
   // Categories Methods
   async getCategories(): Promise<Category[]> {
     const response = await this.request<{categories: Category[]}>('/categories');
-    return response.categories;
+    // The API returns {success: true, categories: [...]}
+    return response.categories || [];
   }
 
   async createCategory(categoryData: Partial<Category>): Promise<Category> {
@@ -324,6 +442,18 @@ class ApiClient {
       body: JSON.stringify(categoryData),
     });
     return response;
+  }
+
+  async updateCategory(id: string, categoryData: Partial<Category>): Promise<Category> {
+    const response = await this.request<Category>(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(categoryData),
+    });
+    return response;
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    await this.request(`/categories/${id}`, { method: 'DELETE' });
   }
 
   // Users Methods
@@ -370,10 +500,189 @@ class ApiClient {
     return response;
   }
 
-  // Health Check
-  async healthCheck(): Promise<{ status: string; timestamp: string; environment: string; database: string }> {
-    const response = await this.request('/health');
+  // Posts Methods
+  async getPosts(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    author?: string;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ data: Post[]; pagination: any }> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    const response = await this.request<{ data: Post[]; pagination: any }>(`/posts?${queryParams}`);
     return response;
+  }
+
+  async getPost(id: string): Promise<Post> {
+    const response = await this.request<{ success: boolean; data: Post }>(`/posts/${id}`);
+    return response.data;
+  }
+
+  async createPost(data: {
+    title: string;
+    content: string;
+    excerpt?: string;
+    featuredImage?: string;
+    status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED';
+    categoryId?: string;
+    isFeatured?: boolean;
+    isPinned?: boolean;
+    allowComments?: boolean;
+    tags?: string[];
+    metaTitle?: string;
+    metaDescription?: string;
+  }): Promise<Post> {
+    const response = await this.request<Post>('/posts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response;
+  }
+
+  async updatePost(id: string, data: Partial<{
+    title: string;
+    content: string;
+    excerpt: string;
+    featuredImage: string;
+    status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED';
+    categoryId: string;
+    isFeatured: boolean;
+    isPinned: boolean;
+    allowComments: boolean;
+    tags: string[];
+    metaTitle: string;
+    metaDescription: string;
+  }>): Promise<Post> {
+    const response = await this.request<Post>(`/posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response;
+  }
+
+  async deletePost(id: string): Promise<void> {
+    await this.request(`/posts/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async deletePosts(ids: string[]): Promise<void> {
+    await this.request('/posts/bulk-delete', {
+      method: 'DELETE',
+      body: JSON.stringify({ ids }),
+    });
+  }
+
+  async getPostStats(): Promise<{
+    totalPosts: number;
+    publishedPosts: number;
+    draftPosts: number;
+    featuredPosts: number;
+    totalViews: number;
+    totalLikes: number;
+  }> {
+    const response = await this.request<{
+      success: boolean;
+      data: {
+        totalPosts: number;
+        publishedPosts: number;
+        draftPosts: number;
+        featuredPosts: number;
+        totalViews: number;
+        totalLikes: number;
+      };
+    }>('/posts/stats');
+    return response.data;
+  }
+
+  // Media Methods
+  async getMediaFiles(params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    type?: string;
+  }): Promise<MediaFile[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.type) searchParams.append('type', params.type);
+
+    const response = await this.request<{media: MediaFile[]}>(
+      `/media?${searchParams.toString()}`
+    );
+    return response.media || [];
+  }
+
+  async getMediaFile(id: string): Promise<MediaFile> {
+    const response = await this.request<MediaFile>(`/media/${id}`);
+    return response;
+  }
+
+  async uploadMediaFiles(formData: FormData): Promise<MediaFile[]> {
+    const response = await this.request<{media: MediaFile[]}>('/media/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    return response.media || [];
+  }
+
+  async updateMediaFile(id: string, mediaData: Partial<MediaFile>): Promise<MediaFile> {
+    const response = await this.request<MediaFile>(`/media/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(mediaData),
+    });
+    return response;
+  }
+
+  async deleteMediaFiles(ids: string[]): Promise<void> {
+    await this.request('/media/bulk-delete', {
+      method: 'DELETE',
+      body: JSON.stringify({ ids }),
+    });
+  }
+
+  async deleteMediaFile(id: string): Promise<void> {
+    await this.request(`/media/${id}`, { method: 'DELETE' });
+  }
+
+  async getMediaStats(): Promise<{
+    totalMedia: number;
+    totalImages: number;
+    totalVideos: number;
+    totalDocuments: number;
+    totalSize: number;
+  }> {
+    const response = await this.request<{
+      success: boolean;
+      stats: {
+        totalFiles: number;
+        imagesCount: number;
+        videosCount: number;
+        documentsCount: number;
+        audioCount: number;
+        totalSize: number;
+      };
+    }>('/media/stats');
+    return {
+      totalMedia: response.stats.totalFiles,
+      totalImages: response.stats.imagesCount,
+      totalVideos: response.stats.videosCount,
+      totalDocuments: response.stats.documentsCount,
+      totalSize: response.stats.totalSize
+    };
   }
 }
 
@@ -390,6 +699,8 @@ export type {
   Article,
   Category,
   User,
+  MediaFile,
+  Post,
   DashboardStats,
   AnalyticsData,
 };

@@ -10,17 +10,48 @@ import Login from './pages/Login';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import Articles from './pages/admin/Articles';
+import BreakingNews from './pages/admin/BreakingNews';
+import FeaturedNews from './pages/admin/FeaturedNews';
+import News from './pages/admin/News';
+import Categories from './pages/admin/Categories';
 import Users from './pages/admin/Users';
 import Analytics from './pages/admin/Analytics';
 import Logs from './pages/admin/Logs';
 import Settings from './pages/admin/Settings';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import MediaLibrary from './pages/admin/MediaLibrary';
+import AddMedia from './pages/admin/AddMedia';
+import Posts from './pages/admin/Posts';
+import AddPost from './pages/admin/AddPost';
+import EditPost from './pages/admin/EditPost';
+import PostDetail from './pages/admin/PostDetail';
+import { withAuth, withAdmin, withEditor } from './contexts/AuthContext';
+
+// Create wrapped components
+const ProtectedAdminDashboard = withEditor(AdminDashboard);
+const ProtectedArticles = withEditor(Articles);
+const ProtectedBreakingNews = withEditor(BreakingNews);
+const ProtectedFeaturedNews = withEditor(FeaturedNews);
+const ProtectedNews = withEditor(News);
+const ProtectedCategories = withEditor(Categories);
+const ProtectedUsers = withAdmin(Users);
+const ProtectedAnalytics = withEditor(Analytics);
+const ProtectedLogs = withAdmin(Logs);
+const ProtectedSettings = withAdmin(Settings);
+const ProtectedMediaLibrary = withEditor(MediaLibrary);
+const ProtectedAddMedia = withEditor(AddMedia);
+const ProtectedPosts = withEditor(Posts);
+const ProtectedAddPost = withEditor(AddPost);
+const ProtectedEditPost = withEditor(EditPost);
+const ProtectedPostDetail = withEditor(PostDetail);
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Login route - standalone, no layout wrapper */}
+          <Route path="/login" element={<Login />} />
+          
           {/* Public routes with Layout */}
           <Route path="/*" element={
             <Layout>
@@ -37,23 +68,32 @@ function App() {
                 <Route path="/entertainment" element={<Entertainment />} />
                 <Route path="/celebrity" element={<div className="p-8 text-center">Urupapuro rw'Abakinnyi ruzakorwa vuba</div>} />
                 <Route path="/article/:id" element={<div className="p-8 text-center">Urupapuro rw'inkuru ruzakorwa vuba</div>} />
-                <Route path="/login" element={<Login />} />
               </Routes>
             </Layout>
           } />
           
-          {/* Admin routes with AdminLayout */}
+          {/* Admin routes with AdminLayout - Protected with authentication */}
           <Route path="/admin/*" element={
-            <ProtectedRoute requiredRole="ADMIN">
-              <AdminLayout />
-            </ProtectedRoute>
+            <AdminLayout />
           }>
-            <Route index element={<AdminDashboard />} />
-            <Route path="articles" element={<Articles />} />
-            <Route path="users" element={<Users />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="logs" element={<Logs />} />
-            <Route path="settings" element={<Settings />} />
+            <Route index element={<ProtectedAdminDashboard />} />
+            <Route path="articles" element={<ProtectedArticles />} />
+            <Route path="news" element={<ProtectedNews />} />
+            <Route path="breaking-news" element={<ProtectedBreakingNews />} />
+            <Route path="featured-news" element={<ProtectedFeaturedNews />} />
+            <Route path="categories" element={<ProtectedCategories />} />
+            <Route path="users" element={<ProtectedUsers />} />
+            <Route path="analytics" element={<ProtectedAnalytics />} />
+            <Route path="logs" element={<ProtectedLogs />} />
+            <Route path="settings" element={<ProtectedSettings />} />
+            <Route path="media/library" element={<ProtectedMediaLibrary />} />
+            <Route path="media/add" element={<ProtectedAddMedia />} />
+            <Route path="posts" element={<ProtectedPosts />} />
+            <Route path="posts/add" element={<ProtectedAddPost />} />
+            <Route path="posts/edit/:id" element={<ProtectedEditPost />} />
+            <Route path="posts/:id" element={<ProtectedPostDetail />} />
+            {/* Test route to verify routing works */}
+            <Route path="test" element={<div className="p-12 text-center text-green-600 font-bold">✅ Test Route Working!</div>} />
           </Route>
         </Routes>
       </Router>
