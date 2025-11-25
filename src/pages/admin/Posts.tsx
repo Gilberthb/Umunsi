@@ -18,7 +18,10 @@ import {
   MessageCircle,
   TrendingUp,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { apiClient, Post, Category } from '../../services/api';
 
@@ -28,37 +31,22 @@ const Posts: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper function to get server base URL
   const getServerBaseUrl = () => {
-    // In development, use relative URLs since Vite proxy handles routing
-    if (import.meta.env.DEV) {
-      return '';
-    }
-    // In production, use the full server URL
-    return import.meta.env.VITE_API_URL || '';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    return apiUrl.replace('/api', '');
   };
 
-  // Helper function to get image URL
   const getImageUrl = (imagePath: string) => {
-    console.log('🔗 Processing image URL:', imagePath);
-    
-    // Fix any URLs that still have /api/ in them
     let fixedPath = imagePath;
     if (imagePath.includes('/api/uploads/')) {
       fixedPath = imagePath.replace('/api/uploads/', '/uploads/');
-      console.log('🔧 Fixed URL (removed /api/):', fixedPath);
     }
-    
-    // If the image path already includes a full URL, use it as is
     if (fixedPath.startsWith('http://') || fixedPath.startsWith('https://')) {
-      console.log('✅ Using full URL as-is:', fixedPath);
       return fixedPath;
     }
-    // Otherwise, prepend the server base URL
-    const finalUrl = `${getServerBaseUrl()}${fixedPath}`;
-    console.log('🔧 Constructed URL:', finalUrl);
-    return finalUrl;
+    return `${getServerBaseUrl()}${fixedPath}`;
   };
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -86,31 +74,12 @@ const Posts: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const params: any = {
-        page: currentPage,
-        limit: 12
-      };
-
-      if (selectedStatus !== 'all') {
-        params.status = selectedStatus;
-      }
-
-      if (selectedCategory !== 'all') {
-        params.category = selectedCategory;
-      }
-
-      if (searchTerm) {
-        params.search = searchTerm;
-      }
+      const params: Record<string, unknown> = { page: currentPage, limit: 12 };
+      if (selectedStatus !== 'all') params.status = selectedStatus;
+      if (selectedCategory !== 'all') params.category = selectedCategory;
+      if (searchTerm) params.search = searchTerm;
 
       const response = await apiClient.getPosts(params);
-      console.log('📄 Posts fetched:', response.data.length, 'posts');
-      response.data.forEach(post => {
-        if (post.featuredImage) {
-          console.log('🖼️ Post featured image:', post.title, '->', post.featuredImage);
-          console.log('🔗 Generated image URL:', getImageUrl(post.featuredImage));
-        }
-      });
       setPosts(response.data);
       setTotalPages(response.pagination.pages);
     } catch (error) {
@@ -142,12 +111,10 @@ const Posts: React.FC = () => {
       setSelectedPosts([]);
       setShowDeleteConfirm(false);
       setPostsToDelete([]);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting posts:', error);
-      // Check if it's a "Post not found" error
-      if (error.message && error.message.includes('Post not found')) {
+      if (error instanceof Error && error.message?.includes('Post not found')) {
         setError('Some posts may have already been deleted. Refreshing the list...');
-        // Refresh the posts list to get current state
         await fetchPosts();
       } else {
         setError('Failed to delete posts. Please try again.');
@@ -157,34 +124,22 @@ const Posts: React.FC = () => {
     }
   };
 
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
-    setPostsToDelete([]);
-  };
-
   const togglePostSelection = (postId: string) => {
     setSelectedPosts(prev => 
-      prev.includes(postId) 
-        ? prev.filter(id => id !== postId)
-        : [...prev, postId]
+      prev.includes(postId) ? prev.filter(id => id !== postId) : [...prev, postId]
     );
   };
 
-  const selectAllPosts = () => {
-    setSelectedPosts(posts.map(post => post.id));
-  };
+  const selectAllPosts = () => setSelectedPosts(posts.map(post => post.id));
+  const clearSelection = () => setSelectedPosts([]);
 
-  const clearSelection = () => {
-    setSelectedPosts([]);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PUBLISHED': return 'bg-green-100 text-green-800';
-      case 'DRAFT': return 'bg-yellow-100 text-yellow-800';
-      case 'ARCHIVED': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      'PUBLISHED': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      'DRAFT': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+      'ARCHIVED': 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+    };
+    return styles[status] || styles.DRAFT;
   };
 
   const formatDate = (dateString: string) => {
@@ -195,20 +150,33 @@ const Posts: React.FC = () => {
     });
   };
 
-  const filteredPosts = posts;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-[#fcd535]/20"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#fcd535] animate-spin"></div>
+            <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#fcd535] animate-pulse" />
+          </div>
+          <p className="text-gray-400">Loading posts...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-[#0b0e11] p-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Posts</h1>
-            <p className="text-gray-600 mt-1">Manage your blog posts and articles</p>
+            <h1 className="text-2xl font-bold text-white">Posts</h1>
+            <p className="text-gray-400 mt-1">Manage your blog posts and articles</p>
           </div>
           <button 
             onClick={() => navigate('/admin/posts/add')}
-            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="inline-flex items-center px-5 py-2.5 bg-[#fcd535] text-[#0b0e11] font-semibold rounded-xl hover:bg-[#f0b90b] transition-all"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Post
@@ -217,72 +185,56 @@ const Posts: React.FC = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+      <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-4 mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search */}
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 group-focus-within:text-[#fcd535]" />
               <input
                 type="text"
                 placeholder="Search posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50"
               />
             </div>
           </div>
 
-          {/* Status Filter */}
-          <div className="lg:w-48">
+          <div className="lg:w-44">
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
             >
               {statusOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+                <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
           </div>
 
-          {/* Category Filter */}
-          <div className="lg:w-48">
+          <div className="lg:w-44">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
+                <option key={category.id} value={category.id}>{category.name}</option>
               ))}
             </select>
           </div>
 
-          {/* View Mode */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 bg-[#2b2f36] rounded-xl p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'grid' 
-                  ? 'bg-green-100 text-green-600' 
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-gray-400 hover:text-white'}`}
             >
               <Grid3X3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${
-                viewMode === 'list' 
-                  ? 'bg-green-100 text-green-600' 
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-gray-400 hover:text-white'}`}
             >
               <List className="w-4 h-4" />
             </button>
@@ -292,22 +244,22 @@ const Posts: React.FC = () => {
 
       {/* Bulk Actions */}
       {selectedPosts.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div className="bg-[#fcd535]/10 border border-[#fcd535]/30 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between">
-            <span className="text-green-800 font-medium">
+            <span className="text-[#fcd535] font-medium">
               {selectedPosts.length} post{selectedPosts.length > 1 ? 's' : ''} selected
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => handleDeletePosts(selectedPosts)}
-                className="flex items-center px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                className="flex items-center px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
               >
                 <Trash2 className="w-4 h-4 mr-1" />
                 Delete
               </button>
               <button
                 onClick={clearSelection}
-                className="px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-3 py-1.5 text-gray-400 hover:text-white transition-colors"
               >
                 Cancel
               </button>
@@ -318,12 +270,12 @@ const Posts: React.FC = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-          <span className="text-red-800">{error}</span>
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center">
+          <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
+          <span className="text-red-400">{error}</span>
           <button
             onClick={() => fetchPosts()}
-            className="ml-auto px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm"
+            className="ml-auto px-3 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-sm"
           >
             Retry
           </button>
@@ -331,181 +283,119 @@ const Posts: React.FC = () => {
       )}
 
       {/* Posts Grid/List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+      {posts.length === 0 ? (
+        <div className="text-center py-16 bg-[#181a20] rounded-2xl border border-[#2b2f36]">
+          <div className="w-16 h-16 bg-[#2b2f36] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 text-gray-500" />
         </div>
-      ) : filteredPosts.length === 0 ? (
-        <div className="text-center py-12">
-          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No posts found</h3>
-          <p className="text-gray-600">Get started by creating your first post.</p>
+          <h3 className="text-lg font-medium text-white mb-2">No posts found</h3>
+          <p className="text-gray-400 mb-4">Get started by creating your first post.</p>
+          <button
+            onClick={() => navigate('/admin/posts/add')}
+            className="px-4 py-2 bg-[#fcd535] text-[#0b0e11] font-medium rounded-lg hover:bg-[#f0b90b] transition-all"
+          >
+            Create First Post
+          </button>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {filteredPosts.map((post) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {posts.map((post) => (
             <div
               key={post.id}
-              className={`bg-white rounded-lg border-2 transition-all cursor-pointer ${
+              className={`bg-[#181a20] rounded-xl border-2 transition-all cursor-pointer group ${
                 selectedPosts.includes(post.id) 
-                  ? 'border-green-500 bg-green-50' 
-                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                  ? 'border-[#fcd535]' 
+                  : 'border-[#2b2f36] hover:border-[#fcd535]/30'
               }`}
               onClick={(e) => {
-                // Don't navigate if clicking on checkbox or action buttons
                 if ((e.target as HTMLElement).closest('input[type="checkbox"]') || 
-                    (e.target as HTMLElement).closest('button')) {
-                  return;
-                }
-                console.log('🖱️ Grid view: Clicking on post:', post.id, post.title);
+                    (e.target as HTMLElement).closest('button')) return;
                 navigate(`/admin/posts/${post.id}`);
               }}
             >
-              <div className="p-3">
-                {/* Post Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
                       checked={selectedPosts.includes(post.id)}
                       onChange={() => togglePostSelection(post.id)}
-                      className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                      className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535] focus:ring-[#fcd535]/50"
                     />
-                    {/* Square Status Badge */}
-                    <div className="flex justify-center">
-                      <span className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded-md ${getStatusColor(post.status)}`}>
-                        {post.status.charAt(0).toUpperCase()}
+                    <span className={`px-2 py-0.5 text-xs font-medium rounded-md border ${getStatusBadge(post.status)}`}>
+                      {post.status}
                       </span>
-                    </div>
                   </div>
                   <div className="flex items-center space-x-1">
-                    {post.isFeatured && <Star className="w-4 h-4 text-yellow-500" />}
-                    {post.isPinned && <Pin className="w-4 h-4 text-blue-500" />}
-                    <button className="p-1 hover:bg-gray-100 rounded">
-                      <MoreVertical className="w-4 h-4 text-gray-400" />
-                    </button>
+                    {post.isFeatured && <Star className="w-4 h-4 text-[#fcd535]" />}
+                    {post.isPinned && <Pin className="w-4 h-4 text-blue-400" />}
                   </div>
                 </div>
 
-                {/* Optimized Post Thumbnail */}
-                <div className="mb-3">
-                  <div className="relative w-full h-36 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <div className="mb-3 relative overflow-hidden rounded-lg aspect-video bg-[#2b2f36]">
                     {post.featuredImage ? (
                       <img
                         src={getImageUrl(post.featuredImage)}
                         alt={post.title}
-                        className="w-full h-full object-cover object-center transition-transform duration-200 hover:scale-105"
-                        style={{
-                          objectFit: 'cover',
-                          objectPosition: 'center'
-                        }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          console.error('❌ Failed to load featured image:', getImageUrl(post.featuredImage));
                           const target = e.target as HTMLImageElement;
                           target.style.display = 'none';
-                          // Show a placeholder
-                          const parent = target.parentElement;
-                          if (parent) {
-                            parent.innerHTML = `
-                              <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                <div class="text-center">
-                                  <svg class="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                  </svg>
-                                  <p class="text-xs text-gray-500 font-medium">No image</p>
-                                </div>
-                              </div>
-                            `;
-                          }
-                        }}
-                        onLoad={() => {
-                          console.log('✅ Featured image loaded:', getImageUrl(post.featuredImage));
                         }}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                        <div className="text-center">
-                          <FileText className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                          <p className="text-xs text-gray-500 font-medium">No image</p>
-                        </div>
-                      </div>
-                    )}
-                    {/* Overlay for better text readability if needed */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
-                  </div>
+                    <div className="w-full h-full flex items-center justify-center">
+                      <FileText className="w-8 h-8 text-gray-600" />
                 </div>
-
-                {/* Post Content */}
-                <div className="mb-3">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
-                    {post.title}
-                  </h3>
-                  {post.excerpt && (
-                    <p className="text-xs text-gray-600 line-clamp-2">
-                      {post.excerpt}
-                    </p>
                   )}
                 </div>
 
-                {/* Post Meta */}
-                <div className="space-y-1 text-xs text-gray-500">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
+                <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-[#fcd535] transition-colors">
+                  {post.title}
+                </h3>
+
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                  <div className="flex items-center space-x-1">
                       <User className="w-3 h-3" />
-                      <span className="truncate">{post.author.firstName} {post.author.lastName}</span>
+                    <span>{post.author.firstName} {post.author.lastName}</span>
                     </div>
-                    <div className="flex items-center">
-                      <Calendar className="w-3 h-3 mr-1" />
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="w-3 h-3" />
                       <span>{formatDate(post.createdAt)}</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between text-xs text-gray-500">
                     {post.category && (
-                      <div className="flex items-center">
-                        <Tag className="w-3 h-3 mr-1" />
-                        <span className="px-1 py-0.5 bg-gray-100 rounded text-xs">
+                    <span className="px-2 py-0.5 bg-[#2b2f36] rounded text-gray-400">
                           {post.category.name}
                         </span>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center">
-                        <Eye className="w-3 h-3 mr-1" />
-                        <span>{post.viewCount}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <MessageCircle className="w-3 h-3 mr-1" />
-                        <span>{post.commentCount}</span>
-                      </div>
-                    </div>
+                  )}
+                  <div className="flex items-center space-x-3">
+                    <span className="flex items-center"><Eye className="w-3 h-3 mr-1" />{post.viewCount}</span>
+                    <span className="flex items-center"><MessageCircle className="w-3 h-3 mr-1" />{post.commentCount}</span>
                   </div>
                 </div>
 
-                {/* Post Actions */}
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#2b2f36]">
                   <div className="flex items-center space-x-1">
                     <button 
                       onClick={() => navigate(`/admin/posts/${post.id}`)}
-                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                      title="View Post"
+                      className="p-1.5 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg transition-colors"
                     >
-                      <Eye className="w-3 h-3" />
+                      <Eye className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                      title="Edit Post"
+                      className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
                     >
-                      <Edit className="w-3 h-3" />
+                      <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleDeletePosts([post.id])}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                      title="Delete Post"
+                      className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -514,167 +404,103 @@ const Posts: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-[#1e2329] border-b border-[#2b2f36]">
                 <tr>
-                  <th className="px-6 py-3 text-left">
+                <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedPosts.length === filteredPosts.length && filteredPosts.length > 0}
-                      onChange={selectedPosts.length === filteredPosts.length ? clearSelection : selectAllPosts}
-                      className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                    checked={selectedPosts.length === posts.length && posts.length > 0}
+                    onChange={selectedPosts.length === posts.length ? clearSelection : selectAllPosts}
+                    className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
                     />
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Post
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Author
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stats
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Post</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Author</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Stats</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPosts.map((post) => (
+            <tbody className="divide-y divide-[#2b2f36]">
+              {posts.map((post) => (
                   <tr 
                     key={post.id} 
-                    className="hover:bg-gray-50 cursor-pointer"
+                  className="hover:bg-[#1e2329] cursor-pointer transition-colors"
                     onClick={(e) => {
-                      // Don't navigate if clicking on checkbox or action buttons
                       if ((e.target as HTMLElement).closest('input[type="checkbox"]') || 
-                          (e.target as HTMLElement).closest('button')) {
-                        return;
-                      }
-                      console.log('🖱️ List view: Clicking on post:', post.id, post.title);
+                        (e.target as HTMLElement).closest('button')) return;
                       navigate(`/admin/posts/${post.id}`);
                     }}
                   >
-                    <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selectedPosts.includes(post.id)}
                         onChange={() => togglePostSelection(post.id)}
-                        className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                      className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
                       />
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-[#2b2f36] rounded-lg overflow-hidden flex-shrink-0">
                           {post.featuredImage ? (
-                            <img
-                              src={getImageUrl(post.featuredImage)}
-                              alt={post.title}
-                              className="w-full h-full object-cover object-center"
-                              style={{
-                                objectFit: 'cover',
-                                objectPosition: 'center'
-                              }}
-                              onError={(e) => {
-                                console.error('❌ Failed to load list view featured image:', getImageUrl(post.featuredImage));
-                                // Fallback to FileText icon if image fails to load
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                const parent = target.parentElement;
-                                if (parent) {
-                                  parent.innerHTML = '<svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>';
-                                }
-                              }}
-                              onLoad={() => {
-                                console.log('✅ List view featured image loaded:', getImageUrl(post.featuredImage));
-                              }}
-                            />
-                          ) : (
-                            <FileText className="w-7 h-7 text-gray-400" />
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 flex items-center">
-                            {post.title}
-                            {post.isFeatured && <Star className="w-4 h-4 text-yellow-500 ml-2" />}
-                            {post.isPinned && <Pin className="w-4 h-4 text-blue-500 ml-1" />}
-                          </div>
-                          {post.excerpt && (
-                            <div className="text-sm text-gray-500 line-clamp-1">
-                              {post.excerpt}
+                          <img src={getImageUrl(post.featuredImage)} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-gray-600" />
                             </div>
                           )}
                         </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white truncate flex items-center">
+                          {post.title}
+                          {post.isFeatured && <Star className="w-3 h-3 text-[#fcd535] ml-2" />}
+                        </p>
+                        {post.excerpt && <p className="text-xs text-gray-500 truncate">{post.excerpt}</p>}
+                      </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center">
-                        <span className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded-md ${getStatusColor(post.status)}`}>
-                          {post.status.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-md border ${getStatusBadge(post.status)}`}>
+                      {post.status}
+                    </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {post.author.firstName} {post.author.lastName}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-4 py-3 text-sm text-gray-300">{post.author.firstName} {post.author.lastName}</td>
+                  <td className="px-4 py-3">
                       {post.category ? (
-                        <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                          {post.category.name}
-                        </span>
+                      <span className="px-2 py-1 bg-[#2b2f36] rounded text-xs text-gray-400">{post.category.name}</span>
                       ) : (
-                        <span className="text-gray-400">No category</span>
+                      <span className="text-gray-600 text-xs">No category</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center">
-                          <Eye className="w-3 h-3 mr-1 text-gray-400" />
-                          <span>{post.viewCount}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <MessageCircle className="w-3 h-3 mr-1 text-gray-400" />
-                          <span>{post.commentCount}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <TrendingUp className="w-3 h-3 mr-1 text-gray-400" />
-                          <span>{post.likeCount}</span>
-                        </div>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center space-x-3 text-xs text-gray-500">
+                      <span className="flex items-center"><Eye className="w-3 h-3 mr-1" />{post.viewCount}</span>
+                      <span className="flex items-center"><MessageCircle className="w-3 h-3 mr-1" />{post.commentCount}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      {formatDate(post.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium">
-                      <div className="flex items-center space-x-2">
+                  <td className="px-4 py-3 text-sm text-gray-400">{formatDate(post.createdAt)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center space-x-1">
                         <button 
                           onClick={() => navigate(`/admin/posts/${post.id}`)}
-                          className="text-gray-400 hover:text-gray-600 transition-colors"
-                          title="View Post"
+                        className="p-1.5 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                          className="text-gray-400 hover:text-blue-600 transition-colors"
-                          title="Edit Post"
+                        className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeletePosts([post.id])}
-                          className="text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete Post"
+                        className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -684,30 +510,31 @@ const Posts: React.FC = () => {
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-700">
-            Showing page {currentPage} of {totalPages}
+        <div className="flex items-center justify-between mt-6 bg-[#181a20] rounded-xl border border-[#2b2f36] p-4">
+          <div className="text-sm text-gray-400">
+            Page {currentPage} of {totalPages}
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1.5 bg-[#2b2f36] text-gray-400 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#363a45] hover:text-white transition-colors flex items-center"
             >
+              <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
             </button>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1.5 bg-[#2b2f36] text-gray-400 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#363a45] hover:text-white transition-colors flex items-center"
             >
               Next
+              <ChevronRight className="w-4 h-4 ml-1" />
             </button>
           </div>
         </div>
@@ -715,41 +542,36 @@ const Posts: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 max-w-md w-full">
             <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
+              <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mr-4">
+                <Trash2 className="w-6 h-6 text-red-400" />
               </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div>
+                <h3 className="text-lg font-semibold text-white">
                   Delete {postsToDelete.length === 1 ? 'Post' : 'Posts'}
                 </h3>
-                <p className="text-sm text-gray-500">
-                  This action cannot be undone.
-                </p>
+                <p className="text-sm text-gray-400">This action cannot be undone.</p>
               </div>
             </div>
             
-            <div className="mb-6">
-              <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-300 mb-6">
                 Are you sure you want to delete {postsToDelete.length === 1 ? 'this post' : `these ${postsToDelete.length} posts`}? 
-                This will permanently remove {postsToDelete.length === 1 ? 'it' : 'them'} from the database.
               </p>
-            </div>
             
             <div className="flex justify-end space-x-3">
               <button
-                onClick={cancelDelete}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-gray-400 hover:text-white hover:bg-[#2b2f36] rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
               >
-                Delete {postsToDelete.length === 1 ? 'Post' : 'Posts'}
+                Delete
               </button>
             </div>
           </div>

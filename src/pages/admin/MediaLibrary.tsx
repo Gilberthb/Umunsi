@@ -25,10 +25,20 @@ import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  Lock
+  Lock,
+  Database
 } from 'lucide-react';
 import { apiClient } from '../../services/api';
 import MediaLibraryModal from '../../components/MediaLibraryModal';
+
+// Helper function to format file size
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 // Document Viewer Component
 const DocumentViewer: React.FC<{ 
@@ -68,10 +78,10 @@ const DocumentViewer: React.FC<{
 
   if (loading) {
     return (
-      <div className="w-full h-full bg-white rounded-lg flex items-center justify-center">
+      <div className="w-full h-full bg-[#181a20] rounded-2xl flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading document...</p>
+          <div className="w-12 h-12 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading document...</p>
         </div>
       </div>
     );
@@ -79,10 +89,10 @@ const DocumentViewer: React.FC<{
 
   if (error) {
     return (
-      <div className="w-full h-full bg-white rounded-lg flex items-center justify-center">
+      <div className="w-full h-full bg-[#181a20] rounded-2xl flex items-center justify-center">
         <div className="text-center">
           <FileText className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <p className="text-red-600 mb-2">Error loading document</p>
+          <p className="text-red-400 mb-2">Error loading document</p>
           <p className="text-sm text-gray-500">{error}</p>
         </div>
       </div>
@@ -90,19 +100,19 @@ const DocumentViewer: React.FC<{
   }
 
   return (
-    <div className="w-full h-full bg-white rounded-lg overflow-hidden flex flex-col shadow-lg" style={{ minHeight: '90vh' }}>
+    <div className="w-full h-full bg-[#181a20] rounded-2xl overflow-hidden flex flex-col border border-[#2b2f36]" style={{ minHeight: '90vh' }}>
       {/* Header */}
-      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="bg-[#0b0e11] px-6 py-4 border-b border-[#2b2f36] flex items-center justify-between">
         <div className="flex items-center">
-          <FileText className="w-6 h-6 text-gray-600 mr-3" />
-          <h3 className="text-lg font-medium text-gray-900">{file.originalName}</h3>
+          <FileText className="w-6 h-6 text-[#fcd535] mr-3" />
+          <h3 className="text-lg font-medium text-white">{file.originalName}</h3>
         </div>
         <div className="flex items-center space-x-3">
-          <span className="text-sm text-gray-500">{formatFileSize(file.size)}</span>
+          <span className="text-sm text-gray-400">{formatFileSize(file.size)}</span>
           <a
             href={`${getServerBaseUrl()}${file.url}`}
             download={file.originalName}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors bg-white rounded-md shadow-sm hover:shadow-md"
+            className="p-2 text-gray-400 hover:text-[#fcd535] transition-colors bg-[#1e2329] rounded-lg hover:bg-[#2b2f36]"
             title="Download"
           >
             <Download className="w-5 h-5" />
@@ -111,17 +121,17 @@ const DocumentViewer: React.FC<{
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6" style={{ minHeight: 'calc(90vh - 80px)' }}>
+      <div className="flex-1 overflow-auto p-6 bg-[#0b0e11]" style={{ minHeight: 'calc(90vh - 80px)' }}>
         {file.mimeType === 'application/json' ? (
-          <pre className="text-base text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="text-base text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
             {JSON.stringify(JSON.parse(content), null, 2)}
           </pre>
         ) : file.mimeType === 'application/xml' ? (
-          <pre className="text-base text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="text-base text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
             {content}
           </pre>
         ) : (
-          <pre className="text-base text-gray-800 whitespace-pre-wrap font-mono leading-relaxed">
+          <pre className="text-base text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
             {content}
           </pre>
         )}
@@ -132,12 +142,7 @@ const DocumentViewer: React.FC<{
 
 // Helper function to get server base URL
 const getServerBaseUrl = () => {
-  // In development, use relative URLs since Vite proxy handles routing
-  if (import.meta.env.DEV) {
-    return '';
-  }
-  // In production, use the full server URL
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5003/api';
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   return apiUrl.replace('/api', '');
 };
 
@@ -263,14 +268,6 @@ const MediaLibrary: React.FC = () => {
            mimeType.includes('document');
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   const filteredFiles = mediaFiles.filter(file => {
     const matchesSearch = file.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          file.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -296,7 +293,6 @@ const MediaLibrary: React.FC = () => {
   };
 
   const handleMediaItemClick = (file: MediaFile, e: React.MouseEvent) => {
-    // Don't open modal if clicking on selection checkbox or action buttons
     if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('input')) {
       return;
     }
@@ -325,26 +321,37 @@ const MediaLibrary: React.FC = () => {
     setSelectedMediaFile(filteredFiles[newIndex]);
   };
 
+  // Stats
+  const totalFiles = mediaFiles.length;
+  const imageCount = mediaFiles.filter(f => f.mimeType.startsWith('image/')).length;
+  const videoCount = mediaFiles.filter(f => f.mimeType.startsWith('video/')).length;
+  const docCount = mediaFiles.filter(f => f.mimeType.includes('pdf') || f.mimeType.includes('document')).length;
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-[#0b0e11] min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-xl">
+              <Database className="w-6 h-6 text-orange-400" />
+            </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Media Library</h1>
-            <p className="text-gray-600 mt-1">Manage your media files and assets</p>
+              <h1 className="text-2xl font-bold text-white">Media Library</h1>
+              <p className="text-gray-400 mt-1">Manage your media files and assets</p>
+            </div>
           </div>
           <div className="flex items-center space-x-3">
             <button 
               onClick={() => setShowMediaLibraryModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2.5 text-gray-300 border border-[#2b2f36] rounded-xl hover:bg-[#1e2329] transition-colors"
             >
               <Eye className="w-4 h-4 mr-2" />
               Browse Library
             </button>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all shadow-lg shadow-[#fcd535]/20"
             >
               <Plus className="w-4 h-4 mr-2" />
               Upload Files
@@ -355,70 +362,64 @@ const MediaLibrary: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <ImageIcon className="w-5 h-5 text-blue-600" />
+        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400">Total Files</p>
+              <p className="text-2xl font-bold text-white mt-1">{totalFiles}</p>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Total Files</p>
-              <p className="text-2xl font-bold text-gray-900">{mediaFiles.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <ImageIcon className="w-5 h-5 text-green-600" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Images</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {mediaFiles.filter(f => f.mimeType.startsWith('image/')).length}
-              </p>
+            <div className="p-3 bg-blue-500/10 rounded-xl">
+              <Database className="w-6 h-6 text-blue-400" />
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Video className="w-5 h-5 text-purple-600" />
+        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400">Images</p>
+              <p className="text-2xl font-bold text-white mt-1">{imageCount}</p>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Videos</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {mediaFiles.filter(f => f.mimeType.startsWith('video/')).length}
-              </p>
+            <div className="p-3 bg-emerald-500/10 rounded-xl">
+              <ImageIcon className="w-6 h-6 text-emerald-400" />
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <FileText className="w-5 h-5 text-orange-600" />
+        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400">Videos</p>
+              <p className="text-2xl font-bold text-white mt-1">{videoCount}</p>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Documents</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {mediaFiles.filter(f => f.mimeType.includes('pdf') || f.mimeType.includes('document')).length}
-              </p>
+            <div className="p-3 bg-purple-500/10 rounded-xl">
+              <Video className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-400">Documents</p>
+              <p className="text-2xl font-bold text-white mt-1">{docCount}</p>
+            </div>
+            <div className="p-3 bg-orange-500/10 rounded-xl">
+              <FileText className="w-6 h-6 text-orange-400" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+      <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36] mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search files..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
               />
             </div>
           </div>
@@ -426,7 +427,7 @@ const MediaLibrary: React.FC = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="px-4 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl text-gray-300 focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
             >
               {categories.map(category => (
                 <option key={category.value} value={category.value}>
@@ -434,16 +435,16 @@ const MediaLibrary: React.FC = () => {
                 </option>
               ))}
             </select>
-            <div className="flex border border-gray-300 rounded-lg">
+            <div className="flex border border-[#2b2f36] rounded-xl overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 ${viewMode === 'grid' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
+                className={`p-2.5 ${viewMode === 'grid' ? 'bg-[#fcd535]/10 text-[#fcd535]' : 'bg-[#0b0e11] text-gray-400 hover:bg-[#1e2329]'}`}
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 ${viewMode === 'list' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
+                className={`p-2.5 ${viewMode === 'list' ? 'bg-[#fcd535]/10 text-[#fcd535]' : 'bg-[#0b0e11] text-gray-400 hover:bg-[#1e2329]'}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -454,22 +455,22 @@ const MediaLibrary: React.FC = () => {
 
       {/* Selection Actions */}
       {selectedFiles.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div className="bg-[#fcd535]/10 border border-[#fcd535]/30 rounded-2xl p-4 mb-6">
           <div className="flex items-center justify-between">
-            <span className="text-green-800 font-medium">
+            <span className="text-[#fcd535] font-medium">
               {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => handleDeleteFiles(selectedFiles)}
-                className="flex items-center px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
               >
-                <Trash2 className="w-4 h-4 mr-1" />
+                <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </button>
               <button
                 onClick={clearSelection}
-                className="px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 bg-[#1e2329] text-gray-300 rounded-xl hover:bg-[#2b2f36] transition-colors"
               >
                 Clear
               </button>
@@ -481,15 +482,15 @@ const MediaLibrary: React.FC = () => {
       {/* Media Files */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+          <div className="w-8 h-8 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36]">
           {filteredFiles.length === 0 ? (
             <div className="text-center py-12">
-              <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No files found</h3>
-              <p className="text-gray-600 mb-4">
+              <FolderOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">No files found</h3>
+              <p className="text-gray-500 mb-4">
                 {searchTerm || selectedCategory !== 'all' 
                   ? 'Try adjusting your search or filter criteria'
                   : 'Upload your first media file to get started'
@@ -498,7 +499,7 @@ const MediaLibrary: React.FC = () => {
               {!searchTerm && selectedCategory === 'all' && (
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
                 >
                   Upload Files
                 </button>
@@ -513,10 +514,10 @@ const MediaLibrary: React.FC = () => {
                     return (
                       <div
                         key={file.id}
-                        className={`relative group cursor-pointer rounded-lg border-2 transition-all ${
+                        className={`relative group cursor-pointer rounded-xl border-2 transition-all ${
                           selectedFiles.includes(file.id) 
-                            ? 'border-green-500 bg-green-50' 
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-[#fcd535] bg-[#fcd535]/5' 
+                            : 'border-[#2b2f36] hover:border-[#fcd535]/50 bg-[#0b0e11]'
                         }`}
                         onClick={(e) => handleMediaItemClick(file, e)}
                       >
@@ -525,23 +526,23 @@ const MediaLibrary: React.FC = () => {
                             <img
                               src={`${getServerBaseUrl()}${file.thumbnailUrl || file.url}`}
                               alt={file.originalName}
-                              className="w-full h-full object-cover rounded"
+                              className="w-full h-full object-cover rounded-lg"
                               onError={(e) => {
-                                // Fallback to file icon if image fails to load
                                 e.currentTarget.style.display = 'none';
-                                e.currentTarget.nextElementSibling.style.display = 'flex';
+                                const sibling = e.currentTarget.nextElementSibling;
+                                if (sibling) (sibling as HTMLElement).style.display = 'flex';
                               }}
                             />
                           ) : null}
                           <div className={`w-full h-full flex items-center justify-center ${file.mimeType.startsWith('image/') ? 'hidden' : 'flex'}`}>
-                            <FileIcon className="w-8 h-8 text-gray-400" />
+                            <FileIcon className="w-10 h-10 text-gray-500" />
                           </div>
                         </div>
-                        <div className="p-2">
-                          <p className="text-xs font-medium text-gray-900 truncate">
+                        <div className="p-3 border-t border-[#2b2f36]">
+                          <p className="text-xs font-medium text-white truncate">
                             {file.originalName}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mt-1">
                             {formatFileSize(file.size)}
                           </p>
                         </div>
@@ -551,13 +552,13 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               handleMediaItemClick(file, e);
                             }}
-                            className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
+                            className="p-1.5 bg-[#181a20] rounded-lg shadow-lg hover:bg-[#2b2f36] border border-[#2b2f36]"
                             title={isDocument(file.mimeType) ? "Read" : "View"}
                           >
                             {isDocument(file.mimeType) ? (
-                              <FileText className="w-3 h-3 text-blue-600" />
+                              <FileText className="w-3 h-3 text-blue-400" />
                             ) : (
-                              <Eye className="w-3 h-3 text-gray-600" />
+                              <Eye className="w-3 h-3 text-gray-300" />
                             )}
                           </button>
                           <button 
@@ -565,10 +566,10 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               handleDeleteFiles([file.id]);
                             }}
-                            className="p-1 bg-white rounded-full shadow-sm hover:bg-red-50"
+                            className="p-1.5 bg-[#181a20] rounded-lg shadow-lg hover:bg-red-500/10 border border-[#2b2f36]"
                             title="Delete"
                           >
-                            <Trash2 className="w-3 h-3 text-red-600" />
+                            <Trash2 className="w-3 h-3 text-red-400" />
                           </button>
                         </div>
                         <div className="absolute top-2 left-2">
@@ -579,7 +580,7 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               toggleFileSelection(file.id);
                             }}
-                            className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                            className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
                           />
                         </div>
                       </div>
@@ -593,18 +594,27 @@ const MediaLibrary: React.FC = () => {
                     return (
                       <div
                         key={file.id}
-                        className={`flex items-center p-3 rounded-lg border transition-all ${
+                        className={`flex items-center p-4 rounded-xl border transition-all cursor-pointer ${
                           selectedFiles.includes(file.id) 
-                            ? 'border-green-500 bg-green-50' 
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-[#fcd535] bg-[#fcd535]/5' 
+                            : 'border-[#2b2f36] hover:border-[#fcd535]/50 bg-[#0b0e11]'
                         }`}
                         onClick={(e) => handleMediaItemClick(file, e)}
                       >
-                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
-                          <FileIcon className="w-5 h-5 text-gray-400" />
+                        <input
+                          type="checkbox"
+                          checked={selectedFiles.includes(file.id)}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            toggleFileSelection(file.id);
+                          }}
+                          className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535] mr-4"
+                        />
+                        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-[#181a20] rounded-xl border border-[#2b2f36]">
+                          <FileIcon className="w-6 h-6 text-gray-500" />
                         </div>
-                        <div className="flex-1 ml-3 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                        <div className="flex-1 ml-4 min-w-0">
+                          <p className="text-sm font-medium text-white truncate">
                             {file.originalName}
                           </p>
                           <div className="flex items-center text-xs text-gray-500 mt-1">
@@ -617,18 +627,18 @@ const MediaLibrary: React.FC = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           {file.isFeatured && (
-                            <Star className="w-4 h-4 text-yellow-500" />
+                            <Star className="w-4 h-4 text-yellow-400" />
                           )}
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               handleMediaItemClick(file, e);
                             }}
-                            className="p-1 hover:bg-gray-100 rounded"
+                            className="p-2 hover:bg-[#1e2329] rounded-lg transition-colors"
                             title={isDocument(file.mimeType) ? "Read" : "View"}
                           >
                             {isDocument(file.mimeType) ? (
-                              <FileText className="w-4 h-4 text-blue-500" />
+                              <FileText className="w-4 h-4 text-blue-400" />
                             ) : (
                               <Eye className="w-4 h-4 text-gray-400" />
                             )}
@@ -638,10 +648,10 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               handleDeleteFiles([file.id]);
                             }}
-                            className="p-1 hover:bg-red-100 rounded"
+                            className="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Delete"
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className="w-4 h-4 text-red-400" />
                           </button>
                         </div>
                       </div>
@@ -656,13 +666,13 @@ const MediaLibrary: React.FC = () => {
 
       {/* Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181a20] rounded-2xl w-full max-w-md border border-[#2b2f36]">
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Files</h3>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-4" />
-                <p className="text-sm text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-white mb-4">Upload Files</h3>
+              <div className="border-2 border-dashed border-[#2b2f36] rounded-xl p-8 text-center hover:border-[#fcd535]/50 transition-colors bg-[#0b0e11]">
+                <Upload className="w-10 h-10 text-gray-500 mx-auto mb-4" />
+                <p className="text-sm text-gray-400 mb-4">
                   Drag and drop files here, or click to select
                 </p>
                 <input
@@ -674,7 +684,7 @@ const MediaLibrary: React.FC = () => {
                 />
                 <label
                   htmlFor="file-upload"
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer"
+                  className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Select Files
@@ -682,15 +692,15 @@ const MediaLibrary: React.FC = () => {
               </div>
               {uploading && (
                 <div className="mt-4 text-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto"></div>
-                  <p className="text-sm text-gray-600 mt-2">Uploading files...</p>
+                  <div className="w-6 h-6 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto"></div>
+                  <p className="text-sm text-gray-400 mt-2">Uploading files...</p>
                 </div>
               )}
             </div>
-            <div className="px-6 py-3 bg-gray-50 rounded-b-lg flex justify-end">
+            <div className="px-6 py-4 bg-[#0b0e11] rounded-b-2xl flex justify-end border-t border-[#2b2f36]">
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
               >
                 Cancel
               </button>
@@ -701,12 +711,12 @@ const MediaLibrary: React.FC = () => {
 
       {/* Full-screen Media Modal */}
       {showFullscreenModal && selectedMediaFile && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Close Button */}
             <button
               onClick={closeFullscreenModal}
-              className="absolute top-4 right-4 z-10 p-2 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
+              className="absolute top-4 right-4 z-10 p-2 bg-[#181a20] text-white rounded-xl hover:bg-[#2b2f36] transition-all border border-[#2b2f36]"
             >
               <X className="w-6 h-6" />
             </button>
@@ -716,13 +726,13 @@ const MediaLibrary: React.FC = () => {
               <>
                 <button
                   onClick={() => navigateMedia('prev')}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-[#181a20] text-white rounded-xl hover:bg-[#2b2f36] transition-all border border-[#2b2f36]"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={() => navigateMedia('next')}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-[#181a20] text-white rounded-xl hover:bg-[#2b2f36] transition-all border border-[#2b2f36]"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
@@ -730,24 +740,24 @@ const MediaLibrary: React.FC = () => {
             )}
 
             {/* Media Content */}
-            <div className="w-full h-full p-2 flex items-center justify-center">
+            <div className="w-full h-full p-4 flex items-center justify-center">
               {selectedMediaFile.mimeType.startsWith('image/') ? (
                 <img
                   src={`${getServerBaseUrl()}${selectedMediaFile.thumbnailUrl || selectedMediaFile.url}`}
                   alt={selectedMediaFile.originalName}
-                  className="max-w-full max-h-full object-contain rounded-lg"
+                  className="max-w-full max-h-full object-contain rounded-2xl"
                 />
               ) : selectedMediaFile.mimeType.startsWith('video/') ? (
                 <video
                   src={`${getServerBaseUrl()}${selectedMediaFile.url}`}
                   controls
-                  className="max-w-full max-h-full rounded-lg"
+                  className="max-w-full max-h-full rounded-2xl"
                 >
                   Your browser does not support the video tag.
                 </video>
               ) : selectedMediaFile.mimeType.startsWith('audio/') ? (
-                <div className="bg-white p-8 rounded-lg text-center">
-                  <Music className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <div className="bg-[#181a20] p-8 rounded-2xl text-center border border-[#2b2f36]">
+                  <Music className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                   <audio
                     src={`${getServerBaseUrl()}${selectedMediaFile.url}`}
                     controls
@@ -757,38 +767,7 @@ const MediaLibrary: React.FC = () => {
                   </audio>
                 </div>
               ) : selectedMediaFile.mimeType === 'application/pdf' ? (
-                <div className="w-full h-full bg-white rounded-lg overflow-hidden shadow-lg relative">
-                  {/* PDF Controls */}
-                  <div className="absolute top-4 right-4 z-10 flex gap-2">
-                    <button
-                      onClick={() => {
-                        const iframe = document.querySelector('iframe[title="' + selectedMediaFile.originalName + '"]') as HTMLIFrameElement;
-                        if (iframe) {
-                          const currentSrc = iframe.src;
-                          const newSrc = currentSrc.replace(/zoom=\d+/, 'zoom=75');
-                          iframe.src = newSrc;
-                        }
-                      }}
-                      className="px-3 py-1 bg-black bg-opacity-50 text-white rounded text-sm hover:bg-opacity-70 transition-all"
-                      title="Zoom Out"
-                    >
-                      -
-                    </button>
-                    <button
-                      onClick={() => {
-                        const iframe = document.querySelector('iframe[title="' + selectedMediaFile.originalName + '"]') as HTMLIFrameElement;
-                        if (iframe) {
-                          const currentSrc = iframe.src;
-                          const newSrc = currentSrc.replace(/zoom=\d+/, 'zoom=125');
-                          iframe.src = newSrc;
-                        }
-                      }}
-                      className="px-3 py-1 bg-black bg-opacity-50 text-white rounded text-sm hover:bg-opacity-70 transition-all"
-                      title="Zoom In"
-                    >
-                      +
-                    </button>
-                  </div>
+                <div className="w-full h-full bg-[#181a20] rounded-2xl overflow-hidden border border-[#2b2f36] relative">
                   <iframe
                     src={`${getServerBaseUrl()}${selectedMediaFile.url}#toolbar=1&navpanes=1&scrollbar=1&zoom=100`}
                     className="w-full h-full border-0"
@@ -804,14 +783,14 @@ const MediaLibrary: React.FC = () => {
                   getServerBaseUrl={getServerBaseUrl}
                 />
               ) : (
-                <div className="bg-white p-8 rounded-lg text-center max-w-md">
-                  <FileIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-gray-900 mb-2">{selectedMediaFile.originalName}</p>
+                <div className="bg-[#181a20] p-8 rounded-2xl text-center max-w-md border border-[#2b2f36]">
+                  <File className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                  <p className="text-lg font-medium text-white mb-2">{selectedMediaFile.originalName}</p>
                   <p className="text-sm text-gray-500 mb-4">{formatFileSize(selectedMediaFile.size)}</p>
                   <a
                     href={`${getServerBaseUrl()}${selectedMediaFile.url}`}
                     download={selectedMediaFile.originalName}
-                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download
@@ -820,23 +799,20 @@ const MediaLibrary: React.FC = () => {
               )}
             </div>
 
-            {/* Media Info - Only show for non-documents */}
+            {/* Media Info */}
             {!isDocument(selectedMediaFile.mimeType) && (
-              <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-50 text-white p-4 rounded-lg">
+              <div className="absolute bottom-4 left-4 right-4 bg-[#181a20]/90 backdrop-blur-sm text-white p-4 rounded-2xl border border-[#2b2f36]">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-medium">{selectedMediaFile.originalName}</h3>
-                    <p className="text-sm text-gray-300">
+                    <p className="text-sm text-gray-400">
                       {formatFileSize(selectedMediaFile.size)} • {selectedMediaFile.category} • 
                       Uploaded by {selectedMediaFile.uploadedBy.firstName} {selectedMediaFile.uploadedBy.lastName}
                     </p>
-                    {selectedMediaFile.description && (
-                      <p className="text-sm text-gray-300 mt-1">{selectedMediaFile.description}</p>
-                    )}
                     {selectedMediaFile.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {selectedMediaFile.tags.map((tag, index) => (
-                          <span key={index} className="px-2 py-1 bg-green-600 text-xs rounded-full">
+                          <span key={index} className="px-2 py-1 bg-[#fcd535]/10 text-[#fcd535] text-xs rounded-lg border border-[#fcd535]/30">
                             {tag}
                           </span>
                         ))}
@@ -848,9 +824,9 @@ const MediaLibrary: React.FC = () => {
                       <Star className="w-5 h-5 text-yellow-400" />
                     )}
                     {selectedMediaFile.isPublic ? (
-                      <Globe className="w-5 h-5 text-green-400" />
+                      <Globe className="w-5 h-5 text-emerald-400" />
                     ) : (
-                      <Lock className="w-5 h-5 text-gray-400" />
+                      <Lock className="w-5 h-5 text-gray-500" />
                     )}
                   </div>
                 </div>
@@ -859,7 +835,7 @@ const MediaLibrary: React.FC = () => {
 
             {/* Media Counter */}
             {filteredFiles.length > 1 && (
-              <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+              <div className="absolute top-4 left-4 bg-[#181a20] text-white px-3 py-1.5 rounded-xl text-sm border border-[#2b2f36]">
                 {filteredFiles.findIndex(f => f.id === selectedMediaFile.id) + 1} of {filteredFiles.length}
               </div>
             )}
@@ -869,14 +845,14 @@ const MediaLibrary: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181a20] rounded-2xl p-6 max-w-md w-full border border-[#2b2f36]">
             <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
+              <div className="flex-shrink-0 w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-400" />
               </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-white">
                   Delete {filesToDelete.length === 1 ? 'File' : 'Files'}
                 </h3>
                 <p className="text-sm text-gray-500">
@@ -886,7 +862,7 @@ const MediaLibrary: React.FC = () => {
             </div>
             
             <div className="mb-6">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-400">
                 Are you sure you want to delete {filesToDelete.length === 1 ? 'this file' : `these ${filesToDelete.length} files`}? 
                 This will permanently remove {filesToDelete.length === 1 ? 'it' : 'them'} from the server.
               </p>
@@ -895,13 +871,13 @@ const MediaLibrary: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-4 py-2.5 text-sm font-medium text-gray-300 bg-[#0b0e11] border border-[#2b2f36] rounded-xl hover:bg-[#1e2329] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
               >
                 Delete {filesToDelete.length === 1 ? 'File' : 'Files'}
               </button>

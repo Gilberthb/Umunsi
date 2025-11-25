@@ -16,7 +16,10 @@ import {
   Lock,
   FileText,
   Image as ImageIcon,
-  AlertCircle
+  AlertCircle,
+  Clock,
+  Share2,
+  Bookmark
 } from 'lucide-react';
 import { apiClient, Post } from '../../services/api';
 
@@ -26,8 +29,6 @@ const PostDetail: React.FC = () => {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  console.log('🚀 PostDetail component mounted with ID:', id);
 
   useEffect(() => {
     if (id) {
@@ -39,17 +40,11 @@ const PostDetail: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('🔍 Fetching post with ID:', id);
       const postData = await apiClient.getPost(id!);
-      console.log('📄 Post data received:', postData);
-      console.log('📝 Content length:', postData.content?.length || 0);
-      console.log('🖼️ Featured image:', postData.featuredImage);
-      console.log('📋 Full post object keys:', Object.keys(postData));
-      console.log('📋 Post content preview:', postData.content?.substring(0, 100));
       setPost(postData);
     } catch (error: any) {
-      console.error('❌ Error fetching post:', error);
-      setError('Failed to load post. Please try again.');
+      console.error('Error fetching post:', error);
+      setError('Failed to load article. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -64,16 +59,14 @@ const PostDetail: React.FC = () => {
         navigate('/admin/posts');
       } catch (error: any) {
         console.error('Error deleting post:', error);
-        setError('Failed to delete post. Please try again.');
+        setError('Failed to delete article. Please try again.');
       }
     }
   };
 
   const getServerBaseUrl = () => {
-    if (import.meta.env.DEV) {
-      return '';
-    }
-    return import.meta.env.VITE_API_URL || '';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    return apiUrl.replace('/api', '');
   };
 
   const formatDate = (dateString: string) => {
@@ -88,10 +81,10 @@ const PostDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading post...</p>
+          <div className="w-12 h-12 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading article...</p>
         </div>
       </div>
     );
@@ -99,21 +92,21 @@ const PostDetail: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Post</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-xl font-semibold text-white mb-2">Error Loading Article</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
           <div className="space-x-4">
             <button
               onClick={() => fetchPost()}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
             >
               Try Again
             </button>
             <button
               onClick={() => navigate('/admin/posts')}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="px-4 py-2 bg-[#1e2329] text-gray-300 rounded-xl hover:bg-[#2b2f36] transition-colors"
             >
               Back to Posts
             </button>
@@ -125,14 +118,14 @@ const PostDetail: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
         <div className="text-center">
-          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Post Not Found</h2>
-          <p className="text-gray-600 mb-4">The post you're looking for doesn't exist or has been deleted.</p>
+          <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Article Not Found</h2>
+          <p className="text-gray-400 mb-4">The article you're looking for doesn't exist or has been deleted.</p>
           <button
             onClick={() => navigate('/admin/posts')}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="px-4 py-2 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
           >
             Back to Posts
           </button>
@@ -142,106 +135,113 @@ const PostDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-4">
+    <div className="min-h-screen bg-[#0b0e11]">
+      <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => navigate('/admin/posts')}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors text-sm"
+              className="flex items-center text-gray-400 hover:text-[#fcd535] transition-colors text-sm"
             >
-              <ArrowLeft className="w-4 h-4 mr-1" />
+              <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Posts
             </button>
             
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <button
                 onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                className="flex items-center px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-xs"
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm"
               >
-                <Edit className="w-3 h-3 mr-1" />
-                Edit
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Article
               </button>
               <button
                 onClick={handleDelete}
-                className="flex items-center px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-xs"
+                className="flex items-center px-4 py-2 bg-red-600/10 text-red-400 rounded-xl hover:bg-red-600/20 transition-colors text-sm border border-red-500/30"
               >
-                <Trash2 className="w-3 h-3 mr-1" />
+                <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </button>
             </div>
           </div>
           
-          {/* Title and Thumbnail Section */}
-          <div className="flex items-start gap-4 mb-3">
-            {/* Thumbnail */}
+          {/* Title and Featured Image */}
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
             {post.featuredImage && (
-              <div className="flex-shrink-0">
-                <div className="w-20 h-20 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
+              <div className="relative h-64 md:h-80">
                   <img
                     src={`${getServerBaseUrl()}${post.featuredImage}`}
                     alt={post.title}
-                    className="max-w-full max-h-full object-contain"
+                  className="w-full h-full object-cover"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#181a20] via-transparent to-transparent"></div>
               </div>
             )}
             
-            {/* Title and Meta Info */}
-            <div className="flex-1 min-w-0 overflow-hidden">
-              <h1 
-                className="text-lg font-bold text-gray-900 mb-2 leading-tight break-words overflow-wrap-anywhere"
-                style={{ 
-                  wordBreak: 'break-word',
-                  overflowWrap: 'break-word',
-                  hyphens: 'auto'
-                }}
-              >
+            <div className="p-6">
+              {/* Status Badge */}
+              <div className="flex items-center gap-2 mb-4">
+                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold ${
+                  post.status === 'PUBLISHED' 
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                    : post.status === 'DRAFT'
+                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                    : 'bg-gray-500/10 text-gray-400 border border-gray-500/30'
+                }`}>
+                  {post.status === 'PUBLISHED' ? <Globe className="w-3 h-3 mr-1" /> : <Lock className="w-3 h-3 mr-1" />}
+                  {post.status}
+                </span>
+                {post.isFeatured && (
+                  <span className="inline-flex items-center px-3 py-1 bg-[#fcd535]/10 text-[#fcd535] text-xs font-semibold rounded-lg border border-[#fcd535]/30">
+                    <Star className="w-3 h-3 mr-1" />
+                    Featured
+                  </span>
+                )}
+                {post.isPinned && (
+                  <span className="inline-flex items-center px-3 py-1 bg-blue-500/10 text-blue-400 text-xs font-semibold rounded-lg border border-blue-500/30">
+                    <Pin className="w-3 h-3 mr-1" />
+                    Pinned
+                  </span>
+                )}
+              </div>
+
+              {/* Title */}
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
                 {post.title}
               </h1>
               
-              {/* Post Meta */}
-              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 mb-2">
+              {/* Meta Info */}
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-4">
                 <div className="flex items-center">
-                  <User className="w-3 h-3 mr-1" />
+                  <User className="w-4 h-4 mr-2" />
                   <span>{post.author?.name || 'Unknown Author'}</span>
                 </div>
                 <div className="flex items-center">
-                  <Calendar className="w-3 h-3 mr-1" />
+                  <Calendar className="w-4 h-4 mr-2" />
                   <span>{formatDate(post.createdAt)}</span>
                 </div>
                 <div className="flex items-center">
-                  <Tag className="w-3 h-3 mr-1" />
+                  <Tag className="w-4 h-4 mr-2" />
                   <span>{post.category?.name || 'Uncategorized'}</span>
-                </div>
-                <div className="flex items-center">
-                  {post.status === 'PUBLISHED' ? (
-                    <Globe className="w-3 h-3 mr-1 text-green-600" />
-                  ) : (
-                    <Lock className="w-3 h-3 mr-1 text-gray-400" />
-                  )}
-                  <span className={post.status === 'PUBLISHED' ? 'text-green-600' : 'text-gray-400'}>
-                    {post.status}
-                  </span>
                 </div>
               </div>
 
-              {/* Post Stats */}
-              <div className="flex items-center space-x-4 text-xs text-gray-600">
+              {/* Stats */}
+              <div className="flex items-center gap-6 text-sm text-gray-500">
                 <div className="flex items-center">
-                  <Eye className="w-3 h-3 mr-1" />
+                  <Eye className="w-4 h-4 mr-2" />
                   <span>{post.viewCount} views</span>
                 </div>
                 <div className="flex items-center">
-                  <MessageCircle className="w-3 h-3 mr-1" />
+                  <MessageCircle className="w-4 h-4 mr-2" />
                   <span>{post.commentCount} comments</span>
                 </div>
                 <div className="flex items-center">
-                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <TrendingUp className="w-4 h-4 mr-2" />
                   <span>{post.likeCount} likes</span>
                 </div>
               </div>
@@ -249,117 +249,64 @@ const PostDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Post Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Content</h2>
-          <div className="w-full overflow-hidden">
+        {/* Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <FileText className="w-5 h-5 mr-2 text-[#fcd535]" />
+                Article Content
+              </h2>
             {post.content ? (
               <div 
-                className="text-gray-800 text-sm leading-relaxed break-words overflow-wrap-anywhere"
+                  className="prose prose-invert max-w-none text-gray-300 leading-relaxed"
                 style={{ 
                   wordBreak: 'break-word',
-                  overflowWrap: 'break-word',
-                  hyphens: 'auto'
+                    overflowWrap: 'break-word'
                 }}
                 dangerouslySetInnerHTML={{ 
                   __html: post.content.replace(
                     /<img([^>]*)src="([^"]*)"([^>]*)>/gi, 
                     (match, before, src, after) => {
-                      // Fix image URLs to use the correct server base URL
                       const correctedSrc = src.startsWith('/uploads/') 
                         ? `${getServerBaseUrl()}${src}`
                         : src.startsWith('http') 
                         ? src 
                         : `${getServerBaseUrl()}/uploads/${src}`;
                       
-                      return `<img${before}src="${correctedSrc}"${after} class="max-w-full h-auto rounded-lg shadow-sm my-4 block" onerror="this.style.display='none'">`;
+                        return `<img${before}src="${correctedSrc}"${after} class="max-w-full h-auto rounded-lg my-4 block" onerror="this.style.display='none'">`;
                     }
                   )
                 }} 
               />
             ) : (
-              <p className="text-gray-500 italic text-sm">No content available for this post.</p>
+                <p className="text-gray-500 italic">No content available for this article.</p>
             )}
           </div>
-        </div>
 
-        {/* Content Images Gallery */}
-        {post.content && (() => {
-          const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/gi;
-          const images = [];
-          let match;
-          while ((match = imgRegex.exec(post.content)) !== null) {
-            images.push(match[1]);
-          }
-          
-          if (images.length > 0) {
-            return (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-                <h2 className="text-base font-semibold text-gray-900 mb-3">Content Images ({images.length})</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {images.map((src, index) => {
-                    const correctedSrc = src.startsWith('/uploads/') 
-                      ? `${getServerBaseUrl()}${src}`
-                      : src.startsWith('http') 
-                      ? src 
-                      : `${getServerBaseUrl()}/uploads/${src}`;
-                    
-                    return (
-                      <div key={index} className="aspect-square bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center group cursor-pointer hover:shadow-md transition-shadow">
-                        <img
-                          src={correctedSrc}
-                          alt={`Content image ${index + 1}`}
-                          className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                          onClick={() => {
-                            // Open image in new tab for full view
-                            window.open(correctedSrc, '_blank');
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          }
-          return null;
-        })()}
-
-        {/* Post Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Left Column */}
-          <div className="space-y-4">
             {/* Excerpt */}
             {post.excerpt && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Excerpt</h3>
-                <div className="w-full overflow-hidden">
-                  <p 
-                    className="text-gray-700 text-sm break-words overflow-wrap-anywhere"
-                    style={{ 
-                      wordBreak: 'break-word',
-                      overflowWrap: 'break-word',
-                      hyphens: 'auto'
-                    }}
-                  >
-                    {post.excerpt}
-                  </p>
-                </div>
+              <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 mt-6">
+                <h3 className="text-lg font-semibold text-white mb-3">Excerpt</h3>
+                <p className="text-gray-400">{post.excerpt}</p>
               </div>
             )}
+          </div>
 
+          {/* Sidebar */}
+          <div className="space-y-6">
             {/* Tags */}
             {post.tags && post.tags.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Tags</h3>
-                <div className="flex flex-wrap gap-1">
+              <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <Tag className="w-5 h-5 mr-2 text-[#fcd535]" />
+                  Tags
+                </h3>
+                <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                      className="px-3 py-1.5 bg-[#0b0e11] text-gray-300 rounded-lg text-sm border border-[#2b2f36]"
                     >
                       {tag}
                     </span>
@@ -368,111 +315,95 @@ const PostDetail: React.FC = () => {
               </div>
             )}
 
-            {/* SEO */}
-            {(post.metaTitle || post.metaDescription) && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">SEO Information</h3>
-                {post.metaTitle && (
-                  <div className="mb-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Meta Title</label>
-                    <div className="w-full overflow-hidden">
-                      <p 
-                        className="text-gray-600 text-sm break-words overflow-wrap-anywhere"
-                        style={{ 
-                          wordBreak: 'break-word',
-                          overflowWrap: 'break-word',
-                          hyphens: 'auto'
-                        }}
-                      >
-                        {post.metaTitle}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {post.metaDescription && (
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Meta Description</label>
-                    <div className="w-full overflow-hidden">
-                      <p 
-                        className="text-gray-600 text-sm break-words overflow-wrap-anywhere"
-                        style={{ 
-                          wordBreak: 'break-word',
-                          overflowWrap: 'break-word',
-                          hyphens: 'auto'
-                        }}
-                      >
-                        {post.metaDescription}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-4">
             {/* Post Settings */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Post Settings</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700 text-sm">Featured Post</span>
+            <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <FileText className="w-5 h-5 mr-2 text-[#fcd535]" />
+                Article Settings
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                  <span className="text-gray-400 text-sm">Featured Article</span>
                   {post.isFeatured ? (
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
                   ) : (
-                    <Star className="w-4 h-4 text-gray-300" />
+                    <Star className="w-5 h-5 text-gray-600" />
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700 text-sm">Pinned Post</span>
+                <div className="flex items-center justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                  <span className="text-gray-400 text-sm">Pinned Article</span>
                   {post.isPinned ? (
-                    <Pin className="w-4 h-4 text-blue-500 fill-current" />
+                    <Pin className="w-5 h-5 text-blue-500 fill-current" />
                   ) : (
-                    <Pin className="w-4 h-4 text-gray-300" />
+                    <Pin className="w-5 h-5 text-gray-600" />
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700 text-sm">Allow Comments</span>
+                <div className="flex items-center justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                  <span className="text-gray-400 text-sm">Allow Comments</span>
                   {post.allowComments ? (
-                    <MessageCircle className="w-4 h-4 text-green-500" />
+                    <MessageCircle className="w-5 h-5 text-emerald-500" />
                   ) : (
-                    <MessageCircle className="w-4 h-4 text-gray-300" />
+                    <MessageCircle className="w-5 h-5 text-gray-600" />
                   )}
                 </div>
               </div>
             </div>
 
             {/* Post Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Post Information</h3>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">ID:</span>
-                  <span className="font-mono text-gray-900">{post.id}</span>
+            <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <Clock className="w-5 h-5 mr-2 text-[#fcd535]" />
+                Article Information
+              </h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                  <span className="text-gray-500">ID</span>
+                  <span className="font-mono text-gray-300 text-xs">{post.id.slice(0, 8)}...</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Slug:</span>
-                  <span className="font-mono text-gray-900">{post.slug}</span>
+                <div className="flex justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                  <span className="text-gray-500">Slug</span>
+                  <span className="font-mono text-gray-300 text-xs truncate max-w-[150px]">{post.slug}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Created:</span>
-                  <span className="text-gray-900">{formatDate(post.createdAt)}</span>
+                <div className="flex justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                  <span className="text-gray-500">Created</span>
+                  <span className="text-gray-300 text-xs">{formatDate(post.createdAt)}</span>
                 </div>
                 {post.updatedAt && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Updated:</span>
-                    <span className="text-gray-900">{formatDate(post.updatedAt)}</span>
+                  <div className="flex justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                    <span className="text-gray-500">Updated</span>
+                    <span className="text-gray-300 text-xs">{formatDate(post.updatedAt)}</span>
                   </div>
                 )}
                 {post.publishedAt && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Published:</span>
-                    <span className="text-gray-900">{formatDate(post.publishedAt)}</span>
+                  <div className="flex justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                    <span className="text-gray-500">Published</span>
+                    <span className="text-gray-300 text-xs">{formatDate(post.publishedAt)}</span>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* SEO */}
+            {(post.metaTitle || post.metaDescription) && (
+              <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <Globe className="w-5 h-5 mr-2 text-[#fcd535]" />
+                  SEO Information
+                </h3>
+                {post.metaTitle && (
+                  <div className="mb-4">
+                    <label className="block text-xs font-medium text-gray-500 mb-2">Meta Title</label>
+                    <p className="text-gray-300 text-sm p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">{post.metaTitle}</p>
+                  </div>
+                )}
+                {post.metaDescription && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-2">Meta Description</label>
+                    <p className="text-gray-300 text-sm p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">{post.metaDescription}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

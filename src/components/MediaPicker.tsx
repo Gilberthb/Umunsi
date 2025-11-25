@@ -60,7 +60,8 @@ const MediaPicker: React.FC<MediaPickerProps> = ({
   };
 
   const getServerBaseUrl = () => {
-    return import.meta.env.VITE_API_URL || '';
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    return apiUrl.replace('/api', '');
   };
 
   const filteredMedia = mediaFiles.filter(file => {

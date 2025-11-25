@@ -93,12 +93,9 @@ const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
   };
 
   const getServerBaseUrl = () => {
-    // In development, use relative URLs since Vite proxy handles routing
-    if (import.meta.env.DEV) {
-      return '';
-    }
-    // In production, use the full server URL
-    return import.meta.env.VITE_API_URL || '';
+    // Get the API URL and extract the base server URL
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    return apiUrl.replace('/api', '');
   };
 
   const filteredMedia = mediaFiles.filter(file => {

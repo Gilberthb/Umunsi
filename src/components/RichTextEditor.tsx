@@ -103,12 +103,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     console.log('🖼️ InsertImage called with:', media);
     
     const getServerBaseUrl = () => {
-      // In development, use relative URLs since Vite proxy handles routing
-      if (import.meta.env.DEV) {
-        return '';
-      }
-      // In production, use the full server URL
-      return import.meta.env.VITE_API_URL || '';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      return apiUrl.replace('/api', '');
     };
     
     const imageUrl = `${getServerBaseUrl()}${media.url}`;
@@ -460,8 +456,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       type="button"
       onClick={onClick}
       title={title}
-      className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-        isActive ? 'bg-gray-200 text-gray-900' : 'text-gray-600'
+      className={`p-2 rounded hover:bg-[#2b2f36] transition-colors ${
+        isActive ? 'bg-[#2b2f36] text-[#fcd535]' : 'text-gray-400 hover:text-white'
       }`}
     >
       {icon}
@@ -469,11 +465,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   );
 
   return (
-    <div className={`rich-text-editor border border-gray-300 rounded-lg ${className}`}>
+    <div className={`rich-text-editor border border-[#2b2f36] rounded-xl bg-[#0b0e11] ${className}`}>
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+      <div className="flex items-center gap-1 p-2 border-b border-[#2b2f36] bg-[#1e2329] rounded-t-xl">
         {/* Text Formatting */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
           <ToolbarButton
             onClick={() => execCommand('bold')}
             icon={<Bold className="w-4 h-4" />}
@@ -492,7 +488,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
 
         {/* Lists */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
           <ToolbarButton
             onClick={() => execCommand('insertUnorderedList')}
             icon={<List className="w-4 h-4" />}
@@ -506,7 +502,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
 
         {/* Alignment */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
           <ToolbarButton
             onClick={() => execCommand('justifyLeft')}
             icon={<AlignLeft className="w-4 h-4" />}
@@ -525,7 +521,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
 
         {/* Insert */}
-        <div className="flex items-center gap-1 border-r border-gray-300 pr-2">
+        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
           <ToolbarButton
             onClick={insertLink}
             icon={<Link className="w-4 h-4" />}
@@ -569,17 +565,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`min-h-[300px] p-4 focus:outline-none ${
-          isFocused ? 'ring-2 ring-green-500 ring-opacity-50' : ''
+        className={`min-h-[300px] p-4 focus:outline-none text-white bg-[#0b0e11] rounded-b-xl ${
+          isFocused ? 'ring-2 ring-[#fcd535]/50' : ''
         }`}
-        style={{ minHeight: '300px' }}
+        style={{ minHeight: '300px', color: 'white' }}
         data-placeholder={placeholder}
         suppressContentEditableWarning={true}
       />
 
       {/* Placeholder */}
       {!value && (
-        <div className="absolute top-16 left-4 text-gray-400 pointer-events-none">
+        <div className="absolute top-16 left-4 text-gray-500 pointer-events-none">
           {placeholder}
         </div>
       )}

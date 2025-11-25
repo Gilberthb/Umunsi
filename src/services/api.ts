@@ -1,5 +1,5 @@
 // API Base Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5003/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // API Response Types
 export interface ApiResponse<T = any> {
@@ -191,8 +191,43 @@ export interface DashboardStats {
   totalComments: number;
   totalMedia: number;
   totalPosts: number;
+  totalViews: number;
+  totalLikes: number;
   userGrowthPercentage: number;
   articleGrowthPercentage: number;
+  recentArticles?: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    excerpt?: string;
+    status: string;
+    viewCount: number;
+    likeCount: number;
+    commentCount: number;
+    createdAt: string;
+    publishedAt?: string;
+    author: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
+    category?: {
+      id: string;
+      name: string;
+      slug: string;
+      color: string;
+    };
+  }>;
+  recentUsers?: Array<{
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+    isActive: boolean;
+    lastLogin?: string;
+    createdAt: string;
+  }>;
 }
 
 export interface AnalyticsData {
@@ -290,7 +325,6 @@ class ApiClient {
 
       return data;
     } catch (error) {
-      console.error('API Error:', error);
       throw error;
     }
   }
@@ -345,7 +379,7 @@ class ApiClient {
       throw new Error('No token available to refresh');
     }
     
-    const response = await this.request<{ token: string }>('/auth/refresh', {
+    const response = await this.request<{ success: boolean; token: string }>('/auth/refresh', {
       method: 'POST'
     });
     
@@ -430,22 +464,28 @@ class ApiClient {
   }
 
   // Categories Methods
-  async getCategories(): Promise<Category[]> {
-    const response = await this.request<{categories: Category[]}>('/categories');
+  async getCategories(options?: { includeInactive?: boolean }): Promise<Category[]> {
+    const params = new URLSearchParams();
+    if (options?.includeInactive) {
+      params.append('includeInactive', 'true');
+    }
+    const queryString = params.toString();
+    const url = queryString ? `/categories?${queryString}` : '/categories';
+    const response = await this.request<{categories: Category[]}>(url);
     // The API returns {success: true, categories: [...]}
     return response.categories || [];
   }
 
-  async createCategory(categoryData: Partial<Category>): Promise<Category> {
-    const response = await this.request<Category>('/categories', {
+  async createCategory(categoryData: Partial<Category>): Promise<{ success: boolean; category: Category; message?: string }> {
+    const response = await this.request<{ success: boolean; category: Category; message?: string }>('/categories', {
       method: 'POST',
       body: JSON.stringify(categoryData),
     });
     return response;
   }
 
-  async updateCategory(id: string, categoryData: Partial<Category>): Promise<Category> {
-    const response = await this.request<Category>(`/categories/${id}`, {
+  async updateCategory(id: string, categoryData: Partial<Category>): Promise<{ success: boolean; category: Category; message?: string }> {
+    const response = await this.request<{ success: boolean; category: Category; message?: string }>(`/categories/${id}`, {
       method: 'PUT',
       body: JSON.stringify(categoryData),
     });
@@ -688,19 +728,3 @@ class ApiClient {
 
 // Create and export API client instance
 export const apiClient = new ApiClient(API_BASE_URL);
-
-// Export types for use in components
-export type {
-  ApiResponse,
-  PaginatedResponse,
-  LoginCredentials,
-  RegisterData,
-  AuthResponse,
-  Article,
-  Category,
-  User,
-  MediaFile,
-  Post,
-  DashboardStats,
-  AnalyticsData,
-};

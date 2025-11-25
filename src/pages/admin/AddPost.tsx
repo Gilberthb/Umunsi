@@ -18,7 +18,8 @@ import {
   Lock,
   FileText,
   Image as ImageIcon,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 import { apiClient, Category, MediaFile } from '../../services/api';
 import RichTextEditor from '../../components/RichTextEditor';
@@ -198,7 +199,8 @@ const AddPost: React.FC = () => {
   const handleFeaturedImageSelect = (media: MediaFile) => {
     setSelectedFeaturedImage(media);
     const getServerBaseUrl = () => {
-      return import.meta.env.VITE_API_URL || '';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      return apiUrl.replace('/api', '');
     };
     setFormData(prev => ({
       ...prev,
@@ -215,28 +217,35 @@ const AddPost: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-[#0b0e11] min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/admin/posts')}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center text-gray-400 hover:text-[#fcd535] transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Back to Posts
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Post</h1>
-              <p className="text-gray-600 mt-1">Write and publish a new blog post</p>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-gradient-to-br from-[#fcd535]/20 to-[#f0b90b]/20 rounded-xl">
+                  <Sparkles className="w-6 h-6 text-[#fcd535]" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">Create New Article</h1>
+                  <p className="text-gray-300 mt-1">Write and publish a new news article</p>
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <button
               type="button"
               onClick={() => setPreviewMode(!previewMode)}
-              className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center px-4 py-2.5 text-gray-300 border border-[#2b2f36] rounded-xl hover:bg-[#1e2329] transition-colors"
             >
               <Eye className="w-4 h-4 mr-2" />
               {previewMode ? 'Edit' : 'Preview'}
@@ -245,14 +254,14 @@ const AddPost: React.FC = () => {
               type="submit"
               form="post-form"
               disabled={loading}
-              className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center px-6 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#fcd535]/20"
             >
               {loading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0b0e11] mr-2"></div>
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              {loading ? 'Saving...' : 'Save Post'}
+              {loading ? 'Saving...' : 'Publish Article'}
             </button>
           </div>
         </div>
@@ -260,21 +269,21 @@ const AddPost: React.FC = () => {
 
       {/* Error Message */}
       {errors.submit && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-          <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-          <span className="text-red-800">{errors.submit}</span>
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center">
+          <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
+          <span className="text-red-400">{errors.submit}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36]">
             <form id="post-form" onSubmit={handleSubmit} className="p-6">
               {/* Title */}
               <div className="mb-6">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                  Post Title *
+                <label htmlFor="title" className="block text-sm font-medium text-white mb-2">
+                  Article Title *
                 </label>
                 <input
                   type="text"
@@ -282,14 +291,14 @@ const AddPost: React.FC = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg ${
-                    errors.title ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 bg-[#0b0e11] border rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-lg ${
+                    errors.title ? 'border-red-500' : 'border-[#2b2f36]'
                   }`}
-                  placeholder="Enter post title..."
+                  placeholder="Enter article title..."
                   maxLength={200}
                 />
                 {errors.title && (
-                  <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.title}</p>
                 )}
                 <p className="mt-1 text-sm text-gray-500">
                   {formData.title.length}/200 characters
@@ -298,30 +307,30 @@ const AddPost: React.FC = () => {
 
               {/* Content */}
               <div className="mb-6">
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="content" className="block text-sm font-medium text-white mb-2">
                   Content *
                 </label>
                 <RichTextEditor
                   value={formData.content}
                   onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
-                  placeholder="Write your post content here..."
-                  className={errors.content ? 'border-red-300' : ''}
+                  placeholder="Write your article content here..."
+                  className={errors.content ? 'border-red-500' : ''}
                 />
                 {errors.content && (
-                  <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.content}</p>
                 )}
               </div>
 
               {/* Excerpt */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="excerpt" className="block text-sm font-medium text-white">
                     Excerpt
                   </label>
                   <button
                     type="button"
                     onClick={generateExcerpt}
-                    className="text-sm text-green-600 hover:text-green-700 transition-colors"
+                    className="text-sm text-[#fcd535] hover:text-[#f0b90b] transition-colors"
                   >
                     Generate from content
                   </button>
@@ -332,14 +341,14 @@ const AddPost: React.FC = () => {
                   value={formData.excerpt}
                   onChange={handleInputChange}
                   rows={3}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.excerpt ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-4 py-3 bg-[#0b0e11] border rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 ${
+                    errors.excerpt ? 'border-red-500' : 'border-[#2b2f36]'
                   }`}
-                  placeholder="Brief description of your post..."
+                  placeholder="Brief description of your article..."
                   maxLength={500}
                 />
                 {errors.excerpt && (
-                  <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.excerpt}</p>
                 )}
                 <p className="mt-1 text-sm text-gray-500">
                   {formData.excerpt.length}/500 characters
@@ -348,7 +357,7 @@ const AddPost: React.FC = () => {
 
               {/* Featured Image */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Featured Image
                 </label>
                 
@@ -358,26 +367,23 @@ const AddPost: React.FC = () => {
                       <img
                         src={`${import.meta.env.VITE_API_URL || ''}${selectedFeaturedImage.url}`}
                         alt="Featured image preview"
-                        className="w-full h-48 object-cover rounded-lg border border-gray-200"
+                        className="w-full h-48 object-cover rounded-xl border border-[#2b2f36]"
                         onError={(e) => {
                           console.error('Failed to load featured image:', e);
                           (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                        onLoad={() => {
-                          console.log('Featured image loaded successfully');
                         }}
                       />
                       <button
                         type="button"
                         onClick={removeFeaturedImage}
-                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{selectedFeaturedImage.originalName}</p>
+                        <p className="text-sm font-medium text-white">{selectedFeaturedImage.originalName}</p>
                         <p className="text-xs text-gray-500">
                           {(selectedFeaturedImage.size / 1024 / 1024).toFixed(2)} MB
                         </p>
@@ -385,20 +391,20 @@ const AddPost: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowMediaLibrary(true)}
-                        className="text-sm text-green-600 hover:text-green-700 transition-colors"
+                        className="text-sm text-[#fcd535] hover:text-[#f0b90b] transition-colors"
                       >
                         Change Image
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                    <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">No featured image selected</p>
+                  <div className="border-2 border-dashed border-[#2b2f36] rounded-xl p-6 text-center hover:border-[#fcd535]/50 transition-colors bg-[#0b0e11]">
+                    <ImageIcon className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-white mb-2">No featured image selected</p>
                     <button
                       type="button"
                       onClick={() => setShowMediaLibrary(true)}
-                      className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
                     >
                       <ImageIcon className="w-4 h-4 mr-2" />
                       Select from Media Library
@@ -413,16 +419,16 @@ const AddPost: React.FC = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Publish Settings */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-[#fcd535]" />
               Publish Settings
             </h3>
             
             <div className="space-y-4">
               {/* Status */}
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="status" className="block text-sm font-medium text-white mb-2">
                   Status
                 </label>
                 <select
@@ -430,7 +436,7 @@ const AddPost: React.FC = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white"
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="PUBLISHED">Published</option>
@@ -440,7 +446,7 @@ const AddPost: React.FC = () => {
 
               {/* Category */}
               <div>
-                <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="categoryId" className="block text-sm font-medium text-white mb-2">
                   Category
                 </label>
                 <select
@@ -448,7 +454,7 @@ const AddPost: React.FC = () => {
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white"
                 >
                   <option value="">Select a category</option>
                   {categories.map(category => (
@@ -460,50 +466,50 @@ const AddPost: React.FC = () => {
               </div>
 
               {/* Options */}
-              <div className="space-y-3">
-                <label className="flex items-center">
+              <div className="space-y-3 pt-2">
+                <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                   <input
                     type="checkbox"
                     name="isFeatured"
                     checked={formData.isFeatured}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                    className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
                   />
-                  <Star className="w-4 h-4 ml-2 text-yellow-500" />
-                  <span className="ml-2 text-sm text-gray-700">Featured Post</span>
+                  <Star className="w-4 h-4 ml-3 text-yellow-500" />
+                  <span className="ml-2 text-sm text-white">Featured Article</span>
                 </label>
 
-                <label className="flex items-center">
+                <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                   <input
                     type="checkbox"
                     name="isPinned"
                     checked={formData.isPinned}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                    className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
                   />
-                  <Pin className="w-4 h-4 ml-2 text-blue-500" />
-                  <span className="ml-2 text-sm text-gray-700">Pinned Post</span>
+                  <Pin className="w-4 h-4 ml-3 text-blue-500" />
+                  <span className="ml-2 text-sm text-white">Pinned Article</span>
                 </label>
 
-                <label className="flex items-center">
+                <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                   <input
                     type="checkbox"
                     name="allowComments"
                     checked={formData.allowComments}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500"
+                    className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
                   />
-                  <MessageCircle className="w-4 h-4 ml-2 text-gray-500" />
-                  <span className="ml-2 text-sm text-gray-700">Allow Comments</span>
+                  <MessageCircle className="w-4 h-4 ml-3 text-emerald-500" />
+                  <span className="ml-2 text-sm text-white">Allow Comments</span>
                 </label>
               </div>
             </div>
           </div>
 
           {/* Tags */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Tag className="w-5 h-5 mr-2" />
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <Tag className="w-5 h-5 mr-2 text-[#fcd535]" />
               Tags
             </h3>
             
@@ -514,13 +520,13 @@ const AddPost: React.FC = () => {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="flex-1 px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-sm"
                   placeholder="Add a tag..."
                 />
                 <button
                   type="button"
                   onClick={handleAddTag}
-                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="px-3 py-2.5 bg-[#fcd535] text-[#0b0e11] rounded-xl hover:bg-[#f0b90b] transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -531,13 +537,13 @@ const AddPost: React.FC = () => {
                   {formData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded-full"
+                      className="inline-flex items-center px-3 py-1.5 bg-[#fcd535]/10 text-[#fcd535] text-sm rounded-lg border border-[#fcd535]/30"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 text-gray-500 hover:text-gray-700"
+                        className="ml-2 text-[#fcd535] hover:text-white"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -549,9 +555,9 @@ const AddPost: React.FC = () => {
           </div>
 
           {/* SEO Settings */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Globe className="w-5 h-5 mr-2" />
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <Globe className="w-5 h-5 mr-2 text-[#fcd535]" />
               SEO Settings
             </h3>
             
@@ -559,13 +565,13 @@ const AddPost: React.FC = () => {
               {/* Meta Title */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="metaTitle" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="metaTitle" className="block text-sm font-medium text-white">
                     Meta Title
                   </label>
                   <button
                     type="button"
                     onClick={generateMetaTitle}
-                    className="text-sm text-green-600 hover:text-green-700 transition-colors"
+                    className="text-sm text-[#fcd535] hover:text-[#f0b90b] transition-colors"
                   >
                     Use title
                   </button>
@@ -576,7 +582,7 @@ const AddPost: React.FC = () => {
                   name="metaTitle"
                   value={formData.metaTitle}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-sm"
                   placeholder="SEO title for search engines..."
                 />
               </div>
@@ -584,13 +590,13 @@ const AddPost: React.FC = () => {
               {/* Meta Description */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="metaDescription" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="metaDescription" className="block text-sm font-medium text-white">
                     Meta Description
                   </label>
                   <button
                     type="button"
                     onClick={generateMetaDescription}
-                    className="text-sm text-green-600 hover:text-green-700 transition-colors"
+                    className="text-sm text-[#fcd535] hover:text-[#f0b90b] transition-colors"
                   >
                     Use excerpt
                   </button>
@@ -601,7 +607,7 @@ const AddPost: React.FC = () => {
                   value={formData.metaDescription}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-sm"
                   placeholder="SEO description for search engines..."
                 />
               </div>

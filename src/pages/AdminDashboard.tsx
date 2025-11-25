@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, 
   Users, 
@@ -7,40 +8,24 @@ import {
   Heart, 
   MessageSquare, 
   Calendar,
-  Clock,
   Star,
   Zap,
-  Target,
-  Award,
   BarChart3,
-  PieChart,
   Activity,
-  Globe,
-  Smartphone,
-  Monitor,
-  ArrowUpRight,
-  ArrowDownRight,
-  MoreHorizontal,
   Plus,
-  Settings,
-  RefreshCw,
   Download,
-  Filter,
-  Search,
-  Bell,
-  Mail,
-  Shield,
-  Cloud,
-  Database,
-  Server,
-  Wifi,
-  HardDrive,
-  Network,
   CheckCircle,
   AlertCircle,
   XCircle,
-  Info,
-  User
+  User,
+  ChevronRight,
+  Flame,
+  Sparkles,
+  Layers,
+  BookOpen,
+  Crown,
+  Shield,
+  MoreHorizontal
 } from 'lucide-react';
 import { apiClient } from '../services/api';
 
@@ -76,14 +61,12 @@ interface RecentUser {
 interface SystemStatus {
   database: string;
   server: string;
-  storage: string;
-  network: string;
 }
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalArticles: 0,
@@ -97,11 +80,14 @@ const AdminDashboard = () => {
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
 
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    database: 'healthy',
-    server: 'healthy',
-    storage: 'warning',
-    network: 'healthy'
+    database: 'checking',
+    server: 'checking'
   });
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
@@ -111,68 +97,73 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch dashboard stats
-      const statsResponse = await apiClient.getDashboardStats();
-      if (statsResponse) {
+      // Fetch all dashboard data from the unified endpoint
+      const dashboardResponse = await apiClient.getDashboardStats();
+      
+      if (dashboardResponse) {
+        // Set stats from the response
         setStats({
-          totalUsers: statsResponse.totalUsers || 0,
-          totalArticles: statsResponse.totalArticles || 0,
-          totalCategories: statsResponse.totalCategories || 0,
-          totalComments: statsResponse.totalComments || 0,
-          totalViews: statsResponse.totalViews || 0,
-          totalLikes: statsResponse.totalLikes || 0
+          totalUsers: dashboardResponse.totalUsers || 0,
+          totalArticles: dashboardResponse.totalArticles || 0,
+          totalCategories: dashboardResponse.totalCategories || 0,
+          totalComments: dashboardResponse.totalComments || 0,
+          totalViews: dashboardResponse.totalViews || 0,
+          totalLikes: dashboardResponse.totalLikes || 0
         });
+
+        // Set recent articles from dashboard response
+        if (dashboardResponse.recentArticles && dashboardResponse.recentArticles.length > 0) {
+          const formattedArticles = dashboardResponse.recentArticles.map(article => ({
+            id: article.id,
+            title: article.title,
+            author: article.author 
+              ? `${article.author.firstName || ''} ${article.author.lastName || ''}`.trim() || article.author.username || 'Unknown'
+              : 'Unknown Author',
+            views: article.viewCount || 0,
+            likes: article.likeCount || 0,
+            comments: article.commentCount || 0,
+            status: article.status?.toLowerCase() || 'draft',
+            publishedAt: article.publishedAt || article.createdAt || new Date().toISOString()
+          }));
+          setRecentArticles(formattedArticles);
+        }
+
+        // Set recent users from dashboard response
+        if (dashboardResponse.recentUsers && dashboardResponse.recentUsers.length > 0) {
+          const formattedUsers = dashboardResponse.recentUsers.map(user => ({
+            id: user.id,
+            username: user.username || 'Unknown',
+            email: user.email || '',
+            role: user.role || 'USER',
+            lastActive: user.lastLogin || user.createdAt || new Date().toISOString(),
+            status: user.isActive ? 'active' : 'inactive'
+          }));
+          setRecentUsers(formattedUsers);
+        }
       }
 
-      // Fetch recent articles
-      const articlesResponse = await apiClient.getArticles({ limit: 5, status: 'PUBLISHED' });
-      if (articlesResponse?.data) {
-        const formattedArticles = articlesResponse.data.map(article => ({
-          id: article.id,
-          title: article.title,
-          author: `${article.author?.firstName || ''} ${article.author?.lastName || ''}`.trim() || 'Unknown Author',
-          views: article.viewCount || 0,
-          likes: article.likeCount || 0,
-          comments: article.commentCount || 0,
-          status: article.status?.toLowerCase() || 'draft',
-          publishedAt: article.createdAt || new Date().toISOString()
-        }));
-        setRecentArticles(formattedArticles);
-      }
-
-      // Fetch recent users
-      const usersResponse = await apiClient.getUsers({ limit: 5 });
-      if (usersResponse?.data) {
-        const formattedUsers = usersResponse.data.map(user => ({
-          id: user.id,
-          username: user.username || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-          email: user.email || '',
-          role: user.role || 'USER',
-          lastActive: user.lastLoginAt || user.createdAt || new Date().toISOString(),
-          status: user.isActive ? 'active' : 'inactive'
-        }));
-        setRecentUsers(formattedUsers);
-      }
-
-      // Check system status
+      // Check system health
       try {
         await apiClient.healthCheck();
-        setSystemStatus(prev => ({ ...prev, database: 'healthy', server: 'healthy' }));
-      } catch (error) {
-        setSystemStatus(prev => ({ ...prev, database: 'error', server: 'error' }));
+        setSystemStatus({ database: 'healthy', server: 'healthy' });
+      } catch {
+        setSystemStatus({ database: 'error', server: 'error' });
       }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Set fallback data if API fails
+      // Set fallback data on error
       setStats({
-        totalUsers: 1247,
-        totalArticles: 89,
-        totalCategories: 12,
-        totalComments: 456,
-        totalViews: 23456,
-        totalLikes: 1234
+        totalUsers: 0,
+        totalArticles: 0,
+        totalCategories: 0,
+        totalComments: 0,
+        totalViews: 0,
+        totalLikes: 0
       });
+      setRecentArticles([]);
+      setRecentUsers([]);
+      setSystemStatus({ database: 'error', server: 'error' });
     } finally {
       setLoading(false);
     }
@@ -181,7 +172,7 @@ const AdminDashboard = () => {
   const formatNumber = (num: number) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toString();
+    return num.toLocaleString();
   };
 
   const formatDate = (dateString: string) => {
@@ -193,419 +184,432 @@ const AdminDashboard = () => {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    const colors = {
-      'published': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'draft': 'bg-amber-100 text-amber-800 border-amber-200',
-      'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'active': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'inactive': 'bg-red-100 text-red-800 border-red-200'
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      'published': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      'draft': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+      'pending': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      'active': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      'inactive': 'bg-red-500/20 text-red-400 border-red-500/30'
     };
-    return colors[status as keyof typeof colors] || colors.pending;
-  };
-
-  const getHealthColor = (status: string) => {
-    const colors = {
-      'healthy': 'bg-green-500',
-      'warning': 'bg-yellow-500',
-      'error': 'bg-red-500'
-    };
-    return colors[status as keyof typeof colors] || colors.warning;
+    return styles[status] || styles.pending;
   };
 
   const getHealthIcon = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-emerald-400" />;
       case 'warning':
-        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+        return <AlertCircle className="w-4 h-4 text-amber-400" />;
       case 'error':
-        return <XCircle className="w-4 h-4 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-red-400" />;
+      case 'checking':
+        return <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />;
       default:
-        return <Info className="w-4 h-4 text-yellow-500" />;
+        return <AlertCircle className="w-4 h-4 text-amber-400" />;
+    }
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role.toUpperCase()) {
+      case 'ADMIN':
+        return <Crown className="w-3.5 h-3.5 text-amber-400" />;
+      case 'EDITOR':
+        return <Shield className="w-3.5 h-3.5 text-blue-400" />;
+      case 'AUTHOR':
+        return <BookOpen className="w-3.5 h-3.5 text-purple-400" />;
+      default:
+        return <User className="w-3.5 h-3.5 text-gray-400" />;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-yellow-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-          <p className="text-yellow-600 text-lg">Loading dashboard...</p>
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-[#fcd535]/20"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#fcd535] animate-spin"></div>
+            <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-[#fcd535] animate-pulse" />
+          </div>
+          <p className="text-gray-400 text-lg font-medium">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50">
-      {/* Navbar */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-green-200/50 shadow-lg sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            
-            {/* Left side - Logo */}
-            <div className="flex items-center">
-              {/* Logo */}
-              <div className="flex items-center">
-                <div className="relative">
-                  <img 
-                    src="/images/logo.png" 
-                    alt="Umunsi Logo" 
-                    className="w-16 h-16 object-contain drop-shadow-sm"
-                  />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border border-white"></div>
-                </div>
+    <div className="min-h-screen bg-[#0b0e11] p-6 lg:p-8">
+      {/* Welcome Banner */}
+      <div className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-r from-[#181a20] via-[#1e2329] to-[#181a20] border border-[#2b2f36]">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmIyZjM2IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#fcd535]/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="relative px-8 py-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-3 mb-3">
+                <span className="px-3 py-1 bg-[#fcd535]/20 text-[#fcd535] text-xs font-semibold rounded-full border border-[#fcd535]/30">
+                  LIVE
+                </span>
+                <span className="text-gray-500 text-sm">
+                  {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">Welcome back, Admin!</h2>
+              <p className="text-gray-400 max-w-lg">
+                Your dashboard is looking great. Here's what's happening with your content platform today.
+              </p>
+            </div>
+            <div className="hidden lg:flex items-center space-x-4">
+              <button 
+                onClick={() => navigate('/admin/posts/add')}
+                className="px-5 py-3 bg-[#fcd535] text-[#181a20] font-semibold rounded-xl hover:bg-[#f0b90b] transition-all active:scale-95 flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>New Article</span>
+              </button>
+              <button className="px-5 py-3 bg-[#2b2f36] text-white font-medium rounded-xl hover:bg-[#363a45] transition-all border border-[#2b2f36] flex items-center space-x-2">
+                <Download className="w-5 h-5" />
+                <span>Export</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Total Users */}
+        <div className="group relative bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden hover:border-[#fcd535]/30 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="p-6 relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-500/10 rounded-xl">
+                <Users className="w-6 h-6 text-blue-400" />
               </div>
             </div>
+            <div>
+              <p className="text-3xl font-bold text-white mb-1">{formatNumber(stats.totalUsers)}</p>
+              <p className="text-sm text-gray-500">Total Users</p>
+            </div>
+          </div>
+        </div>
 
-            {/* Center - Search */}
-            <div className="flex-1 max-w-lg mx-4 hidden md:block">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-green-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search articles, users, categories..."
-                  className="block w-full pl-12 pr-4 py-2.5 border border-green-200/50 rounded-xl leading-5 bg-white/60 backdrop-blur-sm placeholder-green-500 focus:outline-none focus:placeholder-green-400 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 shadow-sm transition-all duration-200"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+        {/* Total Articles */}
+        <div className="group relative bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden hover:border-[#fcd535]/30 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="p-6 relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-500/10 rounded-xl">
+                <FileText className="w-6 h-6 text-purple-400" />
               </div>
             </div>
+            <div>
+              <p className="text-3xl font-bold text-white mb-1">{formatNumber(stats.totalArticles)}</p>
+              <p className="text-sm text-gray-500">Total Articles</p>
+            </div>
+          </div>
+        </div>
 
-            {/* Right side - Actions */}
+        {/* Total Views */}
+        <div className="group relative bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden hover:border-[#fcd535]/30 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="p-6 relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-emerald-500/10 rounded-xl">
+                <Eye className="w-6 h-6 text-emerald-400" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-white mb-1">{formatNumber(stats.totalViews)}</p>
+              <p className="text-sm text-gray-500">Total Views</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Engagement */}
+        <div className="group relative bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden hover:border-[#fcd535]/30 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#fcd535]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="p-6 relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-[#fcd535]/10 rounded-xl">
+                <Flame className="w-6 h-6 text-[#fcd535]" />
+              </div>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-white mb-1">{formatNumber(stats.totalLikes + stats.totalComments)}</p>
+              <p className="text-sm text-gray-500">Total Engagement</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Recent Articles */}
+        <div className="xl:col-span-2 bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
+          <div className="px-6 py-5 border-b border-[#2b2f36] flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {/* Mobile search button */}
-              <button className="md:hidden p-2.5 text-green-600 hover:text-green-700 hover:bg-green-50/80 rounded-xl transition-all duration-200 hover:shadow-md">
-                <Search size={20} />
-              </button>
-
-              {/* Notifications */}
-              <button className="p-2.5 text-green-600 hover:text-green-700 hover:bg-green-50/80 rounded-xl transition-all duration-200 hover:shadow-md relative">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white shadow-sm"></span>
-              </button>
-
-              {/* Settings */}
-              <button className="p-2.5 text-green-600 hover:text-green-700 hover:bg-green-50/80 rounded-xl transition-all duration-200 hover:shadow-md">
-                <Settings size={20} />
-              </button>
-
-              {/* User profile */}
-              <div className="relative">
-                <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-sm">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              <div className="p-2 bg-[#fcd535]/10 rounded-lg">
+                <FileText className="w-5 h-5 text-[#fcd535]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Recent Articles</h3>
+                <p className="text-xs text-gray-500">Latest published content</p>
               </div>
             </div>
+            <button 
+              onClick={() => navigate('/admin/posts')}
+              className="flex items-center space-x-1 text-[#fcd535] hover:text-[#f0b90b] text-sm font-medium transition-colors"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
-
-          {/* Mobile search bar */}
-          <div className="md:hidden pb-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-green-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search articles, users, categories..."
-                className="block w-full pl-12 pr-4 py-3 border border-green-200/50 rounded-xl leading-5 bg-white/60 backdrop-blur-sm placeholder-green-500 focus:outline-none focus:placeholder-green-400 focus:ring-2 focus:ring-green-500/20 focus:border-green-500 shadow-sm transition-all duration-200"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalUsers)}</p>
-              <p className="text-sm text-gray-600">Total Users</p>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalArticles)}</p>
-              <p className="text-sm text-gray-600">Articles</p>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <Eye className="w-6 h-6 text-white" />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-green-500" />
-                </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalViews)}</p>
-              <p className="text-sm text-gray-600">Total Views</p>
-              </div>
-            </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <Heart className="w-6 h-6 text-white" />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalLikes)}</p>
-              <p className="text-sm text-gray-600">Total Likes</p>
-                </div>
-                </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <MessageSquare className="w-6 h-6 text-white" />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalComments)}</p>
-              <p className="text-sm text-gray-600">Comments</p>
-            </div>
-          </div>
-
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100/50 hover:shadow-xl transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalCategories)}</p>
-              <p className="text-sm text-gray-600">Categories</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Recent Articles */}
-          <div className="xl:col-span-2 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-green-100/50">
-            <div className="p-6 border-b border-green-100/50">
-                <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Recent Articles</h2>
-                <button className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center space-x-1">
-                  <span>View all</span>
-                  <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            <div className="p-6 space-y-4">
-              {recentArticles.length > 0 ? (
-                recentArticles.map((article) => (
-                  <div key={article.id} className="group p-4 bg-green-50/60 hover:bg-green-100/80 rounded-xl border border-green-200/50 hover:border-green-300/70 transition-all duration-300">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 space-y-2">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-2">
-                          {article.title}
-                        </h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <span className="flex items-center space-x-1">
-                            <User className="w-4 h-4" />
-                            <span>{article.author}</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>{formatDate(article.publishedAt)}</span>
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <span className="flex items-center space-x-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{formatNumber(article.views)} views</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <Heart className="w-4 h-4" />
-                            <span>{formatNumber(article.likes)} likes</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{formatNumber(article.comments)} comments</span>
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 ml-4">
-                        <span className={`px-3 py-1 text-xs rounded-full border ${getStatusColor(article.status)}`}>
-                          {article.status}
+          
+          <div className="divide-y divide-[#2b2f36]">
+            {recentArticles.length > 0 ? (
+              recentArticles.map((article, index) => (
+                <div 
+                  key={article.id} 
+                  className="group px-6 py-4 hover:bg-[#1e2329] transition-colors cursor-pointer"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h4 className="text-white font-medium group-hover:text-[#fcd535] transition-colors line-clamp-1 mb-2">
+                        {article.title}
+                      </h4>
+                      <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm">
+                        <span className="flex items-center space-x-1.5 text-gray-500">
+                          <User className="w-3.5 h-3.5" />
+                          <span>{article.author}</span>
                         </span>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-green-100/80 rounded-lg transition-colors">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
+                        <span className="flex items-center space-x-1.5 text-gray-500">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{formatDate(article.publishedAt)}</span>
+                        </span>
                       </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-500">
+                        <span className="flex items-center space-x-1">
+                          <Eye className="w-4 h-4" />
+                          <span>{formatNumber(article.views)}</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <Heart className="w-4 h-4" />
+                          <span>{formatNumber(article.likes)}</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <MessageSquare className="w-4 h-4" />
+                          <span>{formatNumber(article.comments)}</span>
+                        </span>
+                      </div>
+                      <span className={`px-2.5 py-1 text-xs font-medium rounded-lg border ${getStatusBadge(article.status)}`}>
+                        {article.status}
+                      </span>
+                      <button className="p-1.5 text-gray-500 hover:text-white hover:bg-[#2b2f36] rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-6 py-16 text-center">
+                <div className="w-16 h-16 bg-[#2b2f36] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-8 h-8 text-gray-500" />
+                </div>
+                <p className="text-gray-500 mb-4">No articles found</p>
+                <button 
+                  onClick={() => navigate('/admin/posts/add')}
+                  className="px-4 py-2 bg-[#fcd535] text-[#181a20] font-medium text-sm rounded-lg hover:bg-[#f0b90b] transition-all"
+                >
+                  Create First Article
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Recent Users */}
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#2b2f36] flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <Users className="w-5 h-5 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Recent Users</h3>
+              </div>
+              <button 
+                onClick={() => navigate('/admin/users')}
+                className="text-[#fcd535] hover:text-[#f0b90b] text-sm font-medium transition-colors"
+              >
+                View All
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-2">
+              {recentUsers.length > 0 ? (
+                recentUsers.map((user) => (
+                  <div key={user.id} className="group flex items-center space-x-3 p-3 hover:bg-[#1e2329] rounded-xl transition-colors cursor-pointer">
+                    <div className="relative">
+                      <div className="w-10 h-10 bg-gradient-to-br from-[#2b2f36] to-[#363a45] rounded-xl flex items-center justify-center">
+                        <span className="text-sm font-semibold text-white">
+                          {user.username[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#181a20] ${user.status === 'active' ? 'bg-emerald-500' : 'bg-gray-500'}`}></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate group-hover:text-[#fcd535] transition-colors">
+                        {user.username}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    </div>
+                    <div className="flex items-center space-x-1.5 px-2 py-1 bg-[#2b2f36] rounded-lg">
+                      {getRoleIcon(user.role)}
+                      <span className="text-xs font-medium text-gray-400">{user.role}</span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-3 text-green-400" />
-                  <p>No articles found</p>
+                <div className="py-8 text-center">
+                  <Users className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-500 text-sm">No users found</p>
                 </div>
               )}
-              </div>
-            </div>
-
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Users */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-green-100/50">
-              <div className="p-6 border-b border-green-100/50">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900">Recent Users</h3>
-                  <button className="text-green-600 hover:text-green-700 text-sm font-medium">
-                    View all
-                  </button>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                {recentUsers.length > 0 ? (
-                  recentUsers.map((user) => (
-                    <div key={user.id} className="flex items-center space-x-3 group">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-white">
-                          {user.username[0].toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate group-hover:text-green-600 transition-colors">
-                          {user.username}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(user.status)}`}>
-                          {user.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Users className="w-12 h-12 mx-auto mb-3 text-green-400" />
-                    <p>No users found</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* System Status */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-green-100/50">
-              <div className="p-6 border-b border-green-100/50">
-                <h3 className="text-lg font-bold text-gray-900">System Status</h3>
-              </div>
-              <div className="p-6 space-y-4">
-                {Object.entries(systemStatus).map(([key, status]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${getHealthColor(status)}`} />
-                      <span className="text-sm font-medium text-gray-700 capitalize">
-                        {key}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {getHealthIcon(status)}
-                      <span className={`text-xs font-medium ${
-                        status === 'healthy' ? 'text-green-600' :
-                        status === 'warning' ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {status}
-                      </span>
-                    </div>
-                    </div>
-                  ))}
             </div>
           </div>
 
-            {/* Quick Actions */}
-            <div className="bg-gradient-to-r from-green-600/90 to-green-700/90 backdrop-blur-sm rounded-2xl p-6 text-white">
-              <h3 className="text-lg font-bold mb-4">Quick Actions</h3>
+          {/* System Status */}
+          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#2b2f36]">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <Activity className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">System Status</h3>
+              </div>
+            </div>
+            
+            <div className="p-4 space-y-3">
+              {Object.entries(systemStatus).map(([key, status]) => (
+                <div key={key} className="flex items-center justify-between p-3 bg-[#1e2329] rounded-xl">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      status === 'healthy' ? 'bg-emerald-500' :
+                      status === 'warning' ? 'bg-amber-500' :
+                      status === 'checking' ? 'bg-gray-500' : 'bg-red-500'
+                    } ${status === 'healthy' ? 'animate-pulse' : ''}`}></div>
+                    <span className="text-sm font-medium text-gray-300 capitalize">{key}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {getHealthIcon(status)}
+                    <span className={`text-xs font-medium capitalize ${
+                      status === 'healthy' ? 'text-emerald-400' :
+                      status === 'warning' ? 'text-amber-400' :
+                      status === 'checking' ? 'text-gray-400' : 'text-red-400'
+                    }`}>
+                      {status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="relative bg-gradient-to-br from-[#1e2329] to-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#fcd535]/5 to-transparent"></div>
+            <div className="relative p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                <Zap className="w-5 h-5 text-[#fcd535]" />
+                <span>Quick Actions</span>
+              </h3>
               <div className="space-y-3">
-                <button className="w-full p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-colors text-left flex items-center space-x-3">
-                  <Plus className="w-5 h-5" />
-                  <span className="text-sm font-medium">Create Article</span>
+                <button 
+                  onClick={() => navigate('/admin/posts/add')}
+                  className="w-full flex items-center space-x-3 p-4 bg-[#2b2f36]/50 hover:bg-[#2b2f36] rounded-xl transition-all group border border-transparent hover:border-[#fcd535]/30"
+                >
+                  <div className="p-2 bg-[#fcd535]/10 rounded-lg group-hover:bg-[#fcd535]/20 transition-colors">
+                    <Plus className="w-5 h-5 text-[#fcd535]" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Create New Article</span>
                 </button>
-                <button className="w-full p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-colors text-left flex items-center space-x-3">
-                  <Users className="w-5 h-5" />
-                  <span className="text-sm font-medium">Add User</span>
+                <button 
+                  onClick={() => navigate('/admin/users')}
+                  className="w-full flex items-center space-x-3 p-4 bg-[#2b2f36]/50 hover:bg-[#2b2f36] rounded-xl transition-all group border border-transparent hover:border-blue-500/30"
+                >
+                  <div className="p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                    <Users className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Manage Users</span>
                 </button>
-                <button className="w-full p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-colors text-left flex items-center space-x-3">
-                  <BarChart3 className="w-5 h-5" />
-                  <span className="text-sm font-medium">View Analytics</span>
+                <button 
+                  onClick={() => navigate('/admin/analytics')}
+                  className="w-full flex items-center space-x-3 p-4 bg-[#2b2f36]/50 hover:bg-[#2b2f36] rounded-xl transition-all group border border-transparent hover:border-purple-500/30"
+                >
+                  <div className="p-2 bg-purple-500/10 rounded-lg group-hover:bg-purple-500/20 transition-colors">
+                    <BarChart3 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">View Analytics</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Performance Metrics */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-green-100/50">
-          <div className="p-6 border-b border-green-100/50">
-            <h2 className="text-xl font-bold text-gray-900">Performance Overview</h2>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-lg font-semibold text-gray-900">Growth Rate</h4>
-                <p className="text-2xl font-bold text-green-600">+24.5%</p>
-                <p className="text-sm text-gray-600">vs last month</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Target className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-lg font-semibold text-gray-900">Engagement</h4>
-                <p className="text-2xl font-bold text-green-600">89.2%</p>
-                <p className="text-sm text-gray-600">user retention</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Award className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-lg font-semibold text-gray-900">Quality Score</h4>
-                <p className="text-2xl font-bold text-green-600">9.4/10</p>
-                <p className="text-sm text-gray-600">content rating</p>
-              </div>
-
-          <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Zap className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="text-lg font-semibold text-gray-900">Response Time</h4>
-                <p className="text-2xl font-bold text-green-600">0.8s</p>
-                <p className="text-sm text-gray-600">average load</p>
-              </div>
+      {/* Activity Stats Row */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Categories */}
+        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 group hover:border-[#fcd535]/30 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl">
+              <Layers className="w-6 h-6 text-orange-400" />
             </div>
           </div>
+          <p className="text-3xl font-bold text-white mb-1">{stats.totalCategories}</p>
+          <p className="text-sm text-gray-500">Categories</p>
+        </div>
+
+        {/* Comments */}
+        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 group hover:border-[#fcd535]/30 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl">
+              <MessageSquare className="w-6 h-6 text-cyan-400" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-white mb-1">{formatNumber(stats.totalComments)}</p>
+          <p className="text-sm text-gray-500">Comments</p>
+        </div>
+
+        {/* Likes */}
+        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 group hover:border-[#fcd535]/30 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl">
+              <Heart className="w-6 h-6 text-pink-400" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-white mb-1">{formatNumber(stats.totalLikes)}</p>
+          <p className="text-sm text-gray-500">Total Likes</p>
+        </div>
+
+        {/* Avg. Engagement */}
+        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 group hover:border-[#fcd535]/30 transition-all">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-gradient-to-br from-[#fcd535]/20 to-amber-500/20 rounded-xl">
+              <Star className="w-6 h-6 text-[#fcd535]" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold text-white mb-1">
+            {stats.totalArticles > 0 ? ((stats.totalLikes + stats.totalComments) / stats.totalArticles).toFixed(1) : '0'}
+          </p>
+          <p className="text-sm text-gray-500">Avg. Engagement / Article</p>
         </div>
       </div>
     </div>

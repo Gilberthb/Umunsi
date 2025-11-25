@@ -50,8 +50,6 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  console.log('🔄 AuthProvider rendering...');
-  
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -141,8 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Login error:', error);
-      return false;
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state on app load
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeAuth = () => {
       try {
         const storedUser = localStorage.getItem('umunsi_user');
         const storedToken = localStorage.getItem('umunsi_token');
@@ -185,17 +182,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const userData = JSON.parse(storedUser);
           setUser(userData);
           apiClient.setToken(storedToken);
-          
-          // Verify token is still valid by making a test request
-          try {
-            await apiClient.healthCheck();
-        } catch (error) {
-            // Token expired or invalid, clear auth
-            logout();
-          }
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
         logout();
       } finally {
         setIsLoading(false);
@@ -227,9 +215,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasRole,
   };
 
-  console.log('🔍 AuthProvider context value created:', value);
-  console.log('🔍 Children count:', React.Children.count(children));
-
   return (
     <AuthContext.Provider value={value}>
       {children}
@@ -241,17 +226,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = (): AuthContextType => {
   const context = React.useContext(AuthContext);
   
-  // Add debugging information
-  console.log('🔍 useAuth hook called');
-  console.log('🔍 Context value:', context);
-  console.log('🔍 Context type:', typeof context);
-  
-  // Since we now provide default values, context should always exist
   if (!context) {
-    console.error('❌ useAuth hook error: context is falsy');
-    console.error('❌ This should not happen with default context values');
-    console.error('❌ Component stack:', new Error().stack);
-    throw new Error('useAuth context is not available');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   
   return context;
@@ -264,9 +240,18 @@ export const withAuth = <P extends object>(
   requiredRole?: string
 ) => {
   const WrappedComponent = (props: P) => {
-    const { isAuthenticated, hasPermission, hasRole, isLoading } = useAuth();
+    const { isAuthenticated, hasPermission, hasRole, isLoading, user } = useAuth();
+    
+    // Check localStorage as fallback
+    const storedUser = localStorage.getItem('umunsi_user');
+    const storedToken = localStorage.getItem('umunsi_token');
+    const hasStoredAuth = !!(storedUser && storedToken);
+    
+    // Determine effective authentication status
+    const effectivelyAuthenticated = isAuthenticated || hasStoredAuth;
 
-    if (isLoading) {
+    if (isLoading && hasStoredAuth) {
+      // Show loading if we have stored auth but context is still loading
       return (
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
@@ -277,55 +262,42 @@ export const withAuth = <P extends object>(
       );
     }
 
-    if (!isAuthenticated) {
-      return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600 mb-4">Please log in to access this page.</p>
-            <button
-              onClick={() => window.location.href = '/login'}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
-      );
+    if (!effectivelyAuthenticated) {
+      // Redirect to login instead of showing access denied
+      window.location.href = '/login';
+      return null;
     }
 
-    if (requiredPermission && !hasPermission(requiredPermission)) {
-      return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Permission Denied</h1>
-            <p className="text-gray-600 mb-4">You don't have permission to access this page.</p>
-            <button
-              onClick={() => window.history.back()}
-              className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700"
-            >
-              Go Back
-            </button>
+    // Get user data from either context or localStorage
+    const userData = user || (storedUser ? JSON.parse(storedUser) : null);
+    
+    if (requiredRole && userData) {
+      const roleHierarchy: Record<string, number> = {
+        'USER': 0,
+        'AUTHOR': 1,
+        'EDITOR': 2,
+        'ADMIN': 3
+      };
+      
+      const userRoleLevel = roleHierarchy[userData.role] || 0;
+      const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
+      
+      if (userRoleLevel < requiredRoleLevel) {
+        return (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+              <p className="text-gray-600 mb-4">This page requires {requiredRole} role.</p>
+              <button
+                onClick={() => window.history.back()}
+                className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
-        </div>
-      );
-    }
-
-    if (requiredRole && !hasRole(requiredRole)) {
-      return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Role Required</h1>
-            <p className="text-gray-600 mb-4">This page requires {requiredRole} role.</p>
-            <button
-              onClick={() => window.history.back()}
-              className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
-      );
+        );
+      }
     }
 
     return <Component {...props} />;

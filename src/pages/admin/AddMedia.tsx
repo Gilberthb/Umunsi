@@ -17,7 +17,9 @@ import {
   Globe,
   Lock,
   Star,
-  ArrowLeft
+  ArrowLeft,
+  CloudUpload,
+  Sparkles
 } from 'lucide-react';
 import { apiClient } from '../../services/api';
 
@@ -80,24 +82,22 @@ const AddMedia: React.FC = () => {
                         file.type === 'application/xml' ||
                         file.type.includes('document');
       
-      if (isImage && file.size > 3 * 1024 * 1024) { // 3MB for images
+      if (isImage && file.size > 3 * 1024 * 1024) {
         invalidFiles.push({ name: file.name, reason: 'Image file size cannot exceed 3MB' });
-      } else if (isVideo && file.size > 20 * 1024 * 1024) { // 20MB for videos
+      } else if (isVideo && file.size > 20 * 1024 * 1024) {
         invalidFiles.push({ name: file.name, reason: 'Video file size cannot exceed 20MB' });
-      } else if (isDocument && file.size > 10 * 1024 * 1024) { // 10MB for documents
+      } else if (isDocument && file.size > 10 * 1024 * 1024) {
         invalidFiles.push({ name: file.name, reason: 'Document file size cannot exceed 10MB' });
       } else {
         validFiles.push(file);
       }
     });
 
-    // Show error message for invalid files
     if (invalidFiles.length > 0) {
       const errorMessage = invalidFiles.map(f => `${f.name}: ${f.reason}`).join('\n');
       alert(`Some files were rejected:\n${errorMessage}`);
     }
 
-    // Process valid files
     if (validFiles.length > 0) {
       const newFiles: UploadedFile[] = validFiles.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
@@ -179,21 +179,17 @@ const AddMedia: React.FC = () => {
     setIsUploading(true);
     const formData = new FormData();
 
-    // Add files to FormData
     uploadedFiles.forEach(file => {
       formData.append('files', file.file);
     });
 
     try {
-      // Update status to uploading
       setUploadedFiles(prev => prev.map(file => ({ ...file, status: 'uploading', progress: 50 })));
 
       const response = await apiClient.uploadMediaFiles(formData);
       
-      // Update status to success
       setUploadedFiles(prev => prev.map(file => ({ ...file, status: 'success', progress: 100 })));
 
-      // Update file metadata for each uploaded file
       for (let i = 0; i < response.length; i++) {
         const uploadedFile = uploadedFiles[i];
         const serverFile = response[i];
@@ -209,12 +205,10 @@ const AddMedia: React.FC = () => {
             });
           } catch (updateError) {
             console.error('Error updating file metadata:', updateError);
-            // Continue with other files even if one fails
           }
         }
       }
 
-      // Navigate to media library after successful upload
       setTimeout(() => {
         navigate('/admin/media/library');
       }, 1500);
@@ -241,39 +235,44 @@ const AddMedia: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-[#0b0e11] min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/admin/media/library')}
-              className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="flex items-center px-3 py-2 text-gray-400 hover:text-[#fcd535] transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Library
             </button>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-br from-[#fcd535]/20 to-[#f0b90b]/20 rounded-xl">
+                <CloudUpload className="w-6 h-6 text-[#fcd535]" />
+              </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Add Media Files</h1>
-              <p className="text-gray-600 mt-1">Upload and manage your media files</p>
+                <h1 className="text-2xl font-bold text-white">Upload Media</h1>
+                <p className="text-gray-400 mt-1">Add images, videos, and documents</p>
+              </div>
             </div>
           </div>
           {uploadedFiles.length > 0 && (
             <div className="flex items-center space-x-3">
               <button
                 onClick={clearAllFiles}
-                className="px-4 py-2 text-gray-600 hover:text-red-600 transition-colors"
+                className="px-4 py-2.5 text-gray-400 hover:text-red-400 transition-colors"
               >
                 Clear All
               </button>
               <button
                 onClick={uploadFiles}
                 disabled={isUploading || uploadedFiles.some(f => f.status === 'error')}
-                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center px-6 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#fcd535]/20"
               >
                 {isUploading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0b0e11] mr-2"></div>
                     Uploading...
                   </>
                 ) : (
@@ -291,31 +290,36 @@ const AddMedia: React.FC = () => {
       {/* Upload Area */}
       {uploadedFiles.length === 0 && (
         <div
-          className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+          className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
             dragActive 
-              ? 'border-green-500 bg-green-50' 
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-[#fcd535] bg-[#fcd535]/5' 
+              : 'border-[#2b2f36] hover:border-[#fcd535]/50 bg-[#181a20]'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className="relative mx-auto w-20 h-20 mb-6">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] rounded-2xl blur opacity-30 animate-pulse"></div>
+            <div className="relative bg-[#1e2329] rounded-2xl p-5 border border-[#2b2f36]">
+              <CloudUpload className="w-10 h-10 text-[#fcd535]" />
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">
             Drop files here or click to browse
           </h3>
-          <p className="text-gray-600 mb-2">
+          <p className="text-gray-400 mb-3">
             Support for images, videos, documents (PDF, TXT, JSON, XML), and audio files
           </p>
-          <p className="text-xs text-gray-500 mb-4">
-            Max file sizes: Images (3MB), Videos (20MB), Documents (10MB)
+          <p className="text-xs text-gray-500 mb-6">
+            Max file sizes: Images (3MB) • Videos (20MB) • Documents (10MB)
           </p>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all shadow-lg shadow-[#fcd535]/20"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Select Files
           </button>
           <input
@@ -335,8 +339,8 @@ const AddMedia: React.FC = () => {
           {uploadedFiles.map((file) => {
             const FileIcon = getFileIcon(file.file.type);
             return (
-              <div key={file.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="p-4">
+              <div key={file.id} className="bg-[#181a20] rounded-2xl border border-[#2b2f36]">
+                <div className="p-5">
                   <div className="flex items-start space-x-4">
                     {/* File Preview/Icon */}
                     <div className="flex-shrink-0">
@@ -344,11 +348,11 @@ const AddMedia: React.FC = () => {
                         <img
                           src={file.preview}
                           alt={file.file.name}
-                          className="w-16 h-16 object-cover rounded-lg"
+                          className="w-20 h-20 object-cover rounded-xl border border-[#2b2f36]"
                         />
                       ) : (
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <FileIcon className="w-8 h-8 text-gray-400" />
+                        <div className="w-20 h-20 bg-[#0b0e11] rounded-xl flex items-center justify-center border border-[#2b2f36]">
+                          <FileIcon className="w-10 h-10 text-gray-500" />
                         </div>
                       )}
                     </div>
@@ -357,26 +361,30 @@ const AddMedia: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900 truncate">
+                          <h4 className="text-sm font-medium text-white truncate">
                             {file.file.name}
                           </h4>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mt-1">
                             {formatFileSize(file.file.size)} • {file.category}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           {file.status === 'success' && (
-                            <Check className="w-5 h-5 text-green-500" />
+                            <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                              <Check className="w-5 h-5 text-emerald-400" />
+                            </div>
                           )}
                           {file.status === 'error' && (
-                            <AlertCircle className="w-5 h-5 text-red-500" />
+                            <div className="p-1.5 bg-red-500/10 rounded-lg">
+                              <AlertCircle className="w-5 h-5 text-red-400" />
+                            </div>
                           )}
                           {file.status === 'uploading' && (
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                            <div className="w-5 h-5 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin"></div>
                           )}
                           <button
                             onClick={() => removeFile(file.id)}
-                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                            className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -385,10 +393,10 @@ const AddMedia: React.FC = () => {
 
                       {/* Progress Bar */}
                       {file.status === 'uploading' && (
-                        <div className="mt-2">
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="mt-3">
+                          <div className="w-full bg-[#0b0e11] rounded-full h-2 overflow-hidden">
                             <div 
-                              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                              className="bg-gradient-to-r from-[#fcd535] to-[#f0b90b] h-2 rounded-full transition-all duration-300"
                               style={{ width: `${file.progress}%` }}
                             ></div>
                           </div>
@@ -397,7 +405,7 @@ const AddMedia: React.FC = () => {
 
                       {/* Error Message */}
                       {file.status === 'error' && file.error && (
-                        <p className="text-xs text-red-600 mt-1">{file.error}</p>
+                        <p className="text-xs text-red-400 mt-2">{file.error}</p>
                       )}
 
                       {/* File Settings */}
@@ -405,40 +413,42 @@ const AddMedia: React.FC = () => {
                         <div className="mt-4 space-y-4">
                           {/* Description */}
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                            <label className="block text-xs font-medium text-gray-400 mb-2">
                               Description
                             </label>
                             <textarea
                               value={file.description}
                               onChange={(e) => updateFileProperty(file.id, 'description', e.target.value)}
                               placeholder="Add a description for this file..."
-                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className="w-full px-4 py-3 bg-[#0b0e11] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
                               rows={2}
                             />
                           </div>
 
                           {/* Tags */}
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                            <label className="block text-xs font-medium text-gray-400 mb-2">
                               Tags
                             </label>
-                            <div className="flex flex-wrap gap-2 mb-2">
+                            {file.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-3">
                               {file.tags.map((tag, index) => (
                                 <span
                                   key={index}
-                                  className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+                                    className="inline-flex items-center px-3 py-1.5 bg-[#fcd535]/10 text-[#fcd535] text-xs rounded-lg border border-[#fcd535]/30"
                                 >
                                   <Tag className="w-3 h-3 mr-1" />
                                   {tag}
                                   <button
                                     onClick={() => removeTag(file.id, index)}
-                                    className="ml-1 text-green-600 hover:text-green-800"
+                                      className="ml-2 text-[#fcd535] hover:text-white"
                                   >
                                     <X className="w-3 h-3" />
                                   </button>
                                 </span>
                               ))}
                             </div>
+                            )}
                             <div className="flex space-x-2">
                               <input
                                 type="text"
@@ -446,11 +456,11 @@ const AddMedia: React.FC = () => {
                                 onChange={(e) => setNewTag(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && addTag(file.id)}
                                 placeholder="Add a tag..."
-                                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="flex-1 px-4 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
                               />
                               <button
                                 onClick={() => addTag(file.id)}
-                                className="px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                                className="px-4 py-2.5 bg-[#fcd535] text-[#0b0e11] font-medium text-sm rounded-xl hover:bg-[#f0b90b] transition-colors"
                               >
                                 Add
                               </button>
@@ -458,30 +468,26 @@ const AddMedia: React.FC = () => {
                           </div>
 
                           {/* Settings */}
-                          <div className="flex items-center space-x-6">
-                            <label className="flex items-center">
+                          <div className="flex items-center space-x-4">
+                            <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                               <input
                                 type="checkbox"
                                 checked={file.isPublic}
                                 onChange={(e) => updateFileProperty(file.id, 'isPublic', e.target.checked)}
-                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
                               />
-                              <span className="ml-2 text-xs text-gray-700 flex items-center">
-                                <Globe className="w-3 h-3 mr-1" />
-                                Public
-                              </span>
+                              <Globe className="w-4 h-4 ml-2 text-emerald-400" />
+                              <span className="ml-2 text-xs text-gray-300">Public</span>
                             </label>
-                            <label className="flex items-center">
+                            <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                               <input
                                 type="checkbox"
                                 checked={file.isFeatured}
                                 onChange={(e) => updateFileProperty(file.id, 'isFeatured', e.target.checked)}
-                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
                               />
-                              <span className="ml-2 text-xs text-gray-700 flex items-center">
-                                <Star className="w-3 h-3 mr-1" />
-                                Featured
-                              </span>
+                              <Star className="w-4 h-4 ml-2 text-yellow-400" />
+                              <span className="ml-2 text-xs text-gray-300">Featured</span>
                             </label>
                           </div>
                         </div>
@@ -497,10 +503,10 @@ const AddMedia: React.FC = () => {
 
       {/* Upload Summary */}
       {uploadedFiles.length > 0 && (
-        <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="mt-6 bg-[#181a20] rounded-2xl border border-[#2b2f36] p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">
+              <h3 className="text-sm font-medium text-white">
                 Ready to upload {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''}
               </h3>
               <p className="text-xs text-gray-500 mt-1">
@@ -509,7 +515,8 @@ const AddMedia: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               {uploadedFiles.filter(f => f.status === 'success').length > 0 && (
-                <span className="text-xs text-green-600">
+                <span className="flex items-center text-xs text-emerald-400">
+                  <Check className="w-4 h-4 mr-1" />
                   {uploadedFiles.filter(f => f.status === 'success').length} uploaded successfully
                 </span>
               )}

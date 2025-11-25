@@ -6,7 +6,11 @@ import Images from './pages/Images';
 import Religion from './pages/Religion';
 import Music from './pages/Music';
 import Entertainment from './pages/Entertainment';
+import CategoryPage from './pages/CategoryPage';
+import PostPage from './pages/PostPage';
+import Newsletter from './pages/Newsletter';
 import Login from './pages/Login';
+import TestLogin from './pages/TestLogin';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import Articles from './pages/admin/Articles';
@@ -51,6 +55,8 @@ function App() {
         <Routes>
           {/* Login route - standalone, no layout wrapper */}
           <Route path="/login" element={<Login />} />
+          {/* Test login page for debugging */}
+          <Route path="/test-login" element={<TestLogin />} />
           
           {/* Public routes with Layout */}
           <Route path="/*" element={
@@ -67,7 +73,10 @@ function App() {
                 <Route path="/health" element={<div className="p-8 text-center">Urupapuro rw'Ubuzima ruzakorwa vuba</div>} />
                 <Route path="/entertainment" element={<Entertainment />} />
                 <Route path="/celebrity" element={<div className="p-8 text-center">Urupapuro rw'Abakinnyi ruzakorwa vuba</div>} />
-                <Route path="/article/:id" element={<div className="p-8 text-center">Urupapuro rw'inkuru ruzakorwa vuba</div>} />
+                <Route path="/category/:slug" element={<CategoryPage />} />
+                <Route path="/post/:slug" element={<PostPage />} />
+                <Route path="/article/:id" element={<PostPage />} />
+                <Route path="/newsletter" element={<Newsletter />} />
               </Routes>
             </Layout>
           } />

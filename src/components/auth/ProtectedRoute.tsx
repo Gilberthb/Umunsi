@@ -23,25 +23,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuthenticated) {
-    // Check if there's a token but user is not authenticated (token might be expired)
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // Try to refresh the user data
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">
-              Refreshing Session...
-            </h1>
-            <p className="text-gray-600 mb-4">
-              Please wait while we verify your session.
-            </p>
-          </div>
-        </div>
-      );
-    }
-    
     // Redirect to login page with return url
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

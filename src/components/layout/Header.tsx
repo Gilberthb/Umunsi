@@ -1,97 +1,221 @@
-import { Search, Menu, X, Calendar, Thermometer, Bell, User } from 'lucide-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Search, Menu, X, Calendar, Thermometer, Bell, User, ChevronDown, TrendingUp, Loader2, MoreHorizontal } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { apiClient, Category } from '../../services/api';
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const navigationItems = [
-    { name: 'Iyobokamana', href: '/religion', color: 'text-blue-600' },
-    { name: 'Umuziki', href: '/music', color: 'text-pink-600' },
-    { name: 'Ibikorwa', href: '/entertainment', color: 'text-indigo-600' },
-    { name: 'Abakinnyi', href: '/celebrity', color: 'text-yellow-600' },
-    { name: 'Siporo', href: '/sports', color: 'text-orange-600' },
-    { name: 'Politiki', href: '/politics', color: 'text-red-600' },
-    { name: 'Ubuzima', href: '/health', color: 'text-emerald-600' },
-    { name: 'Amashusho', href: '/images', color: 'text-purple-600' }
-  ];
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      // Fetch only active categories from database
+      const response = await apiClient.getCategories({ includeInactive: false });
+      if (response && Array.isArray(response)) {
+        // Filter to ensure only active categories are shown
+        const activeCategories = response.filter(cat => cat.isActive !== false);
+        setCategories(activeCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
+
+  // Show first 7 categories in navbar, rest in dropdown
+  const visibleCategories = categories.slice(0, 7);
+  const moreCategories = categories.slice(7);
 
   return (
-    <header className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
-      {/* Top Bar */}
-      <div className="bg-gradient-to-r from-green-600 via-green-500 to-yellow-500 text-white py-1.5">
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-xs">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <Calendar size={14} />
-              <span className="font-medium">{new Date().toLocaleDateString('rw-RW')}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Thermometer size={14} />
-              <span>22°C Kigali</span>
-            </div>
-            <Link to="/newsletter" className="hover:text-yellow-200 transition-colors flex items-center space-x-1">
-              <Bell size={14} />
-              <span>Inyandiko</span>
+    <header className="bg-[#0b0e11] sticky top-0 z-50 border-b border-[#2b2f36]">
+      {/* Top Bar - Breaking News / Trending */}
+      <div className="bg-gradient-to-r from-[#181a20] via-[#1e2329] to-[#181a20] border-b border-[#2b2f36]">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center space-x-4">
+              {/* Date & Weather */}
+              <div className="flex items-center space-x-3 text-gray-400">
+                <div className="flex items-center space-x-1.5">
+                  <Calendar size={14} className="text-[#fcd535]" />
+                  <span>{new Date().toLocaleDateString('rw-RW', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                </div>
+                <div className="h-3 w-px bg-[#2b2f36]"></div>
+                <div className="flex items-center space-x-1.5">
+                  <Thermometer size={14} className="text-[#fcd535]" />
+                  <span>22°C Kigali</span>
+                </div>
+              </div>
 
-            </Link>
-            <Link to="/login" className="hover:text-yellow-200 transition-colors flex items-center space-x-1">
-              <User size={14} />
-              <span>Kwinjira</span>
-            </Link>
+              {/* Categories count indicator */}
+              {!loading && categories.length > 0 && (
+                <div className="hidden md:flex items-center space-x-2">
+                  <div className="h-3 w-px bg-[#2b2f36]"></div>
+                  <TrendingUp size={14} className="text-[#fcd535]" />
+                  <span className="text-gray-400">{categories.length} Categories</span>
+                </div>
+              )}
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-3">
+              <Link 
+                to="/newsletter" 
+                className="flex items-center space-x-1.5 text-gray-400 hover:text-[#fcd535] transition-colors group"
+              >
+                <Bell size={14} className="group-hover:animate-bounce" />
+                <span className="hidden sm:inline">Inyandiko</span>
+              </Link>
+              <div className="h-3 w-px bg-[#2b2f36]"></div>
+              <Link 
+                to="/login" 
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-lg hover:from-[#f0b90b] hover:to-[#fcd535] transition-all transform hover:scale-105"
+              >
+                <User size={14} />
+                <span>Kwinjira</span>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 md:space-x-3">
-            <div>
- <img src="/images/logo.png" alt="Umunsi Logo" className="h-10 md:h-12" />
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#fcd535]/20 to-[#f0b90b]/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <img src="/images/logo.png" alt="Umunsi Logo" className="h-10 md:h-12 relative" />
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="px-2 py-1 xl:px-3 text-gray-700 hover:text-green-600 font-semibold transition-all duration-200 rounded-md hover:bg-green-50 relative group text-sm"
-              >
-                <span>{item.name}</span>
-                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-green-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></div>
-              </Link>
-            ))}
+          {/* Desktop Navigation - All active categories from database */}
+          <nav className="hidden lg:flex items-center space-x-1">
+            {loading ? (
+              <div className="flex items-center space-x-2 px-4 py-2 text-gray-400">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-sm">Loading categories...</span>
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="px-4 py-2 text-gray-500 text-sm">No categories available</div>
+            ) : (
+              <>
+                {/* Visible categories */}
+                {visibleCategories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={`/category/${cat.slug}`}
+                    className="group relative px-3 py-2 text-gray-300 hover:text-white font-medium transition-all duration-200 rounded-lg hover:bg-[#1e2329]"
+                  >
+                    <span className="text-sm">{cat.name}</span>
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] group-hover:w-3/4 transition-all duration-300 rounded-full"></div>
+                  </Link>
+                ))}
+
+                {/* More dropdown for additional categories */}
+                {moreCategories.length > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsMoreOpen(!isMoreOpen)}
+                      className="group relative px-3 py-2 text-gray-300 hover:text-white font-medium transition-all duration-200 rounded-lg hover:bg-[#1e2329] flex items-center space-x-1.5"
+                    >
+                      <MoreHorizontal size={16} className="opacity-70 group-hover:opacity-100" />
+                      <span className="text-sm">More</span>
+                      <span className="bg-[#fcd535] text-[#0b0e11] text-xs px-1.5 rounded-full font-bold">{moreCategories.length}</span>
+                    </button>
+
+                    {isMoreOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-56 bg-[#181a20] shadow-2xl rounded-xl border border-[#2b2f36] py-2 z-50">
+                        {moreCategories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/category/${cat.slug}`}
+                            onClick={() => setIsMoreOpen(false)}
+                            className="block px-4 py-2.5 text-gray-300 hover:bg-[#1e2329] hover:text-[#fcd535] transition-colors text-sm"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </nav>
 
-          {/* Search Button */}
-          <div className="flex items-center space-x-4">
+          {/* Right Side - Search & Mobile Menu */}
+          <div className="flex items-center space-x-3">
             {/* Search */}
             <div className="relative">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="p-3 text-gray-600 hover:text-green-600 transition-colors hover:bg-green-50 rounded-lg"
- >
+                className="p-2.5 text-gray-400 hover:text-[#fcd535] transition-colors hover:bg-[#1e2329] rounded-lg"
+              >
                 <Search size={20} />
               </button>
 
+              {/* Search Dropdown */}
               {isSearchOpen && (
-                <div className="absolute right-0 top-full mt-2 w-screen max-w-xs md:max-w-md lg:max-w-lg bg-white shadow-xl rounded-xl border border-gray-100 p-4 md:p-6 z-50">
-                  <div className="flex items-center space-x-2 md:space-x-3 bg-gray-50 rounded-lg p-2 md:p-3">
-                    <Search size={18} className="text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Shakisha amakuru..."
-                      className="flex-1 outline-none text-sm md:text-base bg-transparent"
- />
-                    <button className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg text-sm hover:from-green-700 hover:to-green-800 transition-all">
-                      Shakisha
-                    </button>
-                  </div>
+                <div className="absolute right-0 top-full mt-2 w-screen max-w-xs md:max-w-md bg-[#181a20] shadow-2xl rounded-xl border border-[#2b2f36] p-4 z-50">
+                  <form onSubmit={handleSearch}>
+                    <div className="flex items-center space-x-3 bg-[#1e2329] rounded-lg p-3 border border-[#2b2f36] focus-within:border-[#fcd535]/50 transition-colors">
+                      <Search size={18} className="text-gray-500" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Shakisha amakuru..."
+                        className="flex-1 outline-none text-sm bg-transparent text-white placeholder-gray-500"
+                        autoFocus
+                      />
+                      <button 
+                        type="submit"
+                        className="bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] px-4 py-2 rounded-lg text-sm font-semibold hover:from-[#f0b90b] hover:to-[#fcd535] transition-all transform hover:scale-105"
+                      >
+                        Shakisha
+                      </button>
+                    </div>
+                  </form>
+                  {/* All Categories in search dropdown */}
+                  {categories.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs text-gray-500 uppercase tracking-wider">All Categories ({categories.length})</p>
+                      <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/category/${cat.slug}`}
+                            onClick={() => setIsSearchOpen(false)}
+                            className="px-2 py-1 bg-[#1e2329] text-gray-400 text-xs rounded-lg hover:bg-[#2b2f36] hover:text-[#fcd535] cursor-pointer transition-all"
+                          >
+                            {cat.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -99,32 +223,77 @@ const Header = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-3 text-gray-600 hover:text-green-600 transition-colors hover:bg-green-50 rounded-lg"
- >
+              className="lg:hidden p-2.5 text-gray-400 hover:text-[#fcd535] transition-colors hover:bg-[#1e2329] rounded-lg"
+            >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer - All active categories from database */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t bg-white rounded-b-lg shadow-lg">
-            <nav className="py-4 space-y-1">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="flex items-center px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors font-medium rounded-lg mx-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span className={`w-3 h-3 rounded-full ${item.color.replace('text-', 'bg-')} mr-3`}></span>
-                  <span>{item.name}</span>
-                </Link>
-              ))}
+          <div className="lg:hidden mt-4 pb-4">
+            <nav className="space-y-1 max-h-[60vh] overflow-y-auto">
+              {loading ? (
+                <div className="flex items-center justify-center py-4 text-gray-400">
+                  <Loader2 size={20} className="animate-spin mr-2" />
+                  <span>Loading categories...</span>
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">No categories available</div>
+              ) : (
+                <>
+                  <div className="px-4 py-2 text-xs text-gray-500 uppercase tracking-wider">
+                    All Categories ({categories.length})
+                  </div>
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      to={`/category/${cat.slug}`}
+                      className="flex items-center px-4 py-3 text-gray-300 hover:bg-[#1e2329] hover:text-white transition-colors font-medium rounded-xl group"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span>{cat.name}</span>
+                      <ChevronDown size={16} className="ml-auto text-gray-500 group-hover:text-[#fcd535] transform -rotate-90" />
+                    </Link>
+                  ))}
+                </>
+              )}
             </nav>
+            
+            {/* Mobile Search */}
+            <form onSubmit={handleSearch} className="mt-4 px-4">
+              <div className="flex items-center space-x-3 bg-[#1e2329] rounded-xl p-3 border border-[#2b2f36]">
+                <Search size={18} className="text-gray-500" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Shakisha amakuru..."
+                  className="flex-1 outline-none text-sm bg-transparent text-white placeholder-gray-500"
+                />
+                <button 
+                  type="submit"
+                  className="bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] px-3 py-1.5 rounded-lg text-sm font-semibold"
+                >
+                  Go
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>
+
+      {/* Click outside to close dropdowns */}
+      {(isMoreOpen || isSearchOpen) && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => {
+            setIsMoreOpen(false);
+            setIsSearchOpen(false);
+          }}
+        />
+      )}
     </header>
   );
 };
