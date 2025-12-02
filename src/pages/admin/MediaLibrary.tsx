@@ -142,7 +142,7 @@ const DocumentViewer: React.FC<{
 
 // Helper function to get server base URL
 const getServerBaseUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
   return apiUrl.replace('/api', '');
 };
 

@@ -32,7 +32,7 @@ const Posts: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const getServerBaseUrl = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
     return apiUrl.replace('/api', '');
   };
 

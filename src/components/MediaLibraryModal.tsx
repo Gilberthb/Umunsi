@@ -94,7 +94,7 @@ const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({
 
   const getServerBaseUrl = () => {
     // Get the API URL and extract the base server URL
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
     return apiUrl.replace('/api', '');
   };
 
