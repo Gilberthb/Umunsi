@@ -218,7 +218,7 @@ const PostDetail: React.FC = () => {
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-4">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-2" />
-                  <span>{post.author?.name || 'Unknown Author'}</span>
+                  <span>{post.author ? `${post.author.firstName} ${post.author.lastName}` : 'Unknown Author'}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />

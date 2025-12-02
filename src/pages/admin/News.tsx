@@ -18,13 +18,13 @@ interface NewsArticle {
   publishedAt?: string;
   viewCount: number;
   likeCount: number;
-  isBreaking: boolean;
-  isFeatured: boolean;
-  isTrending: boolean;
+  isBreaking?: boolean;
+  isFeatured?: boolean;
+  isTrending?: boolean;
   createdAt: string;
   updatedAt: string;
-  authorId: string;
-  categoryId: string;
+  authorId?: string;
+  categoryId?: string;
   author: {
     id: string;
     username: string;
@@ -37,7 +37,7 @@ interface NewsArticle {
     name: string;
     slug: string;
     color: string;
-    icon: string;
+    icon?: string;
   };
 }
 
@@ -46,8 +46,8 @@ interface Category {
   name: string;
   slug: string;
   color: string;
-  icon: string;
-  isActive: boolean;
+  icon?: string;
+  isActive?: boolean;
 }
 
 const News: React.FC = () => {
@@ -91,13 +91,11 @@ const News: React.FC = () => {
         limit: itemsPerPage,
         search: searchTerm,
         status: statusFilter === 'ALL' ? undefined : statusFilter,
-        categoryId: categoryFilter === 'ALL' ? undefined : categoryFilter,
-        sortBy,
-        sortOrder
+        category: categoryFilter === 'ALL' ? undefined : categoryFilter
       });
       
       if (response?.data) {
-        let filteredNews = response.data;
+        let filteredNews = response.data as NewsArticle[];
         
         if (typeFilter !== 'ALL') {
           filteredNews = filteredNews.filter(article => {
@@ -109,7 +107,7 @@ const News: React.FC = () => {
         }
         
         setNews(filteredNews);
-        setTotalPages(Math.ceil((response.total || 0) / itemsPerPage));
+        setTotalPages(Math.ceil((response.pagination?.total || filteredNews.length) / itemsPerPage));
       }
     } catch (error) {
       console.error('Error fetching news:', error);
@@ -122,7 +120,7 @@ const News: React.FC = () => {
     try {
       const response = await apiClient.getCategories();
       if (response) {
-        setCategories(response);
+        setCategories(response as Category[]);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -192,7 +190,7 @@ const News: React.FC = () => {
       data.append('isTrending', formData.isTrending.toString());
 
       const newArticle = await apiClient.createArticle(data);
-      setNews(prev => [newArticle, ...prev]);
+      setNews(prev => [newArticle as NewsArticle, ...prev]);
       setFormSuccess('News article created successfully!');
       
       setTimeout(() => {

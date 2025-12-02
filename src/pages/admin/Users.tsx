@@ -78,8 +78,8 @@ const Users = () => {
     try {
       setLoading(true);
       const response = await apiClient.getUsers();
-      if (response?.users) {
-        const transformedUsers = response.users.map((user: unknown) => {
+      if (response?.data) {
+        const transformedUsers = response.data.map((user: unknown) => {
           const u = user as Record<string, unknown>;
           return {
             ...u,

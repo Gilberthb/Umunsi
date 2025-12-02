@@ -126,7 +126,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiClient.login({ email, password });
       
       if (response && response.success && response.user) {
-        setUser(response.user);
+        setUser({
+          ...response.user,
+          role: response.user.role as 'ADMIN' | 'EDITOR' | 'AUTHOR' | 'USER'
+        });
         
         // Store user data in localStorage for persistence
         localStorage.setItem('umunsi_user', JSON.stringify(response.user));

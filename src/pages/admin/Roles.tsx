@@ -145,8 +145,8 @@ const Roles = () => {
     try {
       setLoading(true);
       const response = await apiClient.getUsers({ limit: 1000 });
-      if (response?.users) {
-        setUsers(response.users);
+      if (response?.data) {
+        setUsers(response.data as User[]);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -190,7 +190,7 @@ const Roles = () => {
     
     try {
       setUpdating(true);
-      await apiClient.updateUser(selectedUser.id, { role: newRole });
+      await apiClient.updateUser(selectedUser.id, { role: newRole as 'ADMIN' | 'EDITOR' | 'AUTHOR' | 'USER' });
       
       // Update local state
       setUsers(users.map(u => 
@@ -219,7 +219,7 @@ const Roles = () => {
     
     try {
       setUpdating(true);
-      await apiClient.updateUser(selectedUserToAdd.id, { role: roleToAssign });
+      await apiClient.updateUser(selectedUserToAdd.id, { role: roleToAssign as 'ADMIN' | 'EDITOR' | 'AUTHOR' | 'USER' });
       
       // Update local state
       setUsers(users.map(u => 

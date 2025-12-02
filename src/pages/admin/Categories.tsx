@@ -23,15 +23,18 @@ interface Category {
   id: string;
   name: string;
   slug: string;
-  description: string;
+  description?: string;
   color: string;
-  icon: string;
-  articleCount: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  icon?: string;
+  articleCount?: number;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   parentId?: string;
   children?: Category[];
+  _count?: {
+    news: number;
+  };
 }
 
 const Categories = () => {
@@ -44,11 +47,11 @@ const Categories = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '', isActive: true });
+  const [formData, setFormData] = useState({ name: '', description: '', isActive: true as boolean });
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [editFormData, setEditFormData] = useState({ name: '', description: '', isActive: true });
+  const [editFormData, setEditFormData] = useState({ name: '', description: '', isActive: true as boolean });
   const [editFormLoading, setEditFormLoading] = useState(false);
   const [editFormError, setEditFormError] = useState<string | null>(null);
 
@@ -74,7 +77,7 @@ const Categories = () => {
       const response = await apiClient.getCategories({ includeInactive: true });
       
       if (response && Array.isArray(response)) {
-        const transformedCategories = response.map(category => ({
+        const transformedCategories: Category[] = response.map(category => ({
           ...category,
           description: category.description || '',
           articleCount: category._count?.news || 0,
@@ -114,7 +117,7 @@ const Categories = () => {
       return;
     }
     setEditingCategory(category);
-    setEditFormData({ name: category.name, description: category.description, isActive: category.isActive });
+    setEditFormData({ name: category.name, description: category.description || '', isActive: category.isActive ?? true });
     setShowEditModal(true);
     setEditFormError(null);
   };
@@ -154,7 +157,7 @@ const Categories = () => {
       
       if (response?.success && response?.category) {
         setCategories(prev => prev.map(cat => 
-          cat.id === editingCategory.id ? { ...response.category, articleCount: editingCategory.articleCount } : cat
+          cat.id === editingCategory.id ? { ...response.category, articleCount: editingCategory.articleCount || 0 } as Category : cat
         ));
         closeEditModal();
       } else {
@@ -194,7 +197,8 @@ const Categories = () => {
       });
       
       if (response?.success && response?.category) {
-        setCategories(prev => [{ ...response.category, articleCount: 0 } as Category, ...prev]);
+        const newCategory: Category = { ...response.category, articleCount: 0 };
+        setCategories(prev => [newCategory, ...prev]);
         closeAddModal();
       } else {
         setFormError('Failed to create category. Please try again.');
@@ -222,15 +226,15 @@ const Categories = () => {
       // Make API call to persist the change
       const response = await apiClient.updateCategory(id, {
         name: category.name,
-        description: category.description,
+        description: category.description || '',
         isActive: !currentStatus
       });
 
       // Update local state on success
       if (response?.success && response?.category) {
         setCategories(prev => prev.map(cat => 
-          cat.id === id ? { ...cat, isActive: response.category.isActive } : cat
-    ));
+          cat.id === id ? { ...cat, isActive: response.category.isActive ?? !currentStatus } : cat
+        ));
       } else {
         setError('Failed to update category status');
       }
@@ -299,7 +303,7 @@ const Categories = () => {
 
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (category.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.slug.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -399,7 +403,7 @@ const Categories = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-400">Total Articles</p>
-              <p className="text-2xl font-bold text-white">{categories.reduce((sum, c) => sum + c.articleCount, 0)}</p>
+              <p className="text-2xl font-bold text-white">{categories.reduce((sum, c) => sum + (c.articleCount || 0), 0)}</p>
             </div>
             <div className="p-3 bg-blue-500/10 rounded-xl">
               <FileText className="w-6 h-6 text-blue-400" />
@@ -412,7 +416,7 @@ const Categories = () => {
             <div>
               <p className="text-sm text-gray-400">Avg Articles</p>
               <p className="text-2xl font-bold text-white">
-                {categories.length > 0 ? Math.round(categories.reduce((sum, c) => sum + c.articleCount, 0) / categories.length) : 0}
+                {categories.length > 0 ? Math.round(categories.reduce((sum, c) => sum + (c.articleCount || 0), 0) / categories.length) : 0}
               </p>
             </div>
             <div className="p-3 bg-purple-500/10 rounded-xl">
@@ -522,7 +526,7 @@ const Categories = () => {
                         {category.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">{formatDate(category.createdAt)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">{category.createdAt ? formatDate(category.createdAt) : 'N/A'}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-1">
                         <button 
@@ -538,7 +542,7 @@ const Categories = () => {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => handleToggleStatus(category.id, category.isActive)}
+                          onClick={() => handleToggleStatus(category.id, category.isActive ?? true)}
                           disabled={togglingStatusId === category.id}
                           className={`p-1.5 hover:bg-[#2b2f36] rounded-lg transition-colors disabled:opacity-50 ${
                             category.isActive ? 'text-emerald-400' : 'text-red-400'
@@ -753,11 +757,11 @@ const Categories = () => {
                   </div>
                 <div className="bg-[#1e2329] rounded-xl p-4 border border-[#2b2f36]">
                   <p className="text-xs text-gray-500 mb-1">Created</p>
-                  <p className="text-sm text-white">{formatDate(viewingCategory.createdAt)}</p>
+                  <p className="text-sm text-white">{viewingCategory.createdAt ? formatDate(viewingCategory.createdAt) : 'N/A'}</p>
                   </div>
                 <div className="bg-[#1e2329] rounded-xl p-4 border border-[#2b2f36]">
                   <p className="text-xs text-gray-500 mb-1">Updated</p>
-                  <p className="text-sm text-white">{formatDate(viewingCategory.updatedAt)}</p>
+                  <p className="text-sm text-white">{viewingCategory.updatedAt ? formatDate(viewingCategory.updatedAt) : 'N/A'}</p>
                     </div>
                   </div>
                   

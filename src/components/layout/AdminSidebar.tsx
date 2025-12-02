@@ -332,7 +332,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
         
         const publishedArticles = articles.filter(article => article.status === 'PUBLISHED').length;
         const draftArticles = articles.filter(article => article.status === 'DRAFT').length;
-        const pendingArticles = articles.filter(article => article.status === 'PENDING').length;
+        const archivedArticles = articles.filter(article => article.status === 'ARCHIVED').length;
         
         setBreakdownData({
           title: 'Posts Breakdown',
@@ -340,7 +340,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
             { label: 'Total Posts', count: stats.totalArticles, color: 'blue' },
             { label: 'Published', count: publishedArticles, color: 'emerald' },
             { label: 'Draft', count: draftArticles, color: 'amber' },
-            { label: 'Pending', count: pendingArticles, color: 'orange' }
+            { label: 'Archived', count: archivedArticles, color: 'orange' }
           ]
         });
       } else if (item.name === 'User Management' || item.name === 'All Users') {

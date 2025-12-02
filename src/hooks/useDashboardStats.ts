@@ -7,6 +7,7 @@ interface DashboardStats {
   totalUsers: number;
   totalViews: number;
   totalLikes: number;
+  totalMedia: number;
   recentArticles: any[];
   topCategories: any[];
 }
@@ -18,6 +19,7 @@ export const useDashboardStats = () => {
     totalUsers: 0,
     totalViews: 0,
     totalLikes: 0,
+    totalMedia: 0,
     recentArticles: [],
     topCategories: []
   });
@@ -41,6 +43,15 @@ export const useDashboardStats = () => {
       const usersResponse = await apiClient.getUsers({ page: 1, limit: 1000 });
       const users = usersResponse?.data || [];
 
+      // Fetch media stats
+      let totalMedia = 0;
+      try {
+        const mediaStats = await apiClient.getMediaStats();
+        totalMedia = mediaStats?.totalMedia || 0;
+      } catch (e) {
+        // Media stats not available
+      }
+
       // Calculate totals
       const totalArticles = articles.length;
       const totalCategories = categories.length;
@@ -57,7 +68,7 @@ export const useDashboardStats = () => {
       const topCategories = categories
         .map(category => ({
           ...category,
-          articleCount: articles.filter(article => article.categoryId === category.id).length
+          articleCount: articles.filter(article => article.category?.id === category.id).length
         }))
         .sort((a, b) => b.articleCount - a.articleCount)
         .slice(0, 5);
@@ -68,6 +79,7 @@ export const useDashboardStats = () => {
         totalUsers,
         totalViews,
         totalLikes,
+        totalMedia,
         recentArticles,
         topCategories
       });

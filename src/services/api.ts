@@ -208,7 +208,7 @@ export interface DashboardStats {
     publishedAt?: string;
     author: {
       id: string;
-      username: string;
+      username?: string;
       firstName: string;
       lastName: string;
     };
@@ -216,7 +216,7 @@ export interface DashboardStats {
       id: string;
       name: string;
       slug: string;
-      color: string;
+      color?: string;
     };
   }>;
   recentUsers?: Array<{
@@ -392,7 +392,7 @@ class ApiClient {
     const formData = new FormData();
     formData.append('avatar', file);
 
-    const response = await fetch(`${this.baseUrl}/auth/avatar`, {
+    const response = await fetch(`${this.baseURL}/auth/avatar`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token}`

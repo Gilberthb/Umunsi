@@ -106,7 +106,7 @@ const AdminDashboard = () => {
       
       // Set stats from dashboard response or calculate from direct API responses
       const totalPostsFromResponse = postsResponse?.pagination?.total || postsResponse?.data?.length || 0;
-      const totalUsersFromResponse = usersResponse?.pagination?.total || usersResponse?.users?.length || 0;
+      const totalUsersFromResponse = usersResponse?.pagination?.total || usersResponse?.data?.length || 0;
       
         setStats({
         totalUsers: dashboardResponse?.totalUsers || totalUsersFromResponse,
@@ -141,8 +141,8 @@ const AdminDashboard = () => {
 
       // Get users from dashboard response OR direct users API
       let usersData = dashboardResponse?.recentUsers || [];
-      if (usersData.length === 0 && usersResponse?.users) {
-        usersData = usersResponse.users;
+      if (usersData.length === 0 && usersResponse?.data) {
+        usersData = usersResponse.data;
       }
       
       if (usersData.length > 0) {

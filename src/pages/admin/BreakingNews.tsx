@@ -36,13 +36,13 @@ interface BreakingNews {
   publishedAt?: string;
   viewCount: number;
   likeCount: number;
-  isBreaking: boolean;
-  isFeatured: boolean;
-  isTrending: boolean;
+  isBreaking?: boolean;
+  isFeatured?: boolean;
+  isTrending?: boolean;
   createdAt: string;
   updatedAt: string;
-  authorId: string;
-  categoryId: string;
+  authorId?: string;
+  categoryId?: string;
   author: {
     id: string;
     username: string;
@@ -55,7 +55,7 @@ interface BreakingNews {
     name: string;
     slug: string;
     color: string;
-    icon: string;
+    icon?: string;
   };
 }
 
@@ -64,8 +64,8 @@ interface Category {
   name: string;
   slug: string;
   color: string;
-  icon: string;
-  isActive: boolean;
+  icon?: string;
+  isActive?: boolean;
 }
 
 const BreakingNews: React.FC = () => {
@@ -108,17 +108,16 @@ const BreakingNews: React.FC = () => {
       const response = await apiClient.getArticles({ 
         page: currentPage, 
         limit: itemsPerPage,
-        isBreaking: true,
         search: searchTerm,
         status: statusFilter === 'ALL' ? undefined : statusFilter,
-        categoryId: categoryFilter === 'ALL' ? undefined : categoryFilter,
-        sortBy,
-        sortOrder
+        category: categoryFilter === 'ALL' ? undefined : categoryFilter
       });
       
       if (response?.data) {
-        setBreakingNews(response.data);
-        setTotalPages(Math.ceil((response.total || 0) / itemsPerPage));
+        // Filter for breaking news on the client side
+        const breakingArticles = response.data.filter(article => article.isBreaking);
+        setBreakingNews(breakingArticles as BreakingNews[]);
+        setTotalPages(Math.ceil((response.pagination?.total || breakingArticles.length) / itemsPerPage));
       }
     } catch (error) {
       console.error('Error fetching breaking news:', error);
@@ -133,7 +132,7 @@ const BreakingNews: React.FC = () => {
       setCategoriesLoading(true);
       const response = await apiClient.getCategories();
       if (response) {
-        setCategories(response);
+        setCategories(response as Category[]);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -252,7 +251,7 @@ const BreakingNews: React.FC = () => {
       const newArticle = await apiClient.createArticle(data);
 
       // Add new article to the list
-      setBreakingNews(prev => [newArticle, ...prev]);
+      setBreakingNews(prev => [newArticle as BreakingNews, ...prev]);
       
       // Show success message
       setFormSuccess('Breaking news article created successfully!');

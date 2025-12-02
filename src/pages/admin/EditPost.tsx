@@ -95,8 +95,11 @@ const EditPost: React.FC = () => {
           category: 'featured',
           tags: [],
           description: 'Current featured image',
-          uploadedAt: new Date().toISOString(),
-          uploadedBy: { id: 'temp', firstName: 'Current', lastName: 'User' }
+          uploadedBy: { id: 'temp', username: 'current', firstName: 'Current', lastName: 'User' },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isPublic: true,
+          isFeatured: false
         });
       }
     } catch (error) {
