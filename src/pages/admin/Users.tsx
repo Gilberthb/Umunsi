@@ -339,7 +339,7 @@ const Users = () => {
               <UserPlus className="w-4 h-4" />
               <span>Add User</span>
               </button>
-            <button className="px-4 py-2.5 bg-[#2b2f36] text-gray-400 rounded-xl hover:bg-[#363a45] hover:text-white transition-all flex items-center space-x-2">
+            <button className="px-4 py-2.5 theme-bg-tertiary theme-text-tertiary rounded-xl hover:theme-bg-card-hover hover:theme-text-primary transition-all flex items-center space-x-2">
               <Download className="w-4 h-4" />
               <span>Export</span>
               </button>
@@ -399,17 +399,17 @@ const Users = () => {
         </div>
 
       {/* Filters */}
-      <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-4 mb-6">
+      <div className="theme-bg-secondary rounded-xl border theme-border-primary p-4 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <div className="flex-1 max-w-md">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 group-focus-within:text-[#fcd535]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 theme-text-muted w-4 h-4 group-focus-within:text-[#fcd535]" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50"
+                className="w-full pl-10 pr-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50"
             />
               </div>
           </div>
@@ -418,7 +418,7 @@ const Users = () => {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+              className="px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
           >
             <option value="all">All Roles</option>
             <option value="ADMIN">Admin</option>
@@ -430,7 +430,7 @@ const Users = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+              className="px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -441,23 +441,23 @@ const Users = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+              className="px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
               >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
                 <option value="name">Name A-Z</option>
           </select>
 
-            <div className="flex bg-[#2b2f36] rounded-xl p-1">
+            <div className="flex theme-bg-tertiary rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-gray-400 hover:text-white'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#fcd535] text-[#0b0e11]' : 'theme-text-tertiary hover:theme-text-primary'}`}
                 >
                 <List className="w-4 h-4" />
                 </button>
           <button
                   onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-gray-400 hover:text-white'}`}
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#fcd535] text-[#0b0e11]' : 'theme-text-tertiary hover:theme-text-primary'}`}
                 >
                 <Grid3X3 className="w-4 h-4" />
           </button>
@@ -465,7 +465,7 @@ const Users = () => {
 
             <button
               onClick={fetchUsers}
-              className="p-2.5 bg-[#2b2f36] text-gray-400 rounded-xl hover:bg-[#363a45] hover:text-white transition-all"
+              className="p-2.5 theme-bg-tertiary theme-text-tertiary rounded-xl hover:theme-bg-card-hover hover:theme-text-primary transition-all"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -482,23 +482,23 @@ const Users = () => {
               <button onClick={() => handleBulkAction('activate')} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 text-sm">Activate</button>
               <button onClick={() => handleBulkAction('deactivate')} className="px-3 py-1.5 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 text-sm">Deactivate</button>
               <button onClick={() => handleBulkAction('delete')} className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm">Delete</button>
-              <button onClick={() => setSelectedUsers([])} className="px-3 py-1.5 text-gray-400 hover:text-white text-sm">Cancel</button>
+              <button onClick={() => setSelectedUsers([])} className="px-3 py-1.5 theme-text-tertiary hover:theme-text-primary text-sm">Cancel</button>
               </div>
             </div>
           </div>
         )}
 
       {/* Users List/Grid */}
-      <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#2b2f36] flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">{filteredUsers.length} Users</h2>
-          <span className="text-xs text-gray-500">Last updated: {new Date().toLocaleTimeString()}</span>
+      <div className="theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
+        <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
+          <h2 className="text-lg font-semibold theme-text-primary">{filteredUsers.length} Users</h2>
+          <span className="text-xs theme-text-muted">Last updated: {new Date().toLocaleTimeString()}</span>
       </div>
 
           {viewMode === 'list' ? (
-          <div className="divide-y divide-[#2b2f36]">
+          <div className="divide-y theme-border-primary">
             {filteredUsers.map((user) => (
-              <div key={user.id} className="p-4 hover:bg-[#1e2329] transition-colors">
+              <div key={user.id} className="p-4 hover:theme-bg-tertiary transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
                       <input
@@ -508,7 +508,7 @@ const Users = () => {
                         if (e.target.checked) setSelectedUsers([...selectedUsers, user.id]);
                         else setSelectedUsers(selectedUsers.filter(id => id !== user.id));
                         }}
-                      className="mt-3 w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
+                      className="mt-3 w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535]"
                       />
                       
                     <div className="w-12 h-12 bg-gradient-to-br from-[#fcd535] to-[#f0b90b] rounded-xl flex items-center justify-center flex-shrink-0">
@@ -517,7 +517,7 @@ const Users = () => {
 
                     <div className="space-y-1">
                         <div className="flex items-center space-x-3">
-                        <h3 className="text-white font-medium">{user.firstName} {user.lastName}</h3>
+                        <h3 className="theme-text-primary font-medium">{user.firstName} {user.lastName}</h3>
                         <span className={`px-2 py-0.5 text-xs font-medium rounded-md border flex items-center space-x-1 ${getRoleBadge(user.role)}`}>
                             {getRoleIcon(user.role)}
                             <span>{user.role}</span>
@@ -528,7 +528,7 @@ const Users = () => {
                           </span>
                         </div>
                         
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="flex items-center space-x-4 text-sm theme-text-muted">
                           <span className="flex items-center space-x-1">
                           <Mail className="w-3.5 h-3.5" />
                             <span>{user.email}</span>
@@ -545,7 +545,7 @@ const Users = () => {
                           </span>
                         </div>
 
-                      <div className="flex items-center space-x-4 text-xs text-gray-600">
+                      <div className="flex items-center space-x-4 text-xs theme-text-muted">
                           <span>Articles: {user.articleCount}</span>
                           <span>Comments: {user.commentCount}</span>
                       </div>
@@ -553,30 +553,30 @@ const Users = () => {
                     </div>
 
                   <div className="flex items-center space-x-1">
-                    <button className="p-2 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg transition-colors">
+                    <button className="p-2 theme-text-muted hover:text-[#fcd535] hover:theme-bg-tertiary rounded-lg transition-colors">
                         <Eye className="w-4 h-4" />
                       </button>
                     <button 
                       onClick={() => openEditModal(user)}
-                      className="p-2 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
+                      className="p-2 theme-text-muted hover:text-blue-400 hover:theme-bg-tertiary rounded-lg transition-colors"
                     >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleToggleUserStatus(user.id, user.isActive)}
-                      className={`p-2 hover:bg-[#2b2f36] rounded-lg transition-colors ${user.isActive ? 'text-emerald-400' : 'text-amber-400'}`}
+                      className={`p-2 hover:theme-bg-tertiary rounded-lg transition-colors ${user.isActive ? 'text-emerald-400' : 'text-amber-400'}`}
                       >
                         {user.isActive ? <Ban className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </button>
                       <button 
                         onClick={() => handleToggleVerification(user.id, user.isVerified)}
-                      className={`p-2 hover:bg-[#2b2f36] rounded-lg transition-colors ${user.isVerified ? 'text-amber-400' : 'text-blue-400'}`}
+                      className={`p-2 hover:theme-bg-tertiary rounded-lg transition-colors ${user.isVerified ? 'text-amber-400' : 'text-blue-400'}`}
                       >
                         {user.isVerified ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user.id)}
-                      className="p-2 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
+                      className="p-2 theme-text-muted hover:text-red-400 hover:theme-bg-tertiary rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -588,8 +588,8 @@ const Users = () => {
           ) : (
           <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredUsers.map((user) => (
-              <div key={user.id} className="bg-[#1e2329] rounded-xl border border-[#2b2f36] overflow-hidden hover:border-[#fcd535]/30 transition-all group">
-                <div className="p-4 border-b border-[#2b2f36]">
+              <div key={user.id} className="theme-bg-tertiary rounded-xl border theme-border-primary overflow-hidden hover:border-[#fcd535]/30 transition-all group">
+                <div className="p-4 border-b theme-border-primary">
                   <div className="flex items-center justify-between mb-3">
                         <input
                           type="checkbox"
@@ -598,7 +598,7 @@ const Users = () => {
                         if (e.target.checked) setSelectedUsers([...selectedUsers, user.id]);
                         else setSelectedUsers(selectedUsers.filter(id => id !== user.id));
                           }}
-                      className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
+                      className="w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535]"
                         />
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-md border flex items-center space-x-1 ${getRoleBadge(user.role)}`}>
                           {getRoleIcon(user.role)}
@@ -610,13 +610,13 @@ const Users = () => {
                     <div className="w-14 h-14 bg-gradient-to-br from-[#fcd535] to-[#f0b90b] rounded-xl flex items-center justify-center mx-auto mb-3">
                       <span className="text-[#0b0e11] font-bold text-lg">{user.firstName[0]}{user.lastName[0]}</span>
                     </div>
-                    <h3 className="text-white font-semibold group-hover:text-[#fcd535] transition-colors">{user.firstName} {user.lastName}</h3>
-                    <p className="text-gray-500 text-sm">@{user.username}</p>
+                    <h3 className="theme-text-primary font-semibold group-hover:text-[#fcd535] transition-colors">{user.firstName} {user.lastName}</h3>
+                    <p className="theme-text-muted text-sm">@{user.username}</p>
                   </div>
                     </div>
                     
                 <div className="p-4 space-y-3">
-                  <p className="text-gray-400 text-sm text-center">{user.email}</p>
+                  <p className="theme-text-tertiary text-sm text-center">{user.email}</p>
                   
                   <div className="flex items-center justify-center">
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-md border flex items-center space-x-1 ${getStatusBadge(user.isActive, user.isVerified)}`}>
@@ -625,21 +625,21 @@ const Users = () => {
                       </span>
                     </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="bg-[#2b2f36] px-2 py-1 rounded">Articles: {user.articleCount}</span>
-                    <span className="bg-[#2b2f36] px-2 py-1 rounded">Comments: {user.commentCount}</span>
+                  <div className="flex items-center justify-between text-xs theme-text-muted">
+                    <span className="theme-bg-secondary px-2 py-1 rounded">Articles: {user.articleCount}</span>
+                    <span className="theme-bg-secondary px-2 py-1 rounded">Comments: {user.commentCount}</span>
                   </div>
 
-                  <p className="text-xs text-gray-600 text-center">Joined {formatDate(user.createdAt)}</p>
+                  <p className="text-xs theme-text-muted text-center">Joined {formatDate(user.createdAt)}</p>
                 </div>
 
-                <div className="px-4 py-3 bg-[#181a20] border-t border-[#2b2f36] flex items-center justify-between">
+                <div className="px-4 py-3 theme-bg-secondary border-t theme-border-primary flex items-center justify-between">
                   <div className="flex items-center space-x-1">
-                    <button className="p-1.5 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => openEditModal(user)} className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDeleteUser(user.id)} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                    <button className="p-1.5 theme-text-muted hover:text-[#fcd535] hover:theme-bg-tertiary rounded-lg"><Eye className="w-4 h-4" /></button>
+                    <button onClick={() => openEditModal(user)} className="p-1.5 theme-text-muted hover:text-blue-400 hover:theme-bg-tertiary rounded-lg"><Edit className="w-4 h-4" /></button>
+                    <button onClick={() => handleDeleteUser(user.id)} className="p-1.5 theme-text-muted hover:text-red-400 hover:theme-bg-tertiary rounded-lg"><Trash2 className="w-4 h-4" /></button>
                       </div>
-                  <button className="p-1.5 text-gray-500 hover:text-white hover:bg-[#2b2f36] rounded-lg">
+                  <button className="p-1.5 theme-text-muted hover:theme-text-primary hover:theme-bg-tertiary rounded-lg">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                   </div>
@@ -650,13 +650,13 @@ const Users = () => {
         </div>
 
         {/* Pagination */}
-      <div className="mt-6 bg-[#181a20] rounded-xl border border-[#2b2f36] p-4">
+      <div className="mt-6 theme-bg-secondary rounded-xl border theme-border-primary p-4">
           <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-400">Showing 1 to {filteredUsers.length} of {filteredUsers.length} results</p>
+          <p className="text-sm theme-text-tertiary">Showing 1 to {filteredUsers.length} of {filteredUsers.length} results</p>
             <div className="flex items-center space-x-2">
-            <button className="px-3 py-1.5 bg-[#2b2f36] text-gray-400 rounded-lg hover:bg-[#363a45] hover:text-white transition-colors">Previous</button>
+            <button className="px-3 py-1.5 theme-bg-tertiary theme-text-tertiary rounded-lg hover:theme-bg-card-hover hover:theme-text-primary transition-colors">Previous</button>
             <button className="px-3 py-1.5 bg-[#fcd535] text-[#0b0e11] font-medium rounded-lg">1</button>
-            <button className="px-3 py-1.5 bg-[#2b2f36] text-gray-400 rounded-lg hover:bg-[#363a45] hover:text-white transition-colors">Next</button>
+            <button className="px-3 py-1.5 theme-bg-tertiary theme-text-tertiary rounded-lg hover:theme-bg-card-hover hover:theme-text-primary transition-colors">Next</button>
           </div>
         </div>
       </div>
@@ -664,10 +664,10 @@ const Users = () => {
       {/* Add User Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] w-full max-w-md mx-4 overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#2b2f36] flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Add New User</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-white">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
+              <h3 className="text-lg font-semibold theme-text-primary">Add New User</h3>
+              <button onClick={() => setShowAddModal(false)} className="theme-text-tertiary hover:theme-text-primary">
                 <XCircle className="w-5 h-5" />
               </button>
             </div>
@@ -681,56 +681,56 @@ const Users = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">First Name</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">First Name</label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">Last Name</label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Email</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Password</label>
                 <input
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                   required
                   minLength={6}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Role</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Role</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                  className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                 >
                   <option value="USER">User</option>
                   <option value="AUTHOR">Author</option>
@@ -743,7 +743,7 @@ const Users = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2 theme-text-tertiary hover:theme-text-primary transition-colors"
                 >
                   Cancel
                 </button>
@@ -768,10 +768,10 @@ const Users = () => {
       {/* Edit User Modal */}
       {showEditModal && editingUser && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] w-full max-w-md mx-4 overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#2b2f36] flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Edit User</h3>
-              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }} className="text-gray-400 hover:text-white">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
+              <h3 className="text-lg font-semibold theme-text-primary">Edit User</h3>
+              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }} className="theme-text-tertiary hover:theme-text-primary">
                 <XCircle className="w-5 h-5" />
               </button>
             </div>
@@ -785,43 +785,43 @@ const Users = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">First Name</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">First Name</label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">Last Name</label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Email</label>
                 <input
                   type="email"
                   value={formData.email}
                   disabled
-                  className="w-full px-3 py-2.5 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-gray-500 cursor-not-allowed"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-muted cursor-not-allowed"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Role</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Role</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                  className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                 >
                   <option value="USER">User</option>
                   <option value="AUTHOR">Author</option>
@@ -830,8 +830,8 @@ const Users = () => {
                 </select>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-[#2b2f36] rounded-xl">
-                <span className="text-gray-400 text-sm">Active Status</span>
+              <div className="flex items-center justify-between p-3 theme-bg-tertiary rounded-xl">
+                <span className="theme-text-tertiary text-sm">Active Status</span>
                 <button
                   type="button"
                   onClick={() => setEditingUser({ ...editingUser, isActive: !editingUser.isActive })}
@@ -845,7 +845,7 @@ const Users = () => {
                 <button
                   type="button"
                   onClick={() => { setShowEditModal(false); setEditingUser(null); }}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2 theme-text-tertiary hover:theme-text-primary transition-colors"
                 >
                   Cancel
                 </button>
