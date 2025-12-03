@@ -33,6 +33,8 @@ import Roles from './pages/admin/Roles';
 import Reports from './pages/admin/Reports';
 import Performance from './pages/admin/Performance';
 import Backup from './pages/admin/Backup';
+import AdsManagement from './pages/admin/AdsManagement';
+import Register from './pages/Register';
 import { withAuth, withAdmin, withEditor } from './contexts/AuthContext';
 
 // Create wrapped components
@@ -56,6 +58,7 @@ const ProtectedRoles = withAdmin(Roles);
 const ProtectedReports = withEditor(Reports);
 const ProtectedPerformance = withEditor(Performance);
 const ProtectedBackup = withAdmin(Backup);
+const ProtectedAdsManagement = withAdmin(AdsManagement);
 const ProtectedProfile = withAuth(Profile);
 
 function App() {
@@ -65,6 +68,8 @@ function App() {
         <Routes>
           {/* Login route - standalone, no layout wrapper */}
           <Route path="/login" element={<Login />} />
+          {/* Register route - standalone, no layout wrapper */}
+          <Route path="/register" element={<Register />} />
           {/* Test login page for debugging */}
           <Route path="/test-login" element={<TestLogin />} />
           
@@ -110,6 +115,7 @@ function App() {
             <Route path="logs" element={<ProtectedLogs />} />
             <Route path="settings" element={<ProtectedSettings />} />
             <Route path="backup" element={<ProtectedBackup />} />
+            <Route path="ads" element={<ProtectedAdsManagement />} />
             <Route path="media/library" element={<ProtectedMediaLibrary />} />
             <Route path="media/add" element={<ProtectedAddMedia />} />
             <Route path="posts" element={<ProtectedPosts />} />
