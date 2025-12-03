@@ -236,8 +236,8 @@ const Analytics = () => {
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold theme-text-primary">Analytics</h1>
-            <p className="theme-text-tertiary mt-1">Monitor website performance and content statistics</p>
+            <h1 className="text-2xl font-bold theme-text-primary">Analytics Dashboard</h1>
+            <p className="theme-text-tertiary mt-1">Real-time statistics from your database</p>
           </div>
           <div className="flex items-center space-x-3">
             <button
@@ -248,18 +248,18 @@ const Analytics = () => {
               <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
             </button>
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
+          <select
+            value={period}
+            onChange={(e) => setPeriod(e.target.value)}
               className="px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
-          </div>
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="1y">Last year</option>
+          </select>
         </div>
+      </div>
       </div>
 
       {/* Error Message */}
@@ -459,7 +459,7 @@ const Analytics = () => {
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 theme-text-muted mx-auto mb-3" />
                 <p className="theme-text-muted">No articles found</p>
-              </div>
+            </div>
             )}
           </div>
         </div>
@@ -497,8 +497,8 @@ const Analytics = () => {
                       <div 
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: color }}
-                      ></div>
-                      <div>
+                    ></div>
+                    <div>
                         <p className="text-sm font-medium theme-text-primary group-hover:text-[#fcd535] transition-colors">
                           {category.name}
                         </p>
@@ -506,22 +506,22 @@ const Analytics = () => {
                       </div>
                     </div>
                     <div className="w-24 theme-bg-tertiary rounded-full h-2">
-                      <div 
+                    <div 
                         className="h-2 rounded-full transition-all"
-                        style={{ 
+                      style={{ 
                           width: `${(postCount / maxPosts) * 100}%`,
                           backgroundColor: color
-                        }}
-                      ></div>
-                    </div>
+                      }}
+                    ></div>
                   </div>
+                </div>
                 );
               })
             ) : (
               <div className="text-center py-8">
                 <FolderOpen className="w-12 h-12 theme-text-muted mx-auto mb-3" />
                 <p className="theme-text-muted">No categories found</p>
-              </div>
+            </div>
             )}
           </div>
         </div>
@@ -542,10 +542,10 @@ const Analytics = () => {
               <div className="theme-bg-tertiary rounded-xl p-4 text-center">
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <FileText className="w-6 h-6 text-emerald-400" />
-                </div>
+                    </div>
                 <p className="text-2xl font-bold theme-text-primary">{analyticsData?.publishedPosts || 0}</p>
                 <p className="text-sm theme-text-muted">Published</p>
-              </div>
+                  </div>
               <div className="theme-bg-tertiary rounded-xl p-4 text-center">
                 <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <FileText className="w-6 h-6 text-amber-400" />
@@ -617,7 +617,7 @@ const Analytics = () => {
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-[#fcd535] to-[#f0b90b] flex items-center justify-center flex-shrink-0 ${user.avatar ? 'hidden' : ''}`}>
                     <span className="text-sm font-bold text-[#0b0e11]">
                       {user.firstName?.[0] || user.username?.[0] || 'U'}
-                    </span>
+                  </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium theme-text-primary truncate group-hover:text-[#fcd535] transition-colors">
@@ -641,7 +641,7 @@ const Analytics = () => {
               <div className="text-center py-8">
                 <Users className="w-12 h-12 theme-text-muted mx-auto mb-3" />
                 <p className="theme-text-muted">No users found</p>
-              </div>
+            </div>
             )}
           </div>
         </div>
