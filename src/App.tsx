@@ -31,6 +31,7 @@ import EditPost from './pages/admin/EditPost';
 import PostDetail from './pages/admin/PostDetail';
 import Roles from './pages/admin/Roles';
 import Reports from './pages/admin/Reports';
+import Performance from './pages/admin/Performance';
 import { withAuth, withAdmin, withEditor } from './contexts/AuthContext';
 
 // Create wrapped components
@@ -52,6 +53,7 @@ const ProtectedEditPost = withEditor(EditPost);
 const ProtectedPostDetail = withEditor(PostDetail);
 const ProtectedRoles = withAdmin(Roles);
 const ProtectedReports = withEditor(Reports);
+const ProtectedPerformance = withEditor(Performance);
 const ProtectedProfile = withAuth(Profile);
 
 function App() {
@@ -102,6 +104,7 @@ function App() {
             <Route path="roles" element={<ProtectedRoles />} />
             <Route path="analytics" element={<ProtectedAnalytics />} />
             <Route path="reports" element={<ProtectedReports />} />
+            <Route path="performance" element={<ProtectedPerformance />} />
             <Route path="logs" element={<ProtectedLogs />} />
             <Route path="settings" element={<ProtectedSettings />} />
             <Route path="media/library" element={<ProtectedMediaLibrary />} />
