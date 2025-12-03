@@ -309,27 +309,27 @@ const Users = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-[#fcd535]/20"></div>
             <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#fcd535] animate-spin"></div>
             <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#fcd535] animate-pulse" />
           </div>
-          <p className="text-gray-400">Loading users...</p>
+          <p className="theme-text-tertiary">Loading users...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] p-6">
+    <div className="min-h-screen theme-bg-primary p-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">User Management</h1>
-            <p className="text-gray-400 mt-1">Manage user accounts and permissions</p>
+            <h1 className="text-2xl font-bold theme-text-primary">User Management</h1>
+            <p className="theme-text-tertiary mt-1">Manage user accounts and permissions</p>
             </div>
           <div className="flex items-center space-x-3">
             <button 
@@ -349,11 +349,11 @@ const Users = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
             <div className="flex items-center justify-between">
               <div>
-              <p className="text-sm text-gray-400">Total Users</p>
-              <p className="text-2xl font-bold text-white">{users.length}</p>
+              <p className="text-sm theme-text-tertiary">Total Users</p>
+              <p className="text-2xl font-bold theme-text-primary">{users.length}</p>
               </div>
             <div className="p-3 bg-blue-500/10 rounded-xl">
               <UsersIcon className="w-6 h-6 text-blue-400" />
@@ -361,11 +361,11 @@ const Users = () => {
             </div>
           </div>
           
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
             <div className="flex items-center justify-between">
           <div>
-              <p className="text-sm text-gray-400">Active</p>
-              <p className="text-2xl font-bold text-white">{users.filter(u => u.isActive).length}</p>
+              <p className="text-sm theme-text-tertiary">Active</p>
+              <p className="text-2xl font-bold theme-text-primary">{users.filter(u => u.isActive).length}</p>
               </div>
             <div className="p-3 bg-emerald-500/10 rounded-xl">
               <UserCheck className="w-6 h-6 text-emerald-400" />
@@ -373,11 +373,11 @@ const Users = () => {
             </div>
           </div>
           
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
             <div className="flex items-center justify-between">
               <div>
-              <p className="text-sm text-gray-400">Verified</p>
-              <p className="text-2xl font-bold text-white">{users.filter(u => u.isVerified).length}</p>
+              <p className="text-sm theme-text-tertiary">Verified</p>
+              <p className="text-2xl font-bold theme-text-primary">{users.filter(u => u.isVerified).length}</p>
               </div>
             <div className="p-3 bg-purple-500/10 rounded-xl">
               <Shield className="w-6 h-6 text-purple-400" />
@@ -385,11 +385,11 @@ const Users = () => {
         </div>
       </div>
 
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
             <div className="flex items-center justify-between">
               <div>
-              <p className="text-sm text-gray-400">Admins</p>
-              <p className="text-2xl font-bold text-white">{users.filter(u => u.role === 'ADMIN').length}</p>
+              <p className="text-sm theme-text-tertiary">Admins</p>
+              <p className="text-2xl font-bold theme-text-primary">{users.filter(u => u.role === 'ADMIN').length}</p>
               </div>
             <div className="p-3 bg-amber-500/10 rounded-xl">
               <Crown className="w-6 h-6 text-amber-400" />

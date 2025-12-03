@@ -309,14 +309,14 @@ const Categories = () => {
 
   if (authLoading || (loading && categories.length === 0)) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-[#fcd535]/20"></div>
             <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#fcd535] animate-spin"></div>
             <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#fcd535] animate-pulse" />
           </div>
-          <p className="text-gray-400">{authLoading ? 'Checking authentication...' : 'Loading categories...'}</p>
+          <p className="theme-text-tertiary">{authLoading ? 'Checking authentication...' : 'Loading categories...'}</p>
         </div>
       </div>
     );
@@ -324,13 +324,13 @@ const Categories = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-red-400" />
           </div>
-          <h3 className="text-lg font-medium text-white mb-2">Authentication Required</h3>
-          <p className="text-gray-400 mb-4">You must be logged in to access this page</p>
+          <h3 className="text-lg font-medium theme-text-primary mb-2">Authentication Required</h3>
+          <p className="theme-text-tertiary mb-4">You must be logged in to access this page</p>
           <button
             onClick={() => window.location.href = '/login'}
             className="px-4 py-2 bg-[#fcd535] text-[#0b0e11] font-medium rounded-lg hover:bg-[#f0b90b] transition-all"
@@ -343,13 +343,13 @@ const Categories = () => {
   }
 
     return (
-    <div className="min-h-screen bg-[#0b0e11] p-6">
+    <div className="min-h-screen theme-bg-primary p-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-white">Categories</h1>
-            <p className="text-gray-400 mt-1">Organize and manage article categories</p>
+            <h1 className="text-2xl font-bold theme-text-primary">Categories</h1>
+            <p className="theme-text-tertiary mt-1">Organize and manage article categories</p>
             {user && (
               <p className="text-xs text-gray-500 mt-1">
                 Logged in as: <span className="text-[#fcd535]">{user.firstName} {user.lastName}</span> ({user.role})
@@ -375,11 +375,11 @@ const Categories = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Total Categories</p>
-              <p className="text-2xl font-bold text-white">{categories.length}</p>
+              <p className="text-sm theme-text-tertiary">Total Categories</p>
+              <p className="text-2xl font-bold theme-text-primary">{categories.length}</p>
             </div>
             <div className="p-3 bg-[#fcd535]/10 rounded-xl">
               <FolderOpen className="w-6 h-6 text-[#fcd535]" />
@@ -387,11 +387,11 @@ const Categories = () => {
           </div>
         </div>
         
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Active</p>
-              <p className="text-2xl font-bold text-white">{categories.filter(c => c.isActive).length}</p>
+              <p className="text-sm theme-text-tertiary">Active</p>
+              <p className="text-2xl font-bold theme-text-primary">{categories.filter(c => c.isActive).length}</p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-xl">
               <BarChart3 className="w-6 h-6 text-emerald-400" />
@@ -399,11 +399,11 @@ const Categories = () => {
           </div>
         </div>
         
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Total Articles</p>
-              <p className="text-2xl font-bold text-white">{categories.reduce((sum, c) => sum + (c.articleCount || 0), 0)}</p>
+              <p className="text-sm theme-text-tertiary">Total Articles</p>
+              <p className="text-2xl font-bold theme-text-primary">{categories.reduce((sum, c) => sum + (c.articleCount || 0), 0)}</p>
             </div>
             <div className="p-3 bg-blue-500/10 rounded-xl">
               <FileText className="w-6 h-6 text-blue-400" />
@@ -411,11 +411,11 @@ const Categories = () => {
           </div>
         </div>
         
-        <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-5">
+        <div className="theme-bg-secondary rounded-xl border theme-border-primary p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Avg Articles</p>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-sm theme-text-tertiary">Avg Articles</p>
+              <p className="text-2xl font-bold theme-text-primary">
                 {categories.length > 0 ? Math.round(categories.reduce((sum, c) => sum + (c.articleCount || 0), 0) / categories.length) : 0}
               </p>
             </div>

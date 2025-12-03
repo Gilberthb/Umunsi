@@ -152,27 +152,27 @@ const Posts: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-[#fcd535]/20"></div>
             <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#fcd535] animate-spin"></div>
             <Sparkles className="absolute inset-0 m-auto w-6 h-6 text-[#fcd535] animate-pulse" />
           </div>
-          <p className="text-gray-400">Loading posts...</p>
+          <p className="theme-text-tertiary">Loading posts...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] p-6">
+    <div className="min-h-screen theme-bg-primary p-6">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Posts</h1>
-            <p className="text-gray-400 mt-1">Manage your blog posts and articles</p>
+            <h1 className="text-2xl font-bold theme-text-primary">Posts</h1>
+            <p className="theme-text-tertiary mt-1">Manage your blog posts and articles</p>
           </div>
           <button 
             onClick={() => navigate('/admin/posts/add')}
@@ -185,17 +185,17 @@ const Posts: React.FC = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-4 mb-6">
+      <div className="theme-bg-secondary rounded-2xl border theme-border-primary p-4 mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 group-focus-within:text-[#fcd535]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 theme-text-muted w-4 h-4 group-focus-within:text-[#fcd535]" />
               <input
                 type="text"
                 placeholder="Search posts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50"
+                className="w-full pl-10 pr-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50"
               />
             </div>
           </div>
@@ -204,7 +204,7 @@ const Posts: React.FC = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+              className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
             >
               {statusOptions.map(option => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -216,7 +216,7 @@ const Posts: React.FC = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+              className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
@@ -225,16 +225,16 @@ const Posts: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex items-center space-x-1 bg-[#2b2f36] rounded-xl p-1">
+          <div className="flex items-center space-x-1 theme-bg-tertiary rounded-xl p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-gray-400 hover:text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#fcd535] text-[#0b0e11]' : 'theme-text-tertiary hover:theme-text-primary'}`}
             >
               <Grid3X3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-gray-400 hover:text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#fcd535] text-[#0b0e11]' : 'theme-text-tertiary hover:theme-text-primary'}`}
             >
               <List className="w-4 h-4" />
             </button>

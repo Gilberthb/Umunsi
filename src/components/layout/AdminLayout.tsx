@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
-import { Layers, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 const AdminLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -17,14 +17,14 @@ const AdminLayout = () => {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-20 h-20 mx-auto mb-6">
             <div className="absolute inset-0 rounded-full border-4 border-[#fcd535]/20"></div>
             <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#fcd535] animate-spin"></div>
             <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-[#fcd535] animate-pulse" />
           </div>
-          <p className="text-gray-400 text-lg font-medium">Loading admin panel...</p>
+          <p className="theme-text-tertiary text-lg font-medium">Loading admin panel...</p>
         </div>
       </div>
     );
@@ -40,7 +40,7 @@ const AdminLayout = () => {
   const currentUser = user || (storedUser ? JSON.parse(storedUser) : null);
 
   return (
-    <div className="min-h-screen bg-[#0b0e11]">
+    <div className="min-h-screen theme-bg-primary">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block fixed top-0 left-0 h-full z-40">
         <AdminSidebar 

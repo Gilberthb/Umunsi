@@ -17,29 +17,23 @@ import {
   FolderOpen,
   Activity,
   Image,
-  Sparkles,
-  Star,
-  TrendingUp,
   Shield,
   Database,
   Cloud,
-  Globe,
-  Bell,
   Search,
   Plus,
   Eye,
-  Clock,
   BookOpen,
   Layers,
   PieChart,
   Target,
-  Award,
-  Zap,
   Crown,
-  Menu
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface SidebarItem {
   name: string;
@@ -73,6 +67,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { stats, loading: statsLoading } = useDashboardStats();
+  const { toggleTheme, isDark } = useTheme();
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [breakdownData, setBreakdownData] = useState<{title: string, data: { label: string; count: number; color: string }[]} | null>(null);
   const [breakdownLoading, setBreakdownLoading] = useState(false);
@@ -137,9 +132,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           path: '/admin/posts',
           icon: FileText,
           badge: countsLoading ? '...' : dbCounts.posts,
-      color: 'from-blue-500 to-blue-600'
-    },
-    { 
+          color: 'from-blue-500 to-blue-600'
+        },
+        { 
           name: 'Add New',
           path: '/admin/posts/add',
           icon: Plus,
@@ -197,10 +192,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           badge: countsLoading ? '...' : dbCounts.users,
           color: 'from-cyan-500 to-cyan-600'
         },
-    { 
+        { 
           name: 'Roles',
-      path: '/admin/roles', 
-      icon: Shield, 
+          path: '/admin/roles', 
+          icon: Shield, 
           color: 'from-rose-500 to-rose-600',
           adminOnly: true
         }
@@ -220,17 +215,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           path: '/admin/analytics',
           icon: BarChart3,
           color: 'from-violet-500 to-violet-600'
-    },
-    { 
-      name: 'Reports', 
-      path: '/admin/reports', 
-      icon: PieChart, 
+        },
+        { 
+          name: 'Reports', 
+          path: '/admin/reports', 
+          icon: PieChart, 
           color: 'from-pink-500 to-pink-600'
-    },
-    { 
-      name: 'Performance', 
-      path: '/admin/performance', 
-      icon: Target, 
+        },
+        { 
+          name: 'Performance', 
+          path: '/admin/performance', 
+          icon: Target, 
           color: 'from-amber-500 to-amber-600'
         }
       ]
@@ -250,23 +245,23 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           path: '/admin/settings',
           icon: Settings,
           color: 'from-gray-500 to-gray-600'
-    },
-    { 
-      name: 'Security', 
-      path: '/admin/security', 
+        },
+        { 
+          name: 'Security', 
+          path: '/admin/security', 
           icon: Shield, 
           color: 'from-red-500 to-red-600'
-    },
-    { 
-      name: 'Backup', 
-      path: '/admin/backup', 
-      icon: Cloud, 
+        },
+        { 
+          name: 'Backup', 
+          path: '/admin/backup', 
+          icon: Cloud, 
           color: 'from-sky-500 to-sky-600'
-    },
-    { 
-      name: 'Logs', 
-      path: '/admin/logs', 
-      icon: Activity, 
+        },
+        { 
+          name: 'Logs', 
+          path: '/admin/logs', 
+          icon: Activity, 
           color: 'from-emerald-500 to-emerald-600'
         }
       ]
@@ -373,10 +368,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
       }
     } catch (error) {
       console.error('Error fetching breakdown data:', error);
-        setBreakdownData({
+      setBreakdownData({
         title: 'Error',
         data: [{ label: 'Unable to load data', count: 0, color: 'red' }]
-        });
+      });
     } finally {
       setBreakdownLoading(false);
     }
@@ -414,17 +409,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
       case 'AUTHOR':
         return <BookOpen className="w-3 h-3 text-purple-400" />;
       default:
-        return <User className="w-3 h-3 text-gray-400" />;
+        return <User className="w-3 h-3 theme-text-tertiary" />;
     }
   };
 
   return (
     <>
-      <div className={`h-full bg-[#0b0e11] text-gray-300 transition-all duration-300 ease-in-out border-r border-[#2b2f36] flex flex-col ${
+      <div className={`h-full theme-bg-primary theme-text-secondary transition-all duration-300 ease-in-out border-r theme-border-primary flex flex-col ${
         isCollapsed ? 'w-20' : 'w-72'
       }`}>
         {/* Header */}
-        <div className="p-4 border-b border-[#2b2f36]">
+        <div className="p-4 border-b theme-border-primary">
           <div className="flex items-center justify-between">
             {!isCollapsed && (
               <div className="flex items-center space-x-3">
@@ -435,8 +430,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-white">Umunsi</h1>
-                  <p className="text-xs text-gray-500">Admin Panel</p>
+                  <h1 className="text-lg font-bold theme-text-primary">Umunsi</h1>
+                  <p className="text-xs theme-text-muted">Admin Panel</p>
                 </div>
               </div>
             )}
@@ -451,7 +446,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
             
             <button
               onClick={() => onToggleCollapse(!isCollapsed)}
-              className={`p-2 rounded-lg hover:bg-[#1e2329] transition-colors text-gray-400 hover:text-white ${isCollapsed ? 'mx-auto mt-3' : ''}`}
+              className={`p-2 rounded-lg hover:theme-bg-tertiary transition-colors theme-text-tertiary hover:theme-text-primary ${isCollapsed ? 'mx-auto mt-3' : ''}`}
             >
               {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
             </button>
@@ -462,18 +457,18 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
         {!isCollapsed && (
           <div className="px-4 py-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-muted" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl text-sm theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50 transition-all"
               />
             </div>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2b2f36] scrollbar-track-transparent">
+        <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
           {categories.map((category, catIndex) => {
             const categoryItems = getCategoryItems(category.key);
             if (categoryItems.length === 0) return null;
@@ -481,7 +476,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
             return (
               <div key={category.key} className={catIndex > 0 ? 'mt-6' : ''}>
                 {!isCollapsed && (
-                  <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2">
+                  <h3 className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider px-3 mb-2">
                     {category.label}
                   </h3>
                 )}
@@ -498,13 +493,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                       <div key={item.path}>
                         {/* Main Item */}
                         <div
-                        className={`
+                          className={`
                             group flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 relative cursor-pointer
                             ${isItemActive && !hasSubItems
-                              ? 'bg-[#1e2329] text-[#fcd535]' 
-                              : 'text-gray-400 hover:bg-[#1e2329] hover:text-white'
-                          }
-                        `}
+                              ? 'theme-bg-tertiary text-[#fcd535]' 
+                              : 'theme-text-tertiary hover:theme-bg-tertiary hover:theme-text-primary'
+                            }
+                          `}
                           onClick={() => {
                             if (hasSubItems) {
                               toggleExpanded(item.name);
@@ -512,50 +507,50 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                               navigate(item.path);
                             }
                           }}
-                      >
-                        {/* Active indicator */}
+                        >
+                          {/* Active indicator */}
                           {isItemActive && !hasSubItems && (
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#fcd535] rounded-r-full" />
-                        )}
-                        
+                          )}
+                          
                           {/* Icon */}
                           <div className={`p-2 rounded-lg transition-all duration-200 ${
                             isItemActive && !hasSubItems
                               ? 'bg-[#fcd535]/10 text-[#fcd535]' 
-                              : 'bg-[#2b2f36]/50 text-gray-400 group-hover:bg-[#2b2f36] group-hover:text-white'
-                        }`}>
+                              : 'theme-bg-secondary theme-text-tertiary group-hover:theme-bg-tertiary group-hover:theme-text-primary'
+                          }`}>
                             <Icon className="w-4 h-4" />
-                        </div>
-                        
-                        {!isCollapsed && (
-                          <div className="ml-3 flex-1 flex items-center justify-between">
+                          </div>
+                          
+                          {!isCollapsed && (
+                            <div className="ml-3 flex-1 flex items-center justify-between">
                               <span className="text-sm font-medium">{item.name}</span>
-                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2">
                                 {item.badge && !hasSubItems && (
-                                <button
-                                  onClick={(e) => handleBadgeClick(item, e)}
+                                  <button
+                                    onClick={(e) => handleBadgeClick(item, e)}
                                     className={`px-2 py-0.5 text-xs font-semibold rounded-md transition-all ${
-                                    isItemActive 
+                                      isItemActive 
                                         ? 'bg-[#fcd535]/20 text-[#fcd535]' 
-                                        : 'bg-[#2b2f36] text-gray-400 hover:bg-[#363a45]'
-                                  }`}
-                                >
-                                  {item.badge}
-                                </button>
-                              )}
+                                        : 'theme-bg-secondary theme-text-tertiary hover:theme-bg-tertiary'
+                                    }`}
+                                  >
+                                    {item.badge}
+                                  </button>
+                                )}
                                 {hasSubItems && (
                                   <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
-                                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                                    <ChevronDown className="w-4 h-4 theme-text-muted" />
                                   </div>
                                 )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                         </div>
 
                         {/* Sub Items */}
                         {hasSubItems && isExpanded && !isCollapsed && (
-                          <div className="ml-4 mt-1 space-y-1 pl-4 border-l border-[#2b2f36]">
+                          <div className="ml-4 mt-1 space-y-1 pl-4 border-l theme-border-primary">
                             {item.subItems!.filter(sub => !sub.adminOnly || isAdmin).map((subItem) => {
                               const SubIcon = subItem.icon;
                               const isSubItemActive = location.pathname === subItem.path;
@@ -567,8 +562,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                                   className={`
                                     group flex items-center px-3 py-2 rounded-lg transition-all duration-200 relative
                                     ${isSubItemActive 
-                                      ? 'bg-[#1e2329] text-[#fcd535]' 
-                                      : 'text-gray-500 hover:bg-[#1e2329] hover:text-white'
+                                      ? 'theme-bg-tertiary text-[#fcd535]' 
+                                      : 'theme-text-muted hover:theme-bg-tertiary hover:theme-text-primary'
                                     }
                                   `}
                                 >
@@ -577,21 +572,21 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                                   )}
                                   
                                   <SubIcon className={`w-3.5 h-3.5 transition-all ${
-                                    isSubItemActive ? 'text-[#fcd535]' : 'text-gray-500 group-hover:text-white'
-                                    }`} />
+                                    isSubItemActive ? 'text-[#fcd535]' : 'theme-text-muted group-hover:theme-text-primary'
+                                  }`} />
                                   
                                   <span className="ml-3 text-xs font-medium">{subItem.name}</span>
                                   
-                                    {subItem.badge && (
+                                  {subItem.badge && (
                                     <span className={`ml-auto px-1.5 py-0.5 text-[10px] font-semibold rounded ${
-                                        isSubItemActive 
+                                      isSubItemActive 
                                         ? 'bg-[#fcd535]/20 text-[#fcd535]' 
-                                        : 'bg-[#2b2f36] text-gray-500'
-                                      }`}>
-                                        {subItem.badge}
-                                      </span>
-                                    )}
-                      </Link>
+                                        : 'theme-bg-secondary theme-text-muted'
+                                    }`}>
+                                      {subItem.badge}
+                                    </span>
+                                  )}
+                                </Link>
                               );
                             })}
                           </div>
@@ -606,9 +601,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
         </nav>
 
         {/* User Section */}
-        <div className="p-4 border-t border-[#2b2f36] bg-[#0b0e11]">
+        <div className="p-4 border-t theme-border-primary theme-bg-primary">
           {!isCollapsed && user && (
-            <div className="mb-4 p-3 bg-[#1e2329] rounded-xl border border-[#2b2f36]">
+            <div className="mb-4 p-3 theme-bg-tertiary rounded-xl border theme-border-primary">
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#fcd535] to-[#f0b90b] rounded-xl flex items-center justify-center">
@@ -616,15 +611,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                       {user?.firstName?.[0] || 'U'}
                     </span>
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#1e2329]"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--bg-tertiary)]"></div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
+                  <p className="text-sm font-medium theme-text-primary truncate">
                     {user?.firstName} {user?.lastName}
                   </p>
                   <div className="flex items-center space-x-1">
                     {getRoleIcon(user?.role || '')}
-                    <p className="text-xs text-gray-500">{user?.role}</p>
+                    <p className="text-xs theme-text-muted">{user?.role}</p>
                   </div>
                 </div>
               </div>
@@ -633,11 +628,22 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
 
           {/* Quick Actions */}
           <div className="space-y-1">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`w-full flex items-center px-3 py-2.5 theme-text-tertiary hover:theme-bg-tertiary hover:theme-text-primary rounded-xl transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+            >
+              <div className="p-2 theme-bg-secondary rounded-lg">
+                {isDark ? <Sun className="w-4 h-4 text-[#fcd535]" /> : <Moon className="w-4 h-4" />}
+              </div>
+              {!isCollapsed && <span className="ml-3 text-sm font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>}
+            </button>
+
             <Link
               to="/"
-              className={`flex items-center px-3 py-2.5 text-gray-400 hover:bg-[#1e2329] hover:text-white rounded-xl transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+              className={`flex items-center px-3 py-2.5 theme-text-tertiary hover:theme-bg-tertiary hover:theme-text-primary rounded-xl transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
             >
-              <div className="p-2 bg-[#2b2f36]/50 rounded-lg">
+              <div className="p-2 theme-bg-secondary rounded-lg">
                 <Home className="w-4 h-4" />
               </div>
               {!isCollapsed && <span className="ml-3 text-sm font-medium">View Site</span>}
@@ -645,9 +651,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
             
             <button
               onClick={handleLogout}
-              className={`w-full flex items-center px-3 py-2.5 text-gray-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+              className={`w-full flex items-center px-3 py-2.5 theme-text-tertiary hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
             >
-              <div className="p-2 bg-[#2b2f36]/50 rounded-lg group-hover:bg-red-500/10">
+              <div className="p-2 theme-bg-secondary rounded-lg group-hover:bg-red-500/10">
                 <LogOut className="w-4 h-4" />
               </div>
               {!isCollapsed && <span className="ml-3 text-sm font-medium">Logout</span>}
@@ -659,18 +665,18 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
       {/* Category Breakdown Modal */}
       {showBreakdown && breakdownData && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl shadow-2xl w-full max-w-md border border-[#2b2f36] overflow-hidden">
+          <div className="theme-bg-secondary rounded-2xl shadow-2xl w-full max-w-md border theme-border-primary overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-[#2b2f36]">
+            <div className="flex items-center justify-between p-6 border-b theme-border-primary">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-[#fcd535]/10 rounded-xl">
                   <BarChart3 className="w-5 h-5 text-[#fcd535]" />
                 </div>
-                <h2 className="text-lg font-bold text-white">{breakdownData.title}</h2>
+                <h2 className="text-lg font-bold theme-text-primary">{breakdownData.title}</h2>
               </div>
               <button
                 onClick={() => setShowBreakdown(false)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-[#2b2f36] rounded-lg transition-all"
+                className="p-2 theme-text-tertiary hover:theme-text-primary hover:theme-bg-tertiary rounded-lg transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -682,24 +688,24 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
                     <div className="w-10 h-10 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-400 text-sm">Loading data...</p>
+                    <p className="theme-text-tertiary text-sm">Loading data...</p>
                   </div>
                 </div>
               ) : breakdownData && breakdownData.data.length > 0 ? (
                 <div className="space-y-3">
                   {breakdownData.data.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-[#1e2329] rounded-xl border border-[#2b2f36]">
+                    <div key={index} className="flex items-center justify-between p-4 theme-bg-tertiary rounded-xl border theme-border-primary">
                       <div className="flex items-center space-x-3">
                         <div className={`w-2 h-8 rounded-full ${getColorClass(item.color)}`}></div>
-                        <span className="text-sm font-medium text-gray-300">{item.label}</span>
+                        <span className="text-sm font-medium theme-text-secondary">{item.label}</span>
                       </div>
-                      <span className="text-xl font-bold text-white">{item.count}</span>
+                      <span className="text-xl font-bold theme-text-primary">{item.count}</span>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No data available</p>
+                  <p className="theme-text-muted">No data available</p>
                 </div>
               )}
               
