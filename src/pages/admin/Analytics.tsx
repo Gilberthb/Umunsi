@@ -158,8 +158,8 @@ const Analytics = () => {
 
       const analyticsResult: AnalyticsData = {
         totalViews,
-        totalUsers: dashboardStats?.totalUsers || usersResponse?.pagination?.total || usersResponse?.data?.length || 0,
-        totalPosts: dashboardStats?.totalArticles || dashboardStats?.totalPosts || allPostsResponse?.pagination?.total || allPosts.length,
+        totalUsers: dashboardStats?.totalUsers || (usersResponse as any)?.pagination?.total || usersResponse?.data?.length || 0,
+        totalPosts: dashboardStats?.totalArticles || dashboardStats?.totalPosts || (allPostsResponse as any)?.pagination?.total || allPosts.length,
         totalCategories: dashboardStats?.totalCategories || categoriesResponse?.length || 0,
         totalComments,
         totalLikes,
