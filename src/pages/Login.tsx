@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Lock, Mail, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Sparkles, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   
   const { login } = useAuth();
+  const { toggleTheme, isDark } = useTheme();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -32,13 +34,11 @@ const Login = () => {
       const success = await login(formData.email, formData.password);
       
       if (success) {
-        // Get user data from localStorage to check role
         const storedUser = localStorage.getItem('umunsi_user');
         
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           
-          // Redirect based on role - use window.location for full page reload
           if (userData.role === 'ADMIN' || userData.role === 'EDITOR' || userData.role === 'AUTHOR') {
             window.location.href = '/admin';
           } else {
@@ -58,7 +58,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen theme-bg-primary flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#fcd535]/10 rounded-full blur-3xl animate-pulse"></div>
@@ -72,6 +72,19 @@ const Login = () => {
         backgroundSize: '50px 50px'
       }}></div>
 
+      {/* Theme Toggle - Fixed position */}
+      <button
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 z-50 p-3 theme-bg-secondary rounded-full border theme-border-primary shadow-lg hover:scale-110 transition-transform"
+        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      >
+        {isDark ? (
+          <Sun size={20} className="text-[#fcd535]" />
+        ) : (
+          <Moon size={20} className="text-slate-600" />
+        )}
+      </button>
+
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center">
@@ -83,23 +96,23 @@ const Login = () => {
           </Link>
           <div className="flex items-center justify-center gap-2 mb-2">
             <Sparkles className="w-5 h-5 text-[#fcd535]" />
-            <h2 className="text-3xl font-bold text-white">Kwinjira</h2>
+            <h2 className="text-3xl font-bold theme-text-primary">Kwinjira</h2>
             <Sparkles className="w-5 h-5 text-[#fcd535]" />
           </div>
-          <p className="text-gray-400">Injira kuri konti yawe yo gufata amakuru</p>
+          <p className="theme-text-tertiary">Injira kuri konti yawe yo gufata amakuru</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-[#181a20] rounded-2xl shadow-2xl p-8 border border-[#2b2f36] backdrop-blur-xl">
+        <div className="theme-bg-secondary rounded-2xl shadow-2xl p-8 border theme-border-primary backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium theme-text-secondary mb-2">
                 Imeyili
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-500 group-focus-within:text-[#fcd535] transition-colors" />
+                  <Mail className="h-5 w-5 theme-text-muted group-focus-within:text-[#fcd535] transition-colors" />
                 </div>
                 <input
                   id="email"
@@ -109,7 +122,7 @@ const Login = () => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="block w-full pl-12 pr-4 py-3.5 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]/50 transition-all duration-300"
+                  className="block w-full pl-12 pr-4 py-3.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]/50 transition-all duration-300"
                   placeholder="Injiza imeyili yawe"
                 />
               </div>
@@ -117,12 +130,12 @@ const Login = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium theme-text-secondary mb-2">
                 Ijambo ry'ibanga
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-500 group-focus-within:text-[#fcd535] transition-colors" />
+                  <Lock className="h-5 w-5 theme-text-muted group-focus-within:text-[#fcd535] transition-colors" />
                 </div>
                 <input
                   id="password"
@@ -132,13 +145,13 @@ const Login = () => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="block w-full pl-12 pr-14 py-3.5 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]/50 transition-all duration-300"
+                  className="block w-full pl-12 pr-14 py-3.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]/50 transition-all duration-300"
                   placeholder="Injiza ijambo ry'ibanga"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#fcd535] transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center theme-text-muted hover:text-[#fcd535] transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -158,9 +171,9 @@ const Login = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="h-4 w-4 bg-[#1e2329] border-[#2b2f36] rounded text-[#fcd535] focus:ring-[#fcd535]/50 focus:ring-offset-[#181a20]"
+                  className="h-4 w-4 theme-bg-tertiary theme-border-primary rounded text-[#fcd535] focus:ring-[#fcd535]/50"
                 />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-400">
+                <label htmlFor="rememberMe" className="ml-2 block text-sm theme-text-tertiary">
                   Nyibutsa
                 </label>
               </div>
@@ -213,17 +226,17 @@ const Login = () => {
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#2b2f36]" />
+                <div className="w-full border-t theme-border-primary" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#181a20] text-gray-500">Cyangwa</span>
+                <span className="px-4 theme-bg-secondary theme-text-muted">Cyangwa</span>
               </div>
             </div>
           </div>
 
           {/* Social Login Buttons */}
           <div className="mt-6 space-y-3">
-            <button className="w-full flex items-center justify-center px-4 py-3.5 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-gray-300 hover:bg-[#2b2f36] hover:border-[#3d4148] transition-all duration-300 group">
+            <button className="w-full flex items-center justify-center px-4 py-3.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary hover:theme-bg-card-hover hover:border-[#fcd535]/30 transition-all duration-300 group">
               <svg className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -233,7 +246,7 @@ const Login = () => {
               Kwinjira na Google
             </button>
             
-            <button className="w-full flex items-center justify-center px-4 py-3.5 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-gray-300 hover:bg-[#2b2f36] hover:border-[#3d4148] transition-all duration-300 group">
+            <button className="w-full flex items-center justify-center px-4 py-3.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary hover:theme-bg-card-hover hover:border-[#fcd535]/30 transition-all duration-300 group">
               <svg className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" fill="#1877F2" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
               </svg>
@@ -243,7 +256,7 @@ const Login = () => {
 
           {/* Sign Up Link */}
           <div className="mt-8 text-center">
-            <p className="text-gray-400">
+            <p className="theme-text-tertiary">
               Niba utarafungura konti?{' '}
               <Link
                 to="/register"
@@ -257,7 +270,7 @@ const Login = () => {
 
         {/* Footer */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs theme-text-muted">
             Uko gukoresha urubuga rwacu bisobanuye ko wemera{' '}
             <Link to="/terms" className="text-[#fcd535] hover:text-[#f0b90b] transition-colors">
               amabwiriza

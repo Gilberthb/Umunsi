@@ -60,20 +60,16 @@ const PostPage = () => {
       setLoading(true);
       setError(null);
       
-      // Fetch post directly by ID or slug (backend supports both)
       const foundPost = await apiClient.getPost(postIdentifier!);
       
       if (foundPost) {
         setPost(foundPost);
         setLikeCount(foundPost.likeCount || 0);
         
-        // Fetch related posts and latest posts in parallel
         const postsResponse = await apiClient.getPosts({ limit: 20, status: 'PUBLISHED' });
         if (postsResponse?.data) {
-          // Get latest posts for sidebar
           setLatestPosts(postsResponse.data.filter(p => p.id !== foundPost.id).slice(0, 5));
           
-          // Get related posts from same category
           if (foundPost.category) {
             const related = postsResponse.data.filter(
               p => p.category?.id === foundPost.category?.id && p.id !== foundPost.id
@@ -168,10 +164,10 @@ const PostPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-[#fcd535] animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading article...</p>
+          <p className="theme-text-tertiary">Loading article...</p>
         </div>
       </div>
     );
@@ -179,11 +175,11 @@ const PostPage = () => {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Article Not Found</h2>
-          <p className="text-gray-400 mb-6">{error}</p>
+          <h2 className="text-xl font-bold theme-text-primary mb-2">Article Not Found</h2>
+          <p className="theme-text-tertiary mb-6">{error}</p>
           <Link to="/" className="text-[#fcd535] hover:underline">← Back to Home</Link>
         </div>
       </div>
@@ -191,11 +187,11 @@ const PostPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0e11]">
+    <div className="min-h-screen theme-bg-primary">
       {/* Breadcrumb */}
-      <div className="bg-[#181a20] border-b border-[#2b2f36]">
+      <div className="theme-bg-secondary border-b theme-border-primary">
         <div className="max-w-7xl mx-auto px-3 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm theme-text-tertiary">
             <Link to="/" className="hover:text-[#fcd535]">Ahabanza</Link>
             <ChevronRight className="w-4 h-4" />
             {post.category && (
@@ -206,7 +202,7 @@ const PostPage = () => {
                 <ChevronRight className="w-4 h-4" />
               </>
             )}
-            <span className="text-gray-500 truncate max-w-[300px]">{post.title}</span>
+            <span className="theme-text-muted truncate max-w-[300px]">{post.title}</span>
           </div>
         </div>
       </div>
@@ -216,7 +212,7 @@ const PostPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-8">
             {/* Article Header */}
-            <article className="bg-[#181a20] rounded-lg overflow-hidden">
+            <article className="theme-bg-secondary rounded-lg overflow-hidden">
               {/* Category & Date Header */}
               <div className="p-4 pb-0">
                 <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
@@ -228,7 +224,7 @@ const PostPage = () => {
                       {post.category.name}
                     </Link>
                   )}
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-4 text-xs theme-text-muted">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {formatDate(post.publishedAt || post.createdAt)}
@@ -241,24 +237,24 @@ const PostPage = () => {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">
+                <h1 className="text-2xl md:text-3xl font-bold theme-text-primary leading-tight mb-4">
                   {post.title}
                 </h1>
 
                 {/* Author & Stats Row */}
-                <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-[#2b2f36]">
+                <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b theme-border-primary">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#fcd535] flex items-center justify-center">
                       <User className="w-5 h-5 text-[#0b0e11]" />
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">
+                      <p className="theme-text-primary text-sm font-medium">
                         {post.author?.firstName} {post.author?.lastName}
                       </p>
-                      <p className="text-gray-500 text-xs">Author</p>
+                      <p className="theme-text-muted text-xs">Author</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-4 text-sm theme-text-muted">
                     <span className="flex items-center gap-1">
                       <Eye className="w-4 h-4" />
                       {post.viewCount}
@@ -287,8 +283,8 @@ const PostPage = () => {
               )}
 
               {/* Social Share Bar */}
-              <div className="px-4 py-3 border-b border-[#2b2f36] flex items-center justify-between">
-                <span className="text-sm text-gray-400">Sangiza:</span>
+              <div className="px-4 py-3 border-b theme-border-primary flex items-center justify-between">
+                <span className="text-sm theme-text-tertiary">Sangiza:</span>
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => handleShare('facebook')}
@@ -318,9 +314,9 @@ const PostPage = () => {
                   </button>
                   <button 
                     onClick={() => handleShare('copy')}
-                    className="w-8 h-8 rounded-full bg-[#2b2f36] flex items-center justify-center hover:bg-[#363a45] transition-colors"
+                    className="w-8 h-8 rounded-full theme-bg-tertiary flex items-center justify-center hover:theme-bg-card-hover transition-colors"
                   >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Link2 className="w-4 h-4 text-gray-400" />}
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Link2 className="w-4 h-4 theme-text-tertiary" />}
                   </button>
                 </div>
               </div>
@@ -328,13 +324,13 @@ const PostPage = () => {
               {/* Article Content */}
               <div className="p-4">
                 {post.excerpt && (
-                  <p className="text-gray-300 text-lg leading-relaxed mb-6 font-medium border-l-4 border-[#fcd535] pl-4">
+                  <p className="theme-text-secondary text-lg leading-relaxed mb-6 font-medium border-l-4 border-[#fcd535] pl-4">
                     {post.excerpt}
                   </p>
                 )}
 
                 <div 
-                  className="prose prose-invert prose-lg max-w-none text-gray-300"
+                  className="prose prose-lg max-w-none theme-text-secondary"
                   style={{ wordBreak: 'break-word' }}
                   dangerouslySetInnerHTML={{ 
                     __html: post.content?.replace(
@@ -351,11 +347,11 @@ const PostPage = () => {
 
                 {/* Tags */}
                 {post.tags && post.tags.length > 0 && (
-                  <div className="mt-8 pt-4 border-t border-[#2b2f36]">
+                  <div className="mt-8 pt-4 border-t theme-border-primary">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-gray-500 text-sm">Tags:</span>
+                      <span className="theme-text-muted text-sm">Tags:</span>
                       {post.tags.map((tag, i) => (
-                        <span key={i} className="px-3 py-1 bg-[#2b2f36] text-gray-300 text-sm rounded-full">
+                        <span key={i} className="px-3 py-1 theme-bg-tertiary theme-text-secondary text-sm rounded-full">
                           {tag}
                         </span>
                       ))}
@@ -365,19 +361,19 @@ const PostPage = () => {
               </div>
 
               {/* Like & Share Actions */}
-              <div className="p-4 bg-[#0b0e11] flex items-center justify-between">
+              <div className="p-4 theme-bg-primary flex items-center justify-between">
                 <button 
                   onClick={handleLike}
                   className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium transition-all ${
                     liked 
                       ? 'bg-red-500 text-white' 
-                      : 'bg-[#2b2f36] text-gray-300 hover:bg-[#363a45]'
+                      : 'theme-bg-tertiary theme-text-secondary hover:theme-bg-card-hover'
                   }`}
                 >
                   <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
                   {liked ? 'Liked' : 'Like'} ({likeCount})
                 </button>
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                <div className="flex items-center gap-2 theme-text-muted text-sm">
                   <Eye className="w-4 h-4" />
                   {post.viewCount} views
                 </div>
@@ -386,8 +382,8 @@ const PostPage = () => {
 
             {/* Related Posts */}
             {relatedPosts.length > 0 && (
-              <div className="mt-6 bg-[#181a20] rounded-lg p-4">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <div className="mt-6 theme-bg-secondary rounded-lg p-4">
+                <h3 className="text-lg font-bold theme-text-primary mb-4 flex items-center gap-2">
                   <span className="w-1 h-6 bg-[#fcd535] rounded"></span>
                   Andi makuru ajyanye
                 </h3>
@@ -404,10 +400,10 @@ const PostPage = () => {
                         className="w-24 h-20 object-cover rounded flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-white text-sm font-medium group-hover:text-[#fcd535] transition-colors line-clamp-2">
+                        <h4 className="theme-text-primary text-sm font-medium group-hover:text-[#fcd535] transition-colors line-clamp-2">
                           {rPost.title}
                         </h4>
-                        <p className="text-gray-500 text-xs mt-1">
+                        <p className="theme-text-muted text-xs mt-1">
                           {formatDate(rPost.publishedAt || rPost.createdAt)}
                         </p>
                       </div>
@@ -418,8 +414,8 @@ const PostPage = () => {
             )}
 
             {/* Comments Section */}
-            <div className="mt-6 bg-[#181a20] rounded-lg p-4">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <div className="mt-6 theme-bg-secondary rounded-lg p-4">
+              <h3 className="text-lg font-bold theme-text-primary mb-4 flex items-center gap-2">
                 <span className="w-1 h-6 bg-[#fcd535] rounded"></span>
                 Ibitekerezo ({comments.length})
               </h3>
@@ -431,7 +427,7 @@ const PostPage = () => {
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder={isAuthenticated ? "Andika igitekerezo cyawe..." : "Injira kugira ngo utange igitekerezo"}
                   disabled={!isAuthenticated}
-                  className="w-full px-4 py-3 bg-[#0b0e11] border border-[#2b2f36] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535] resize-none disabled:opacity-50"
+                  className="w-full px-4 py-3 theme-bg-primary border theme-border-primary rounded-lg theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535] resize-none disabled:opacity-50"
                   rows={3}
                 />
                 <div className="flex justify-end mt-2">
@@ -450,22 +446,22 @@ const PostPage = () => {
               {comments.length > 0 ? (
                 <div className="space-y-4">
                   {comments.map((comment) => (
-                    <div key={comment.id} className="p-4 bg-[#0b0e11] rounded-lg">
+                    <div key={comment.id} className="p-4 theme-bg-primary rounded-lg">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-[#2b2f36] flex items-center justify-center">
-                          <User className="w-4 h-4 text-gray-400" />
+                        <div className="w-8 h-8 rounded-full theme-bg-tertiary flex items-center justify-center">
+                          <User className="w-4 h-4 theme-text-tertiary" />
                         </div>
                         <div>
-                          <span className="text-white text-sm font-medium">{comment.author?.name}</span>
-                          <span className="text-gray-500 text-xs ml-2">{formatDate(comment.createdAt)}</span>
+                          <span className="theme-text-primary text-sm font-medium">{comment.author?.name}</span>
+                          <span className="theme-text-muted text-xs ml-2">{formatDate(comment.createdAt)}</span>
                         </div>
                       </div>
-                      <p className="text-gray-300 text-sm pl-11">{comment.content}</p>
+                      <p className="theme-text-secondary text-sm pl-11">{comment.content}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-center py-6">Nta bitekerezo bihari. Ba uwa mbere!</p>
+                <p className="theme-text-muted text-center py-6">Nta bitekerezo bihari. Ba uwa mbere!</p>
               )}
             </div>
           </div>
@@ -473,8 +469,8 @@ const PostPage = () => {
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6">
             {/* Latest News */}
-            <div className="bg-[#181a20] rounded-lg p-4">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <div className="theme-bg-secondary rounded-lg p-4">
+              <h3 className="text-lg font-bold theme-text-primary mb-4 flex items-center gap-2">
                 <span className="w-1 h-6 bg-[#fcd535] rounded"></span>
                 Amakuru Mashya
               </h3>
@@ -489,10 +485,10 @@ const PostPage = () => {
                       {index + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-gray-300 text-sm group-hover:text-[#fcd535] transition-colors line-clamp-2">
+                      <h4 className="theme-text-secondary text-sm group-hover:text-[#fcd535] transition-colors line-clamp-2">
                         {lPost.title}
                       </h4>
-                      <p className="text-gray-500 text-xs mt-1">
+                      <p className="theme-text-muted text-xs mt-1">
                         {formatDate(lPost.publishedAt || lPost.createdAt)}
                       </p>
                     </div>
@@ -502,10 +498,10 @@ const PostPage = () => {
             </div>
 
             {/* Ad Space */}
-            <div className="bg-[#181a20] rounded-lg p-4 text-center">
-              <p className="text-gray-500 text-xs mb-2">ADVERTISEMENT</p>
-              <div className="bg-[#0b0e11] rounded-lg h-60 flex items-center justify-center border border-dashed border-[#2b2f36]">
-                <span className="text-gray-600">Ad Space</span>
+            <div className="theme-bg-secondary rounded-lg p-4 text-center">
+              <p className="theme-text-muted text-xs mb-2">ADVERTISEMENT</p>
+              <div className="theme-bg-primary rounded-lg h-60 flex items-center justify-center border border-dashed theme-border-primary">
+                <span className="theme-text-muted">Ad Space</span>
               </div>
             </div>
 
@@ -514,7 +510,7 @@ const PostPage = () => {
               {post.category && (
                 <Link 
                   to={`/category/${post.category.slug}`}
-                  className="flex items-center justify-between w-full p-3 bg-[#181a20] rounded-lg text-gray-300 hover:text-[#fcd535] transition-colors"
+                  className="flex items-center justify-between w-full p-3 theme-bg-secondary rounded-lg theme-text-secondary hover:text-[#fcd535] transition-colors"
                 >
                   <span>Reba byose muri {post.category.name}</span>
                   <ChevronRight className="w-4 h-4" />
@@ -522,7 +518,7 @@ const PostPage = () => {
               )}
               <Link 
                 to="/"
-                className="flex items-center gap-2 w-full p-3 bg-[#181a20] rounded-lg text-gray-300 hover:text-[#fcd535] transition-colors"
+                className="flex items-center gap-2 w-full p-3 theme-bg-secondary rounded-lg theme-text-secondary hover:text-[#fcd535] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Subira Ahabanza

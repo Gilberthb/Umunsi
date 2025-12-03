@@ -180,29 +180,29 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="min-h-screen theme-bg-primary flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-[#fcd535] animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading profile...</p>
+          <p className="theme-text-tertiary">Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0e11] py-8">
+    <div className="min-h-screen theme-bg-primary py-8">
       <div className="max-w-3xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-400 hover:text-[#fcd535] transition-colors mb-4"
+            className="flex items-center theme-text-tertiary hover:text-[#fcd535] transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </button>
-          <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
-          <p className="text-gray-400 mt-1">Manage your account information</p>
+          <h1 className="text-2xl font-bold theme-text-primary">Profile Settings</h1>
+          <p className="theme-text-tertiary mt-1">Manage your account information</p>
         </div>
 
         {/* Message */}
@@ -223,8 +223,8 @@ const Profile = () => {
 
         <div className="space-y-6">
           {/* Profile Picture */}
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Profile Picture</h2>
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary p-6">
+            <h2 className="text-lg font-semibold theme-text-primary mb-4">Profile Picture</h2>
             
             <div className="flex items-center gap-6">
               <div className="relative">
@@ -261,8 +261,8 @@ const Profile = () => {
               </div>
               
               <div>
-                <p className="text-white font-medium">{profile?.firstName} {profile?.lastName}</p>
-                <p className="text-gray-500 text-sm">{profile?.email}</p>
+                <p className="theme-text-primary font-medium">{profile?.firstName} {profile?.lastName}</p>
+                <p className="theme-text-muted text-sm">{profile?.email}</p>
                 <button
                   onClick={handleAvatarClick}
                   disabled={uploadingAvatar}
@@ -275,62 +275,62 @@ const Profile = () => {
           </div>
 
           {/* Basic Info */}
-          <form onSubmit={handleSubmit} className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Basic Information</h2>
+          <form onSubmit={handleSubmit} className="theme-bg-secondary rounded-2xl border theme-border-primary p-6">
+            <h2 className="text-lg font-semibold theme-text-primary mb-4">Basic Information</h2>
             
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">First Name</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">First Name</label>
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-4 py-3 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Last Name</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">Last Name</label>
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-4 py-3 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 theme-text-muted" />
                   <input
                     type="email"
                     value={profile?.email || ''}
                     disabled
-                    className="w-full pl-12 pr-4 py-3 bg-[#1e2329] border border-[#2b2f36] rounded-xl text-gray-500 cursor-not-allowed"
+                    className="w-full pl-12 pr-4 py-3 theme-bg-primary border theme-border-primary rounded-xl theme-text-muted cursor-not-allowed"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Bio</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Bio</label>
                 <textarea
                   name="bio"
                   value={formData.bio}
                   onChange={handleInputChange}
                   rows={3}
                   placeholder="Tell us about yourself..."
-                  className="w-full px-4 py-3 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50 resize-none"
+                  className="w-full px-4 py-3 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50 resize-none"
                 />
               </div>
               
               <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-4 text-sm theme-text-muted">
                   <span className="flex items-center gap-1">
                     <Shield className="w-4 h-4" />
                     {profile?.role}
@@ -358,28 +358,28 @@ const Profile = () => {
           </form>
 
           {/* Change Password */}
-          <form onSubmit={handleChangePassword} className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <form onSubmit={handleChangePassword} className="theme-bg-secondary rounded-2xl border theme-border-primary p-6">
+            <h2 className="text-lg font-semibold theme-text-primary mb-4 flex items-center gap-2">
               <Lock className="w-5 h-5 text-[#fcd535]" />
               Change Password
             </h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Current Password</label>
+                <label className="block text-sm font-medium theme-text-tertiary mb-1">Current Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords ? 'text' : 'password'}
                     name="currentPassword"
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50 pr-12"
+                    className="w-full px-4 py-3 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50 pr-12"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasswords(!showPasswords)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 theme-text-muted hover:theme-text-primary"
                   >
                     {showPasswords ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -388,25 +388,25 @@ const Profile = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">New Password</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">New Password</label>
                   <input
                     type={showPasswords ? 'text' : 'password'}
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-4 py-3 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                     minLength={6}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Confirm Password</label>
+                  <label className="block text-sm font-medium theme-text-tertiary mb-1">Confirm Password</label>
                   <input
                     type={showPasswords ? 'text' : 'password'}
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                    className="w-full px-4 py-3 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                     required
                     minLength={6}
                   />
@@ -417,7 +417,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className="px-5 py-2.5 bg-[#2b2f36] text-white font-medium rounded-xl hover:bg-[#363a45] transition-all disabled:opacity-50 flex items-center gap-2"
+                  className="px-5 py-2.5 theme-bg-tertiary theme-text-primary font-medium rounded-xl hover:theme-bg-card-hover transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {changingPassword ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -436,4 +436,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
