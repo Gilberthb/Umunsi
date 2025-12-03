@@ -27,13 +27,20 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Update document class and localStorage
     const root = document.documentElement;
+    const body = document.body;
     
     if (theme === 'dark') {
       root.classList.add('dark');
       root.classList.remove('light');
+      body.classList.add('dark');
+      body.classList.remove('light');
+      root.setAttribute('data-theme', 'dark');
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
+      body.classList.add('light');
+      body.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
     }
     
     localStorage.setItem('umunsi-theme', theme);

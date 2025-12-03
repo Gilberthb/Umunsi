@@ -6,14 +6,16 @@
    UMUNSI THEME SYSTEM - Light & Dark Mode
    ======================================== */
 
-:root {
+:root,
+:root.light,
+.light {
   /* Light Mode Colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-input: #f8fafc;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #ffffff;
   --bg-dropdown: #ffffff;
   
   /* Text Colors - Light Mode */
@@ -72,6 +74,7 @@
 }
 
 /* Dark Mode Colors */
+:root.dark,
 .dark {
   --bg-primary: #0b0e11;
   --bg-secondary: #181a20;
@@ -122,6 +125,133 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+}
+
+/* ========================================
+   LIGHT MODE OVERRIDES FOR HARDCODED COLORS
+   ======================================== */
+
+/* Force light backgrounds in light mode for any remaining hardcoded dark colors */
+html.light .bg-\[\#0b0e11\],
+html.light .bg-\[\#181a20\],
+html.light .bg-\[\#1e2329\],
+html[data-theme="light"] .bg-\[\#0b0e11\],
+html[data-theme="light"] .bg-\[\#181a20\],
+html[data-theme="light"] .bg-\[\#1e2329\],
+body.light .bg-\[\#0b0e11\],
+body.light .bg-\[\#181a20\],
+body.light .bg-\[\#1e2329\],
+.light .bg-\[\#0b0e11\],
+.light .bg-\[\#181a20\],
+.light .bg-\[\#1e2329\] {
+  background-color: var(--bg-secondary) !important;
+}
+
+html.light .bg-\[\#2b2f36\],
+html[data-theme="light"] .bg-\[\#2b2f36\],
+body.light .bg-\[\#2b2f36\],
+.light .bg-\[\#2b2f36\] {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* Force light borders in light mode */
+html.light .border-\[\#2b2f36\],
+html.light .border-\[\#1e2329\],
+html.light .border-\[\#181a20\],
+html[data-theme="light"] .border-\[\#2b2f36\],
+html[data-theme="light"] .border-\[\#1e2329\],
+html[data-theme="light"] .border-\[\#181a20\],
+body.light .border-\[\#2b2f36\],
+body.light .border-\[\#1e2329\],
+body.light .border-\[\#181a20\],
+.light .border-\[\#2b2f36\],
+.light .border-\[\#1e2329\],
+.light .border-\[\#181a20\] {
+  border-color: var(--border-primary) !important;
+}
+
+/* Force light text colors in light mode - except for buttons/badges that need contrast */
+html.light .text-white:not(.bg-\[\#fcd535\]):not(.bg-gradient-to-r):not(.bg-emerald-500):not(.bg-blue-500):not(.bg-red-500):not(.bg-amber-500),
+html[data-theme="light"] .text-white:not(.bg-\[\#fcd535\]):not(.bg-gradient-to-r):not(.bg-emerald-500):not(.bg-blue-500):not(.bg-red-500):not(.bg-amber-500),
+body.light .text-white:not(.bg-\[\#fcd535\]):not(.bg-gradient-to-r):not(.bg-emerald-500):not(.bg-blue-500):not(.bg-red-500):not(.bg-amber-500),
+.light .text-white:not(.bg-\[\#fcd535\]):not(.bg-gradient-to-r):not(.bg-emerald-500):not(.bg-blue-500):not(.bg-red-500):not(.bg-amber-500) {
+  color: var(--text-primary) !important;
+}
+
+html.light .text-gray-300,
+html.light .text-gray-400,
+html.light .text-gray-500,
+html.light .text-gray-600,
+html[data-theme="light"] .text-gray-300,
+html[data-theme="light"] .text-gray-400,
+html[data-theme="light"] .text-gray-500,
+html[data-theme="light"] .text-gray-600,
+body.light .text-gray-300,
+body.light .text-gray-400,
+body.light .text-gray-500,
+body.light .text-gray-600,
+.light .text-gray-300,
+.light .text-gray-400,
+.light .text-gray-500,
+.light .text-gray-600 {
+  color: var(--text-tertiary) !important;
+}
+
+/* Force light divide colors in light mode */
+html.light .divide-\[\#2b2f36\] > :not([hidden]) ~ :not([hidden]),
+html[data-theme="light"] .divide-\[\#2b2f36\] > :not([hidden]) ~ :not([hidden]),
+body.light .divide-\[\#2b2f36\] > :not([hidden]) ~ :not([hidden]),
+.light .divide-\[\#2b2f36\] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border-primary) !important;
+}
+
+/* Force light hover backgrounds in light mode */
+html.light .hover\:bg-\[\#1e2329\]:hover,
+html.light .hover\:bg-\[\#2b2f36\]:hover,
+html.light .hover\:bg-\[\#363a45\]:hover,
+html[data-theme="light"] .hover\:bg-\[\#1e2329\]:hover,
+html[data-theme="light"] .hover\:bg-\[\#2b2f36\]:hover,
+html[data-theme="light"] .hover\:bg-\[\#363a45\]:hover,
+body.light .hover\:bg-\[\#1e2329\]:hover,
+body.light .hover\:bg-\[\#2b2f36\]:hover,
+body.light .hover\:bg-\[\#363a45\]:hover,
+.light .hover\:bg-\[\#1e2329\]:hover,
+.light .hover\:bg-\[\#2b2f36\]:hover,
+.light .hover\:bg-\[\#363a45\]:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+
+/* Force light hover text in light mode */
+html.light .hover\:text-white:hover,
+html[data-theme="light"] .hover\:text-white:hover,
+body.light .hover\:text-white:hover,
+.light .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Force input backgrounds in light mode */
+html.light input.bg-\[\#2b2f36\],
+html.light select.bg-\[\#2b2f36\],
+html.light textarea.bg-\[\#2b2f36\],
+html[data-theme="light"] input.bg-\[\#2b2f36\],
+html[data-theme="light"] select.bg-\[\#2b2f36\],
+html[data-theme="light"] textarea.bg-\[\#2b2f36\],
+body.light input.bg-\[\#2b2f36\],
+body.light select.bg-\[\#2b2f36\],
+body.light textarea.bg-\[\#2b2f36\],
+.light input.bg-\[\#2b2f36\],
+.light select.bg-\[\#2b2f36\],
+.light textarea.bg-\[\#2b2f36\] {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Force placeholder colors in light mode */
+html.light .placeholder-gray-500::placeholder,
+html[data-theme="light"] .placeholder-gray-500::placeholder,
+body.light .placeholder-gray-500::placeholder,
+.light .placeholder-gray-500::placeholder {
+  color: var(--text-muted) !important;
 }
 
 /* ========================================
