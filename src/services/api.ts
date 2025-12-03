@@ -918,6 +918,169 @@ class ApiClient {
     }>('/ads/stats');
     return response.data;
   }
+
+  // Security Methods
+  async getSecuritySettings(): Promise<SecuritySettings> {
+    const response = await this.request<{ success: boolean; data: SecuritySettings }>('/security/settings');
+    return response.data;
+  }
+
+  async updateSecuritySettings(settings: Partial<SecuritySettings>): Promise<SecuritySettings> {
+    const response = await this.request<{ success: boolean; data: SecuritySettings }>('/security/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+    return response.data;
+  }
+
+  async getSecurityStats(): Promise<SecurityStats> {
+    const response = await this.request<{ success: boolean; data: SecurityStats }>('/security/stats');
+    return response.data;
+  }
+
+  async getSessions(): Promise<LoginSession[]> {
+    const response = await this.request<{ success: boolean; data: LoginSession[] }>('/security/sessions');
+    return response.data || [];
+  }
+
+  async getUserSessions(): Promise<LoginSession[]> {
+    const response = await this.request<{ success: boolean; data: LoginSession[] }>('/security/sessions/me');
+    return response.data || [];
+  }
+
+  async terminateSession(id: string): Promise<void> {
+    await this.request(`/security/sessions/${id}`, { method: 'DELETE' });
+  }
+
+  async terminateAllSessions(): Promise<void> {
+    await this.request('/security/sessions', { method: 'DELETE' });
+  }
+
+  async getLoginHistory(params?: { page?: number; limit?: number; status?: string }): Promise<{ data: LoginAttempt[]; pagination: any }> {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.status) searchParams.append('status', params.status);
+    
+    const response = await this.request<{ success: boolean; data: LoginAttempt[]; pagination: any }>(
+      `/security/login-history?${searchParams.toString()}`
+    );
+    return { data: response.data || [], pagination: response.pagination };
+  }
+
+  async getApiKeys(): Promise<ApiKeyData[]> {
+    const response = await this.request<{ success: boolean; data: ApiKeyData[] }>('/security/api-keys');
+    return response.data || [];
+  }
+
+  async getAllApiKeys(): Promise<ApiKeyData[]> {
+    const response = await this.request<{ success: boolean; data: ApiKeyData[] }>('/security/api-keys/all');
+    return response.data || [];
+  }
+
+  async createApiKey(data: { name: string; permissions?: string[] }): Promise<ApiKeyData> {
+    const response = await this.request<{ success: boolean; data: ApiKeyData }>('/security/api-keys', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    await this.request(`/security/api-keys/${id}`, { method: 'DELETE' });
+  }
+}
+
+// Security Types
+export interface SecuritySettings {
+  id: string;
+  minPasswordLength: number;
+  requireUppercase: boolean;
+  requireLowercase: boolean;
+  requireNumbers: boolean;
+  requireSpecialChars: boolean;
+  passwordExpireDays: number;
+  preventPasswordReuse: number;
+  sessionTimeout: number;
+  maxConcurrentSessions: number;
+  rememberMeDays: number;
+  maxLoginAttempts: number;
+  lockoutDuration: number;
+  enableCaptcha: boolean;
+  captchaThreshold: number;
+  require2FA: boolean;
+  allow2FAMethods: string[];
+  enableIpWhitelist: boolean;
+  whitelistedIps: string[];
+  enableIpBlacklist: boolean;
+  blacklistedIps: string[];
+  notifyOnNewLogin: boolean;
+  notifyOnPasswordChange: boolean;
+  notifyOnSuspiciousActivity: boolean;
+}
+
+export interface SecurityStats {
+  score: number;
+  activeSessions: number;
+  totalUsers: number;
+  usersWithout2FA: number;
+  successfulLogins24h: number;
+  failedLogins24h: number;
+  blockedLogins24h: number;
+  activeApiKeys: number;
+  issues: string[];
+  warnings: string[];
+  verified: number;
+}
+
+export interface LoginSession {
+  id: string;
+  userId: string;
+  device: string;
+  browser: string;
+  ip: string;
+  location: string | null;
+  isActive: boolean;
+  isCurrent?: boolean;
+  lastActive: string;
+  createdAt: string;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface LoginAttempt {
+  id: string;
+  email: string;
+  ip: string;
+  location: string | null;
+  status: 'success' | 'failed' | 'blocked';
+  createdAt: string;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface ApiKeyData {
+  id: string;
+  name: string;
+  key: string;
+  permissions: string[];
+  lastUsed: string | null;
+  isActive: boolean;
+  createdAt: string;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 // Create and export API client instance

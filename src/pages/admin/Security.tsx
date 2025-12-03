@@ -1,179 +1,130 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield, Lock, Key, Eye, EyeOff, Smartphone, Globe, Clock,
   AlertTriangle, CheckCircle, XCircle, RefreshCw, Copy, Trash2,
   Plus, Settings, Activity, Users, LogIn, LogOut, Monitor,
-  Fingerprint, Mail, Bell, ChevronRight, Info, Download
+  Fingerprint, Mail, Bell, Download
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-
-interface LoginSession {
-  id: string;
-  device: string;
-  browser: string;
-  ip: string;
-  location: string;
-  lastActive: string;
-  isCurrent: boolean;
-}
-
-interface LoginAttempt {
-  id: string;
-  email: string;
-  ip: string;
-  status: 'success' | 'failed' | 'blocked';
-  timestamp: string;
-  location: string;
-}
-
-interface ApiKey {
-  id: string;
-  name: string;
-  key: string;
-  createdAt: string;
-  lastUsed: string | null;
-  permissions: string[];
-}
+import { 
+  apiClient, 
+  SecuritySettings, 
+  SecurityStats, 
+  LoginSession, 
+  LoginAttempt, 
+  ApiKeyData 
+} from '../../services/api';
 
 const Security: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'login-history' | 'api-keys' | '2fa'>('overview');
-  const [showPassword, setShowPassword] = useState(false);
   const [showApiKey, setShowApiKey] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // Security settings state
-  const [settings, setSettings] = useState({
-    // Password Policy
-    minPasswordLength: 8,
-    requireUppercase: true,
-    requireLowercase: true,
-    requireNumbers: true,
-    requireSpecialChars: true,
-    passwordExpireDays: 90,
-    preventPasswordReuse: 5,
-    
-    // Session Settings
-    sessionTimeout: 30,
-    maxConcurrentSessions: 3,
-    rememberMeDays: 30,
-    
-    // Login Security
-    maxLoginAttempts: 5,
-    lockoutDuration: 15,
-    enableCaptcha: true,
-    captchaThreshold: 3,
-    
-    // Two-Factor Authentication
-    require2FA: false,
-    allow2FAMethods: ['app', 'sms', 'email'],
-    
-    // IP Security
-    enableIpWhitelist: false,
-    whitelistedIps: [] as string[],
-    enableIpBlacklist: true,
-    blacklistedIps: ['192.168.1.100', '10.0.0.50'],
-    
-    // Notifications
-    notifyOnNewLogin: true,
-    notifyOnPasswordChange: true,
-    notifyOnSuspiciousActivity: true
-  });
-
-  // Mock data
-  const [sessions, setSessions] = useState<LoginSession[]>([
-    {
-      id: '1',
-      device: 'MacBook Pro',
-      browser: 'Chrome 120',
-      ip: '192.168.1.1',
-      location: 'Kigali, Rwanda',
-      lastActive: new Date().toISOString(),
-      isCurrent: true
-    },
-    {
-      id: '2',
-      device: 'iPhone 15',
-      browser: 'Safari Mobile',
-      ip: '192.168.1.45',
-      location: 'Kigali, Rwanda',
-      lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      isCurrent: false
-    },
-    {
-      id: '3',
-      device: 'Windows PC',
-      browser: 'Firefox 121',
-      ip: '10.0.0.25',
-      location: 'Musanze, Rwanda',
-      lastActive: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      isCurrent: false
-    }
-  ]);
-
-  const [loginHistory, setLoginHistory] = useState<LoginAttempt[]>([
-    { id: '1', email: 'admin@umunsi.com', ip: '192.168.1.1', status: 'success', timestamp: new Date().toISOString(), location: 'Kigali, Rwanda' },
-    { id: '2', email: 'admin@umunsi.com', ip: '192.168.1.1', status: 'success', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), location: 'Kigali, Rwanda' },
-    { id: '3', email: 'unknown@test.com', ip: '45.33.32.156', status: 'failed', timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), location: 'Unknown' },
-    { id: '4', email: 'admin@umunsi.com', ip: '192.168.1.45', status: 'success', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), location: 'Kigali, Rwanda' },
-    { id: '5', email: 'hacker@evil.com', ip: '185.220.101.1', status: 'blocked', timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(), location: 'Unknown (TOR)' },
-  ]);
-
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-    {
-      id: '1',
-      name: 'Mobile App API',
-      key: 'umunsi_api_key_1234567890abcdef',
-      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      lastUsed: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      permissions: ['read:posts', 'read:categories', 'read:users']
-    },
-    {
-      id: '2',
-      name: 'Analytics Integration',
-      key: 'umunsi_api_key_analytics_xyz123',
-      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-      lastUsed: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      permissions: ['read:analytics', 'write:analytics']
-    }
-  ]);
-
+  // Data from API
+  const [settings, setSettings] = useState<SecuritySettings | null>(null);
+  const [stats, setStats] = useState<SecurityStats | null>(null);
+  const [sessions, setSessions] = useState<LoginSession[]>([]);
+  const [loginHistory, setLoginHistory] = useState<LoginAttempt[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([]);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [showNewKeyModal, setShowNewKeyModal] = useState(false);
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [settingsData, statsData, sessionsData, historyData, keysData] = await Promise.all([
+        apiClient.getSecuritySettings().catch(() => null),
+        apiClient.getSecurityStats().catch(() => null),
+        apiClient.getSessions().catch(() => []),
+        apiClient.getLoginHistory({ limit: 50 }).catch(() => ({ data: [] })),
+        apiClient.getAllApiKeys().catch(() => [])
+      ]);
+      
+      if (settingsData) setSettings(settingsData);
+      if (statsData) setStats(statsData);
+      setSessions(sessionsData || []);
+      setLoginHistory(historyData.data || []);
+      setApiKeys(keysData || []);
+      
+      // Check if current user has 2FA enabled
+      setTwoFactorEnabled(user?.twoFactorEnabled || false);
+    } catch (err) {
+      console.error('Error fetching security data:', err);
+      setError('Failed to load security data');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setLoading(false), 500);
-  }, []);
+    fetchData();
+  }, [fetchData]);
 
-  const handleSaveSettings = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+    
+    try {
+      setSaving(true);
+      await apiClient.updateSecuritySettings(settings);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setError('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleTerminateSession = (sessionId: string) => {
-    setSessions(sessions.filter(s => s.id !== sessionId));
+  const handleTerminateSession = async (sessionId: string) => {
+    try {
+      await apiClient.terminateSession(sessionId);
+      setSessions(sessions.filter(s => s.id !== sessionId));
+    } catch (err) {
+      setError('Failed to terminate session');
+    }
   };
 
-  const handleTerminateAllSessions = () => {
-    setSessions(sessions.filter(s => s.isCurrent));
+  const handleTerminateAllSessions = async () => {
+    try {
+      await apiClient.terminateAllSessions();
+      setSessions(sessions.filter(s => s.isCurrent));
+    } catch (err) {
+      setError('Failed to terminate sessions');
+    }
   };
 
-  const handleDeleteApiKey = (keyId: string) => {
-    setApiKeys(apiKeys.filter(k => k.id !== keyId));
+  const handleCreateApiKey = async () => {
+    if (!newKeyName.trim()) return;
+    
+    try {
+      const newKey = await apiClient.createApiKey({ 
+        name: newKeyName,
+        permissions: ['read:posts', 'read:categories']
+      });
+      setNewlyCreatedKey(newKey.key);
+      setApiKeys([newKey, ...apiKeys]);
+      setNewKeyName('');
+    } catch (err) {
+      setError('Failed to create API key');
+    }
   };
 
-  const handleGenerateApiKey = () => {
-    const newKey: ApiKey = {
-      id: Date.now().toString(),
-      name: 'New API Key',
-      key: `umunsi_api_key_${Math.random().toString(36).substring(2, 15)}`,
-      createdAt: new Date().toISOString(),
-      lastUsed: null,
-      permissions: ['read:posts']
-    };
-    setApiKeys([...apiKeys, newKey]);
+  const handleDeleteApiKey = async (keyId: string) => {
+    try {
+      await apiClient.deleteApiKey(keyId);
+      setApiKeys(apiKeys.filter(k => k.id !== keyId));
+    } catch (err) {
+      setError('Failed to delete API key');
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -196,14 +147,10 @@ const Security: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'success':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-      case 'failed':
-        return 'bg-red-500/10 text-red-400 border-red-500/30';
-      case 'blocked':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-      default:
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
+      case 'success': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      case 'failed': return 'bg-red-500/10 text-red-400 border-red-500/30';
+      case 'blocked': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      default: return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
     }
   };
 
@@ -213,6 +160,12 @@ const Security: React.FC = () => {
       case 'failed': return <XCircle className="w-3.5 h-3.5" />;
       case 'blocked': return <AlertTriangle className="w-3.5 h-3.5" />;
       default: return null;
+    }
+  };
+
+  const updateSetting = (key: keyof SecuritySettings, value: any) => {
+    if (settings) {
+      setSettings({ ...settings, [key]: value });
     }
   };
 
@@ -241,6 +194,15 @@ const Security: React.FC = () => {
         </div>
       )}
 
+      {/* Error Toast */}
+      {error && (
+        <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2">
+          <AlertTriangle className="w-5 h-5" />
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="ml-2 hover:text-white/80">×</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -249,11 +211,11 @@ const Security: React.FC = () => {
               <Shield className="w-7 h-7 mr-2 text-red-500" />
               Umutekano
             </h1>
-            <p className="theme-text-tertiary mt-1">Gucunga umutekano w'urubuga</p>
+            <p className="theme-text-tertiary mt-1">Gucunga umutekano w'urubuga • Data from database</p>
           </div>
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => window.location.reload()}
+              onClick={fetchData}
               className="flex items-center px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary hover:border-red-500/50 transition-colors"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -261,9 +223,14 @@ const Security: React.FC = () => {
             </button>
             <button
               onClick={handleSaveSettings}
-              className="flex items-center px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:from-red-600 hover:to-red-700 transition-all"
+              disabled={saving}
+              className="flex items-center px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl hover:from-red-600 hover:to-red-700 transition-all disabled:opacity-50"
             >
-              <Settings className="w-4 h-4 mr-2" />
+              {saving ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+              ) : (
+                <Settings className="w-4 h-4 mr-2" />
+              )}
               Bika Igenamiterere
             </button>
           </div>
@@ -277,36 +244,30 @@ const Security: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <svg className="w-24 h-24 transform -rotate-90">
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r="40"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    fill="none"
-                    className="text-gray-700"
-                  />
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r="40"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    fill="none"
-                    strokeDasharray={`${75 * 2.51} ${100 * 2.51}`}
-                    className="text-emerald-500"
+                  <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="none" className="text-gray-700" />
+                  <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="none"
+                    strokeDasharray={`${(stats?.score || 0) * 2.51} ${100 * 2.51}`}
+                    className={stats?.score && stats.score >= 70 ? 'text-emerald-500' : stats?.score && stats.score >= 50 ? 'text-amber-500' : 'text-red-500'}
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-bold theme-text-primary">75%</span>
+                  <span className="text-2xl font-bold theme-text-primary">{stats?.score || 0}%</span>
                 </div>
               </div>
               <div>
                 <h3 className="text-lg font-semibold theme-text-primary">Umutekano Score</h3>
-                <p className="theme-text-muted text-sm">Umutekano wawe uri mu rwego rwiza</p>
+                <p className="theme-text-muted text-sm">
+                  {stats?.score && stats.score >= 70 ? 'Umutekano wawe uri mu rwego rwiza' : 
+                   stats?.score && stats.score >= 50 ? 'Umutekano wawe uri mu rwego rwo hagati' : 
+                   'Umutekano wawe ukeneye kunozwa'}
+                </p>
                 <div className="flex items-center space-x-2 mt-2">
-                  <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs rounded-full border border-emerald-500/30">
-                    Mwiza
+                  <span className={`px-2 py-0.5 text-xs rounded-full border ${
+                    stats?.score && stats.score >= 70 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                    stats?.score && stats.score >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                    'bg-red-500/10 text-red-400 border-red-500/30'
+                  }`}>
+                    {stats?.score && stats.score >= 70 ? 'Mwiza' : stats?.score && stats.score >= 50 ? 'Hagati' : 'Gukosora'}
                   </span>
                 </div>
               </div>
@@ -316,28 +277,28 @@ const Security: React.FC = () => {
                 <div className="flex items-center justify-center w-10 h-10 bg-emerald-500/10 rounded-lg mx-auto mb-2">
                   <CheckCircle className="w-5 h-5 text-emerald-500" />
                 </div>
-                <p className="text-lg font-bold theme-text-primary">12</p>
+                <p className="text-lg font-bold theme-text-primary">{stats?.verified || 0}</p>
                 <p className="text-xs theme-text-muted">Byemejwe</p>
               </div>
               <div className="text-center p-3 theme-bg-tertiary rounded-lg">
                 <div className="flex items-center justify-center w-10 h-10 bg-amber-500/10 rounded-lg mx-auto mb-2">
                   <AlertTriangle className="w-5 h-5 text-amber-500" />
                 </div>
-                <p className="text-lg font-bold theme-text-primary">3</p>
+                <p className="text-lg font-bold theme-text-primary">{stats?.warnings?.length || 0}</p>
                 <p className="text-xs theme-text-muted">Iburira</p>
               </div>
               <div className="text-center p-3 theme-bg-tertiary rounded-lg">
                 <div className="flex items-center justify-center w-10 h-10 bg-red-500/10 rounded-lg mx-auto mb-2">
                   <XCircle className="w-5 h-5 text-red-500" />
                 </div>
-                <p className="text-lg font-bold theme-text-primary">1</p>
+                <p className="text-lg font-bold theme-text-primary">{stats?.issues?.length || 0}</p>
                 <p className="text-xs theme-text-muted">Ibibazo</p>
               </div>
               <div className="text-center p-3 theme-bg-tertiary rounded-lg">
                 <div className="flex items-center justify-center w-10 h-10 bg-blue-500/10 rounded-lg mx-auto mb-2">
                   <Activity className="w-5 h-5 text-blue-500" />
                 </div>
-                <p className="text-lg font-bold theme-text-primary">{sessions.length}</p>
+                <p className="text-lg font-bold theme-text-primary">{stats?.activeSessions || 0}</p>
                 <p className="text-xs theme-text-muted">Sessions</p>
               </div>
             </div>
@@ -370,7 +331,7 @@ const Security: React.FC = () => {
       </div>
 
       {/* Overview Tab */}
-      {activeTab === 'overview' && (
+      {activeTab === 'overview' && settings && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Password Policy */}
           <div className="theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
@@ -387,11 +348,9 @@ const Security: React.FC = () => {
                 </label>
                 <div className="flex items-center space-x-3">
                   <input
-                    type="range"
-                    min="6"
-                    max="20"
+                    type="range" min="6" max="20"
                     value={settings.minPasswordLength}
-                    onChange={(e) => setSettings({ ...settings, minPasswordLength: parseInt(e.target.value) })}
+                    onChange={(e) => updateSetting('minPasswordLength', parseInt(e.target.value))}
                     className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500"
                   />
                   <span className="text-lg font-bold text-red-500 w-8">{settings.minPasswordLength}</span>
@@ -410,8 +369,8 @@ const Security: React.FC = () => {
                     <div className="relative">
                       <input
                         type="checkbox"
-                        checked={settings[item.key as keyof typeof settings] as boolean}
-                        onChange={(e) => setSettings({ ...settings, [item.key]: e.target.checked })}
+                        checked={settings[item.key as keyof SecuritySettings] as boolean}
+                        onChange={(e) => updateSetting(item.key as keyof SecuritySettings, e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
@@ -421,12 +380,10 @@ const Security: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium theme-text-secondary mb-2">
-                  Ijambo ry'ibanga rirangira nyuma y'iminsi
-                </label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Ijambo ry'ibanga rirangira nyuma y'iminsi</label>
                 <select
                   value={settings.passwordExpireDays}
-                  onChange={(e) => setSettings({ ...settings, passwordExpireDays: parseInt(e.target.value) })}
+                  onChange={(e) => updateSetting('passwordExpireDays', parseInt(e.target.value))}
                   className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
                 >
                   <option value={30}>Iminsi 30</option>
@@ -449,12 +406,10 @@ const Security: React.FC = () => {
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium theme-text-secondary mb-2">
-                  Session irangira nyuma y'iminota
-                </label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Session irangira nyuma y'iminota</label>
                 <select
                   value={settings.sessionTimeout}
-                  onChange={(e) => setSettings({ ...settings, sessionTimeout: parseInt(e.target.value) })}
+                  onChange={(e) => updateSetting('sessionTimeout', parseInt(e.target.value))}
                   className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
                 >
                   <option value={15}>Iminota 15</option>
@@ -464,31 +419,21 @@ const Security: React.FC = () => {
                   <option value={480}>Amasaha 8</option>
                 </select>
               </div>
-
               <div>
-                <label className="block text-sm font-medium theme-text-secondary mb-2">
-                  Umubare ntarengwa wa sessions
-                </label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Umubare ntarengwa wa sessions</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="10"
+                  type="number" min="1" max="10"
                   value={settings.maxConcurrentSessions}
-                  onChange={(e) => setSettings({ ...settings, maxConcurrentSessions: parseInt(e.target.value) })}
+                  onChange={(e) => updateSetting('maxConcurrentSessions', parseInt(e.target.value))}
                   className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium theme-text-secondary mb-2">
-                  "Nyibuka" iminsi
-                </label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">"Nyibuka" iminsi</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="90"
+                  type="number" min="1" max="90"
                   value={settings.rememberMeDays}
-                  onChange={(e) => setSettings({ ...settings, rememberMeDays: parseInt(e.target.value) })}
+                  onChange={(e) => updateSetting('rememberMeDays', parseInt(e.target.value))}
                   className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
                 />
               </div>
@@ -505,40 +450,30 @@ const Security: React.FC = () => {
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium theme-text-secondary mb-2">
-                  Inshuro ntarengwa zo kugerageza
-                </label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Inshuro ntarengwa zo kugerageza</label>
                 <input
-                  type="number"
-                  min="3"
-                  max="10"
+                  type="number" min="3" max="10"
                   value={settings.maxLoginAttempts}
-                  onChange={(e) => setSettings({ ...settings, maxLoginAttempts: parseInt(e.target.value) })}
+                  onChange={(e) => updateSetting('maxLoginAttempts', parseInt(e.target.value))}
                   className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium theme-text-secondary mb-2">
-                  Igihe cyo gufungwa (iminota)
-                </label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Igihe cyo gufungwa (iminota)</label>
                 <input
-                  type="number"
-                  min="5"
-                  max="60"
+                  type="number" min="5" max="60"
                   value={settings.lockoutDuration}
-                  onChange={(e) => setSettings({ ...settings, lockoutDuration: parseInt(e.target.value) })}
+                  onChange={(e) => updateSetting('lockoutDuration', parseInt(e.target.value))}
                   className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
                 />
               </div>
-
               <label className="flex items-center justify-between cursor-pointer">
                 <span className="theme-text-secondary text-sm">Gukoresha CAPTCHA</span>
                 <div className="relative">
                   <input
                     type="checkbox"
                     checked={settings.enableCaptcha}
-                    onChange={(e) => setSettings({ ...settings, enableCaptcha: e.target.checked })}
+                    onChange={(e) => updateSetting('enableCaptcha', e.target.checked)}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
@@ -569,8 +504,8 @@ const Security: React.FC = () => {
                   <div className="relative mt-1">
                     <input
                       type="checkbox"
-                      checked={settings[item.key as keyof typeof settings] as boolean}
-                      onChange={(e) => setSettings({ ...settings, [item.key]: e.target.checked })}
+                      checked={settings[item.key as keyof SecuritySettings] as boolean}
+                      onChange={(e) => updateSetting(item.key as keyof SecuritySettings, e.target.checked)}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
@@ -596,7 +531,7 @@ const Security: React.FC = () => {
             </button>
           </div>
           <div className="divide-y theme-border-primary">
-            {sessions.map((session) => (
+            {sessions.length > 0 ? sessions.map((session) => (
               <div key={session.id} className="p-4 hover:theme-bg-tertiary transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
@@ -618,7 +553,7 @@ const Security: React.FC = () => {
                           <Globe className="w-3 h-3" />
                           <span>{session.ip}</span>
                         </span>
-                        <span>{session.location}</span>
+                        <span>{session.location || 'Unknown'}</span>
                         <span className="flex items-center space-x-1">
                           <Clock className="w-3 h-3" />
                           <span>{formatTimeAgo(session.lastActive)}</span>
@@ -637,7 +572,12 @@ const Security: React.FC = () => {
                   )}
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="p-8 text-center">
+                <Monitor className="w-12 h-12 theme-text-muted mx-auto mb-3" />
+                <p className="theme-text-muted">Nta sessions zihari</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -646,7 +586,7 @@ const Security: React.FC = () => {
       {activeTab === 'login-history' && (
         <div className="theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
           <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
-            <h3 className="font-semibold theme-text-primary">Amateka yo Kwinjira</h3>
+            <h3 className="font-semibold theme-text-primary">Amateka yo Kwinjira ({loginHistory.length})</h3>
             <button className="text-sm text-[#fcd535] hover:underline flex items-center space-x-1">
               <Download className="w-4 h-4" />
               <span>Kuramo CSV</span>
@@ -664,14 +604,14 @@ const Security: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y theme-border-primary">
-                {loginHistory.map((attempt) => (
+                {loginHistory.length > 0 ? loginHistory.map((attempt) => (
                   <tr key={attempt.id} className="hover:theme-bg-tertiary transition-colors">
                     <td className="px-4 py-3 text-sm theme-text-secondary whitespace-nowrap">
-                      {formatTimeAgo(attempt.timestamp)}
+                      {formatTimeAgo(attempt.createdAt)}
                     </td>
                     <td className="px-4 py-3 text-sm theme-text-primary">{attempt.email}</td>
                     <td className="px-4 py-3 text-sm theme-text-muted font-mono">{attempt.ip}</td>
-                    <td className="px-4 py-3 text-sm theme-text-muted">{attempt.location}</td>
+                    <td className="px-4 py-3 text-sm theme-text-muted">{attempt.location || 'Unknown'}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center space-x-1 px-2 py-0.5 text-xs font-medium rounded-md border ${getStatusBadge(attempt.status)}`}>
                         {getStatusIcon(attempt.status)}
@@ -679,7 +619,13 @@ const Security: React.FC = () => {
                       </span>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center theme-text-muted">
+                      Nta mateka yo kwinjira ahari
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -693,7 +639,7 @@ const Security: React.FC = () => {
             <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
               <h3 className="font-semibold theme-text-primary">API Keys ({apiKeys.length})</h3>
               <button
-                onClick={handleGenerateApiKey}
+                onClick={() => setShowNewKeyModal(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
                 <Plus className="w-4 h-4" />
@@ -701,7 +647,7 @@ const Security: React.FC = () => {
               </button>
             </div>
             <div className="divide-y theme-border-primary">
-              {apiKeys.map((apiKey) => (
+              {apiKeys.length > 0 ? apiKeys.map((apiKey) => (
                 <div key={apiKey.id} className="p-4 hover:theme-bg-tertiary transition-colors">
                   <div className="flex items-start justify-between">
                     <div>
@@ -743,9 +689,78 @@ const Security: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="p-8 text-center">
+                  <Key className="w-12 h-12 theme-text-muted mx-auto mb-3" />
+                  <p className="theme-text-muted">Nta API keys zihari</p>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* New API Key Modal */}
+          {showNewKeyModal && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-md overflow-hidden">
+                <div className="px-6 py-4 border-b theme-border-primary">
+                  <h3 className="text-lg font-semibold theme-text-primary">Kora API Key Nshya</h3>
+                </div>
+                <div className="p-6 space-y-4">
+                  {newlyCreatedKey ? (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                        <p className="text-sm text-emerald-400 mb-2">✓ API Key yarakozwe! Bika iyi key ubu - ntuzongera kuyibona.</p>
+                        <code className="block p-3 theme-bg-tertiary rounded-lg text-sm font-mono theme-text-primary break-all">
+                          {newlyCreatedKey}
+                        </code>
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(newlyCreatedKey)}
+                        className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 theme-bg-tertiary rounded-xl theme-text-primary hover:bg-opacity-80"
+                      >
+                        <Copy className="w-4 h-4" />
+                        <span>Copy to Clipboard</span>
+                      </button>
+                      <button
+                        onClick={() => { setShowNewKeyModal(false); setNewlyCreatedKey(null); }}
+                        className="w-full px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600"
+                      >
+                        Funga
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium theme-text-secondary mb-2">Izina rya Key</label>
+                        <input
+                          type="text"
+                          value={newKeyName}
+                          onChange={(e) => setNewKeyName(e.target.value)}
+                          placeholder="eg. Mobile App API"
+                          className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-red-500/50"
+                        />
+                      </div>
+                      <div className="flex space-x-3">
+                        <button
+                          onClick={() => setShowNewKeyModal(false)}
+                          className="flex-1 px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary"
+                        >
+                          Hagarika
+                        </button>
+                        <button
+                          onClick={handleCreateApiKey}
+                          disabled={!newKeyName.trim()}
+                          className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 disabled:opacity-50"
+                        >
+                          Kora Key
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="theme-bg-secondary rounded-xl border border-amber-500/30 p-4">
             <div className="flex items-start space-x-3">
@@ -762,7 +777,7 @@ const Security: React.FC = () => {
       )}
 
       {/* 2FA Tab */}
-      {activeTab === '2fa' && (
+      {activeTab === '2fa' && settings && (
         <div className="space-y-6">
           <div className="theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
             <div className="px-6 py-4 border-b theme-border-primary">
@@ -782,16 +797,13 @@ const Security: React.FC = () => {
                   </h4>
                   <p className="theme-text-muted text-sm mt-1">
                     {twoFactorEnabled 
-                      ? 'Konte yawe irinzwe n\'icyemezo cya kabiri. Buri gihe winjira uzasabwa kode.'
-                      : 'Ongeraho umutekano ku konte yawe ukoresheje icyemezo cya kabiri.'}
+                      ? 'Konte yawe irinzwe n\'icyemezo cya kabiri.'
+                      : 'Ongeraho umutekano ku konte yawe.'}
                   </p>
                   <button
                     onClick={() => {
-                      if (!twoFactorEnabled) {
-                        setShowQRCode(true);
-                      } else {
-                        setTwoFactorEnabled(false);
-                      }
+                      if (!twoFactorEnabled) setShowQRCode(true);
+                      else setTwoFactorEnabled(false);
                     }}
                     className={`mt-4 px-4 py-2 rounded-lg font-medium transition-colors ${
                       twoFactorEnabled
@@ -808,11 +820,8 @@ const Security: React.FC = () => {
                 <div className="mt-6 p-6 theme-bg-tertiary rounded-xl">
                   <div className="flex flex-col md:flex-row items-start gap-6">
                     <div className="bg-white p-4 rounded-xl">
-                      {/* Placeholder QR Code */}
                       <div className="w-40 h-40 bg-gray-200 flex items-center justify-center">
-                        <div className="text-center text-gray-500 text-xs">
-                          QR Code
-                        </div>
+                        <div className="text-center text-gray-500 text-xs">QR Code</div>
                       </div>
                     </div>
                     <div className="flex-1">
@@ -823,15 +832,7 @@ const Security: React.FC = () => {
                         <li>Injiza kode y'imibare 6 hano</li>
                       </ol>
                       <div className="mt-4">
-                        <p className="text-xs theme-text-muted mb-2">Kode y'ibanga:</p>
-                        <code className="px-3 py-2 theme-bg-secondary rounded-lg font-mono text-sm theme-text-primary block">
-                          UMUN-SI2F-A4S3-CR3T-K3Y1
-                        </code>
-                      </div>
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium theme-text-secondary mb-2">
-                          Injiza kode y'imibare 6
-                        </label>
+                        <label className="block text-sm font-medium theme-text-secondary mb-2">Injiza kode y'imibare 6</label>
                         <div className="flex space-x-2">
                           <input
                             type="text"
@@ -840,10 +841,7 @@ const Security: React.FC = () => {
                             className="flex-1 px-4 py-2.5 theme-bg-secondary border theme-border-primary rounded-xl theme-text-primary text-center font-mono text-lg tracking-widest focus:outline-none focus:border-red-500/50"
                           />
                           <button
-                            onClick={() => {
-                              setTwoFactorEnabled(true);
-                              setShowQRCode(false);
-                            }}
+                            onClick={() => { setTwoFactorEnabled(true); setShowQRCode(false); }}
                             className="px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors"
                           >
                             Emeza
@@ -884,9 +882,9 @@ const Security: React.FC = () => {
                       checked={settings.allow2FAMethods.includes(method.id)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSettings({ ...settings, allow2FAMethods: [...settings.allow2FAMethods, method.id] });
+                          updateSetting('allow2FAMethods', [...settings.allow2FAMethods, method.id]);
                         } else {
-                          setSettings({ ...settings, allow2FAMethods: settings.allow2FAMethods.filter(m => m !== method.id) });
+                          updateSetting('allow2FAMethods', settings.allow2FAMethods.filter(m => m !== method.id));
                         }
                       }}
                       className="sr-only peer"
@@ -898,7 +896,7 @@ const Security: React.FC = () => {
             </div>
           </div>
 
-          {/* Admin 2FA Requirement */}
+          {/* Require 2FA for all */}
           <div className="theme-bg-secondary rounded-xl border theme-border-primary p-6">
             <label className="flex items-center justify-between cursor-pointer">
               <div className="flex items-center space-x-4">
@@ -914,7 +912,7 @@ const Security: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={settings.require2FA}
-                  onChange={(e) => setSettings({ ...settings, require2FA: e.target.checked })}
+                  onChange={(e) => updateSetting('require2FA', e.target.checked)}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
@@ -936,4 +934,3 @@ const Security: React.FC = () => {
 };
 
 export default Security;
-
