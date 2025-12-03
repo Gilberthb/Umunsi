@@ -370,7 +370,7 @@ const Posts: React.FC = () => {
                     <span className="px-2 py-0.5 theme-bg-tertiary rounded theme-text-tertiary">
                           {post.category.name}
                         </span>
-                  )}
+                    )}
                   <div className="flex items-center space-x-3">
                     <span className="flex items-center"><Eye className="w-3 h-3 mr-1" />{post.viewCount}</span>
                     <span className="flex items-center"><MessageCircle className="w-3 h-3 mr-1" />{post.commentCount}</span>

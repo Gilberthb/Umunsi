@@ -15,9 +15,15 @@ import {
   Sparkles,
   FolderOpen,
   Calendar,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from 'lucide-react';
 import { apiClient } from '../../services/api';
+
+const getServerBaseUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
+  return apiUrl.replace('/api', '');
+};
 
 interface AnalyticsData {
   totalViews: number;
@@ -29,9 +35,11 @@ interface AnalyticsData {
   topArticles: Array<{
     id: string;
     title: string;
+    slug?: string;
     viewCount: number;
     likeCount: number;
     commentCount: number;
+    featuredImage?: string;
     author?: {
       firstName: string;
       lastName: string;
@@ -40,16 +48,20 @@ interface AnalyticsData {
   topCategories: Array<{
     id: string;
     name: string;
+    slug?: string;
     color?: string;
     _count?: {
       news: number;
     };
+    postCount?: number;
   }>;
   recentUsers: Array<{
     id: string;
     username: string;
     firstName: string;
     lastName: string;
+    email?: string;
+    avatar?: string;
     createdAt: string;
     role: string;
   }>;
@@ -61,69 +73,135 @@ const Analytics = () => {
   const navigate = useNavigate();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState('30d');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAnalytics();
   }, [period]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
       
-      // Fetch real data from the database
-      const [dashboardStats, postsResponse, categoriesResponse, usersResponse] = await Promise.all([
-        apiClient.getDashboardStats().catch(() => null),
-        apiClient.getPosts({ limit: 10, sortBy: 'viewCount', sortOrder: 'desc' }).catch(() => ({ data: [] })),
-        apiClient.getCategories().catch(() => []),
-        apiClient.getUsers({ limit: 10 }).catch(() => ({ data: [] }))
+      console.log('📊 Fetching analytics data...');
+      
+      // Fetch all data in parallel for better performance
+      const [dashboardStats, postsResponse, allPostsResponse, categoriesResponse, usersResponse] = await Promise.all([
+        apiClient.getDashboardStats().catch((err) => {
+          console.log('Dashboard stats error:', err);
+          return null;
+        }),
+        apiClient.getPosts({ limit: 50, status: 'PUBLISHED' }).catch((err) => {
+          console.log('Posts error:', err);
+          return { data: [] };
+        }),
+        apiClient.getPosts({ limit: 100 }).catch((err) => {
+          console.log('All posts error:', err);
+          return { data: [] };
+        }),
+        apiClient.getCategories({ includeInactive: true }).catch((err) => {
+          console.log('Categories error:', err);
+          return [];
+        }),
+        apiClient.getUsers({ limit: 50 }).catch((err) => {
+          console.log('Users error:', err);
+          return { data: [] };
+        })
       ]);
 
-      // Get posts statistics
-      const allPosts = postsResponse?.data || [];
-      const publishedPosts = allPosts.filter((p: any) => p.status === 'PUBLISHED').length;
-      const draftPosts = allPosts.filter((p: any) => p.status === 'DRAFT').length;
+      console.log('📊 Dashboard stats:', dashboardStats);
+      console.log('📊 Posts response:', postsResponse);
+      console.log('📊 Categories response:', categoriesResponse);
+      console.log('📊 Users response:', usersResponse);
 
-      // Calculate total views, likes, comments from posts
+      // Get all posts for statistics
+      const allPosts = allPostsResponse?.data || [];
+      const publishedPosts = allPosts.filter((p: any) => p.status === 'PUBLISHED');
+      const draftPosts = allPosts.filter((p: any) => p.status === 'DRAFT');
+
+      // Calculate total statistics from posts
       let totalViews = dashboardStats?.totalViews || 0;
       let totalLikes = dashboardStats?.totalLikes || 0;
       let totalComments = dashboardStats?.totalComments || 0;
 
-      if (totalViews === 0) {
+      // Calculate from posts if not available from dashboard stats
+      if (totalViews === 0 && allPosts.length > 0) {
         totalViews = allPosts.reduce((sum: number, p: any) => sum + (p.viewCount || 0), 0);
       }
-      if (totalLikes === 0) {
+      if (totalLikes === 0 && allPosts.length > 0) {
         totalLikes = allPosts.reduce((sum: number, p: any) => sum + (p.likeCount || 0), 0);
       }
-      if (totalComments === 0) {
+      if (totalComments === 0 && allPosts.length > 0) {
         totalComments = allPosts.reduce((sum: number, p: any) => sum + (p.commentCount || p._count?.comments || 0), 0);
       }
 
-      setAnalyticsData({
+      // Sort posts by view count for top articles
+      const sortedByViews = [...publishedPosts].sort((a: any, b: any) => (b.viewCount || 0) - (a.viewCount || 0));
+      
+      // Get categories with post counts
+      const categoriesWithCounts = (categoriesResponse || []).map((cat: any) => ({
+        ...cat,
+        postCount: cat._count?.news || cat._count?.posts || allPosts.filter((p: any) => p.category?.id === cat.id).length
+      })).sort((a: any, b: any) => (b.postCount || 0) - (a.postCount || 0));
+
+      // Get recent users sorted by creation date
+      const recentUsers = [...(usersResponse?.data || [])]
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5);
+
+      const analyticsResult: AnalyticsData = {
         totalViews,
         totalUsers: dashboardStats?.totalUsers || usersResponse?.pagination?.total || usersResponse?.data?.length || 0,
-        totalPosts: dashboardStats?.totalArticles || dashboardStats?.totalPosts || postsResponse?.pagination?.total || allPosts.length,
+        totalPosts: dashboardStats?.totalArticles || dashboardStats?.totalPosts || allPostsResponse?.pagination?.total || allPosts.length,
         totalCategories: dashboardStats?.totalCategories || categoriesResponse?.length || 0,
         totalComments,
         totalLikes,
-        topArticles: allPosts.slice(0, 5).map((post: any) => ({
+        topArticles: sortedByViews.slice(0, 5).map((post: any) => ({
           id: post.id,
           title: post.title,
+          slug: post.slug,
           viewCount: post.viewCount || 0,
           likeCount: post.likeCount || 0,
           commentCount: post.commentCount || post._count?.comments || 0,
+          featuredImage: post.featuredImage,
           author: post.author
         })),
-        topCategories: categoriesResponse || [],
-        recentUsers: usersResponse?.data?.slice(0, 5) || [],
-        publishedPosts,
-        draftPosts
-      });
+        topCategories: categoriesWithCounts.slice(0, 5),
+        recentUsers: recentUsers.map((user: any) => ({
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email,
+          avatar: user.avatar,
+          createdAt: user.createdAt,
+          role: user.role
+        })),
+        publishedPosts: publishedPosts.length,
+        draftPosts: draftPosts.length
+      };
+
+      console.log('📊 Final analytics data:', analyticsResult);
+      setAnalyticsData(analyticsResult);
+
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      setError('Failed to load analytics data. Please try again.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchAnalytics(true);
   };
 
   const formatNumber = (num: number) => {
@@ -161,18 +239,44 @@ const Analytics = () => {
             <h1 className="text-2xl font-bold theme-text-primary">Analytics</h1>
             <p className="theme-text-tertiary mt-1">Monitor website performance and content statistics</p>
           </div>
-          <select
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-            <option value="1y">Last year</option>
-          </select>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary hover:border-[#fcd535]/50 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="1y">Last year</option>
+            </select>
+          </div>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-between">
+          <div className="flex items-center">
+            <Activity className="w-5 h-5 text-red-400 mr-2" />
+            <span className="text-red-400">{error}</span>
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="text-red-400 hover:text-red-300 text-sm font-medium"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -304,14 +408,26 @@ const Analytics = () => {
                   onClick={() => navigate(`/admin/posts/${article.id}`)}
                 >
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <span className="w-7 h-7 theme-bg-tertiary rounded-lg flex items-center justify-center text-xs font-bold theme-text-tertiary flex-shrink-0">
+                    <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                      index < 3 ? 'bg-[#fcd535] text-[#0b0e11]' : 'theme-bg-tertiary theme-text-tertiary'
+                    }`}>
                       {index + 1}
                     </span>
-                    <div className="min-w-0">
+                    {article.featuredImage && (
+                      <img 
+                        src={article.featuredImage.startsWith('http') ? article.featuredImage : `${getServerBaseUrl()}${article.featuredImage}`}
+                        alt={article.title}
+                        className="w-12 h-10 object-cover rounded-lg flex-shrink-0"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium theme-text-primary truncate group-hover:text-[#fcd535] transition-colors">
                         {article.title}
                       </p>
-                      <div className="flex items-center space-x-3 text-xs theme-text-muted">
+                      <div className="flex items-center space-x-3 text-xs theme-text-muted mt-0.5">
                         <span className="flex items-center space-x-1">
                           <Eye className="w-3 h-3" />
                           <span>{formatNumber(article.viewCount)}</span>
@@ -327,7 +443,7 @@ const Analytics = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="w-24 theme-bg-tertiary rounded-full h-2 ml-4 flex-shrink-0">
+                  <div className="w-20 theme-bg-tertiary rounded-full h-2 ml-3 flex-shrink-0">
                     <div 
                       className="bg-[#fcd535] h-2 rounded-full transition-all"
                       style={{ 
@@ -367,15 +483,15 @@ const Analytics = () => {
           <div className="p-6 space-y-4">
             {analyticsData?.topCategories && analyticsData.topCategories.length > 0 ? (
               analyticsData.topCategories.slice(0, 5).map((category, index) => {
-                const postCount = category._count?.news || 0;
-                const maxPosts = Math.max(...analyticsData.topCategories.map(c => c._count?.news || 0));
+                const postCount = category.postCount || category._count?.news || 0;
+                const maxPosts = Math.max(...analyticsData.topCategories.map(c => c.postCount || c._count?.news || 0), 1);
                 const color = category.color || getCategoryColor(index);
                 
                 return (
                   <div 
                     key={category.id} 
                     className="flex items-center justify-between group cursor-pointer"
-                    onClick={() => navigate('/admin/categories')}
+                    onClick={() => navigate(`/category/${category.slug || category.id}`)}
                   >
                     <div className="flex items-center space-x-3">
                       <div 
@@ -386,14 +502,14 @@ const Analytics = () => {
                         <p className="text-sm font-medium theme-text-primary group-hover:text-[#fcd535] transition-colors">
                           {category.name}
                         </p>
-                        <p className="text-xs theme-text-muted">{postCount} posts</p>
+                        <p className="text-xs theme-text-muted">{postCount} {postCount === 1 ? 'post' : 'posts'}</p>
                       </div>
                     </div>
                     <div className="w-24 theme-bg-tertiary rounded-full h-2">
                       <div 
                         className="h-2 rounded-full transition-all"
                         style={{ 
-                          width: `${maxPosts > 0 ? (postCount / maxPosts) * 100 : 0}%`,
+                          width: `${(postCount / maxPosts) * 100}%`,
                           backgroundColor: color
                         }}
                       ></div>
@@ -485,23 +601,38 @@ const Analytics = () => {
                 <div 
                   key={user.id} 
                   className="flex items-center space-x-3 p-3 theme-bg-tertiary rounded-xl cursor-pointer hover:theme-bg-card-hover transition-colors group"
-                  onClick={() => navigate(`/admin/users/${user.id}`)}
+                  onClick={() => navigate(`/admin/users`)}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#fcd535] to-[#f0b90b] flex items-center justify-center flex-shrink-0">
+                  {user.avatar ? (
+                    <img 
+                      src={user.avatar.startsWith('http') ? user.avatar : `${getServerBaseUrl()}${user.avatar}`}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-[#fcd535] to-[#f0b90b] flex items-center justify-center flex-shrink-0 ${user.avatar ? 'hidden' : ''}`}>
                     <span className="text-sm font-bold text-[#0b0e11]">
                       {user.firstName?.[0] || user.username?.[0] || 'U'}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium theme-text-primary truncate group-hover:text-[#fcd535] transition-colors">
-                      {user.firstName} {user.lastName}
+                      {user.firstName || user.username} {user.lastName || ''}
                     </p>
                     <div className="flex items-center space-x-2 text-xs theme-text-muted">
                       <Calendar className="w-3 h-3" />
                       <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <span className="px-2 py-1 text-xs font-medium theme-bg-secondary rounded-lg theme-text-tertiary">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-lg ${
+                    user.role === 'ADMIN' ? 'bg-purple-500/10 text-purple-400' :
+                    user.role === 'EDITOR' ? 'bg-blue-500/10 text-blue-400' :
+                    'theme-bg-secondary theme-text-tertiary'
+                  }`}>
                     {user.role}
                   </span>
                 </div>
