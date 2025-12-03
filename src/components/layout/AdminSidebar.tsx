@@ -29,7 +29,8 @@ import {
   Target,
   Crown,
   Sun,
-  Moon
+  Moon,
+  Megaphone
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
@@ -229,6 +230,16 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           color: 'from-amber-500 to-amber-600'
         }
       ]
+    },
+    
+    // Ads Management (Admin Only)
+    { 
+      name: 'Ads Management', 
+      path: '/admin/ads', 
+      icon: Megaphone, 
+      category: 'system',
+      color: 'from-pink-500 to-pink-600',
+      adminOnly: true
     },
     
     // System & Tools (Admin Only)
