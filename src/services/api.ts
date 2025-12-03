@@ -183,6 +183,30 @@ export interface Post {
   };
 }
 
+// Ad Types
+export interface Ad {
+  id: string;
+  name: string;
+  placement: 'leaderboard_top' | 'leaderboard_bottom' | 'content_banner' | 'sidebar_rectangle' | 'sidebar_square' | 'sidebar_skyscraper';
+  type: 'image' | 'gif' | 'html';
+  imageUrl: string;
+  targetUrl: string;
+  status: 'active' | 'paused' | 'scheduled' | 'expired';
+  startDate: string;
+  endDate: string;
+  impressions: number;
+  clicks: number;
+  revenue: number;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
 // Analytics Types
 export interface DashboardStats {
   totalUsers: number;
@@ -785,6 +809,114 @@ class ApiClient {
       totalDocuments: response.stats.documentsCount,
       totalSize: response.stats.totalSize
     };
+  }
+
+  // Ads Methods
+  async getAds(params?: {
+    placement?: string;
+    status?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: Ad[]; pagination: any }> {
+    const searchParams = new URLSearchParams();
+    if (params?.placement) searchParams.append('placement', params.placement);
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const response = await this.request<{ success: boolean; data: Ad[]; pagination: any }>(
+      `/ads?${searchParams.toString()}`
+    );
+    return { data: response.data || [], pagination: response.pagination };
+  }
+
+  async getActiveAds(placement?: string): Promise<Ad[]> {
+    const params = placement ? `?placement=${placement}` : '';
+    const response = await this.request<{ success: boolean; data: Ad[] }>(`/ads/active${params}`);
+    return response.data || [];
+  }
+
+  async getAd(id: string): Promise<Ad> {
+    const response = await this.request<{ success: boolean; data: Ad }>(`/ads/${id}`);
+    return response.data;
+  }
+
+  async createAd(adData: {
+    name: string;
+    placement: string;
+    type?: string;
+    imageUrl: string;
+    targetUrl: string;
+    startDate: string;
+    endDate: string;
+    priority?: number;
+    revenue?: number;
+  }): Promise<Ad> {
+    const response = await this.request<{ success: boolean; data: Ad }>('/ads', {
+      method: 'POST',
+      body: JSON.stringify(adData),
+    });
+    return response.data;
+  }
+
+  async updateAd(id: string, adData: Partial<{
+    name: string;
+    placement: string;
+    type: string;
+    imageUrl: string;
+    targetUrl: string;
+    startDate: string;
+    endDate: string;
+    priority: number;
+    revenue: number;
+    status: string;
+  }>): Promise<Ad> {
+    const response = await this.request<{ success: boolean; data: Ad }>(`/ads/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(adData),
+    });
+    return response.data;
+  }
+
+  async deleteAd(id: string): Promise<void> {
+    await this.request(`/ads/${id}`, { method: 'DELETE' });
+  }
+
+  async trackAdImpression(id: string, count: number = 1): Promise<void> {
+    await this.request(`/ads/${id}/impression`, {
+      method: 'POST',
+      body: JSON.stringify({ count }),
+    });
+  }
+
+  async trackAdClick(id: string): Promise<void> {
+    await this.request(`/ads/${id}/click`, {
+      method: 'POST',
+    });
+  }
+
+  async getAdStats(): Promise<{
+    totalAds: number;
+    activeAds: number;
+    totalImpressions: number;
+    totalClicks: number;
+    totalRevenue: number;
+    averageCTR: string;
+  }> {
+    const response = await this.request<{
+      success: boolean;
+      data: {
+        totalAds: number;
+        activeAds: number;
+        totalImpressions: number;
+        totalClicks: number;
+        totalRevenue: number;
+        averageCTR: string;
+      };
+    }>('/ads/stats');
+    return response.data;
   }
 }
 

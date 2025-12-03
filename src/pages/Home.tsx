@@ -1,13 +1,101 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, Eye, ChevronRight, Loader2, Heart, TrendingUp, Zap, AlertCircle, Mail, Calendar, MapPin, CloudSun, Send, ThumbsUp } from 'lucide-react';
-import { apiClient, Post, Category } from '../services/api';
+import { apiClient, Post, Category, Ad } from '../services/api';
 
 const getServerBaseUrl = () => {
   if (import.meta.env.DEV) {
     return (import.meta.env.VITE_API_URL || 'https://fggg.space/api').replace('/api', '');
   }
   return (import.meta.env.VITE_API_URL || '').replace('/api', '');
+};
+
+// Ad Placement Types
+type AdPlacement = 'leaderboard_top' | 'leaderboard_bottom' | 'content_banner' | 'sidebar_rectangle' | 'sidebar_square' | 'sidebar_skyscraper';
+
+// AdBanner Component
+interface AdBannerProps {
+  placement: AdPlacement;
+  ads: Ad[];
+  className?: string;
+  height?: string;
+  fallbackText?: string;
+  fallbackSize?: string;
+}
+
+const AdBanner: React.FC<AdBannerProps> = ({ 
+  placement, 
+  ads, 
+  className = '', 
+  height = 'h-[120px]',
+  fallbackText = 'Banner',
+  fallbackSize = '970 x 120 px'
+}) => {
+  const [hasError, setHasError] = useState(false);
+  
+  const getServerBaseUrl = () => {
+    if (import.meta.env.DEV) {
+      return (import.meta.env.VITE_API_URL || 'https://fggg.space/api').replace('/api', '');
+    }
+    return (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  };
+
+  // Find active ad for this placement (highest priority first)
+  const activeAd = ads
+    .filter(ad => ad.placement === placement && ad.status === 'active')
+    .sort((a, b) => b.priority - a.priority)[0];
+
+  // Track impression when ad is displayed
+  useEffect(() => {
+    if (activeAd) {
+      apiClient.trackAdImpression(activeAd.id).catch(console.error);
+    }
+  }, [activeAd?.id]);
+
+  const handleAdClick = async (ad: Ad) => {
+    try {
+      await apiClient.trackAdClick(ad.id);
+    } catch (error) {
+      console.error('Failed to track click:', error);
+    }
+  };
+
+  const getAdImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('data:')) return url;
+    if (url.startsWith('http')) return url;
+    return `${getServerBaseUrl()}${url}`;
+  };
+
+  if (!activeAd || hasError) {
+    // Fallback placeholder
+    return (
+      <div className={`theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center ${height} hover:border-[#fcd535]/50 transition-colors ${className}`}>
+        <div className="text-center">
+          <span className="text-3xl mb-2 block">📢</span>
+          <p className="theme-text-tertiary text-sm font-medium">{fallbackText}</p>
+          <p className="text-[#fcd535] text-xs font-bold">{fallbackSize}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={activeAd.targetUrl}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      onClick={() => handleAdClick(activeAd)}
+      className={`block ${className}`}
+    >
+      <img
+        src={getAdImageUrl(activeAd.imageUrl)}
+        alt={activeAd.name}
+        className={`w-full object-cover rounded-lg hover:opacity-90 transition-opacity ${height}`}
+        onError={() => setHasError(true)}
+      />
+    </a>
+  );
 };
 
 const Home = () => {
@@ -18,12 +106,24 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [email, setEmail] = useState('');
+  const [ads, setAds] = useState<Ad[]>([]);
+
+  // Fetch active ads
+  const fetchAds = useCallback(async () => {
+    try {
+      const activeAds = await apiClient.getActiveAds();
+      setAds(activeAds || []);
+    } catch (error) {
+      console.error('Error fetching ads:', error);
+    }
+  }, []);
 
   useEffect(() => {
     fetchHomeData();
+    fetchAds();
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [fetchAds]);
 
   const fetchHomeData = async () => {
     try {
@@ -266,15 +366,15 @@ const Home = () => {
             <p className="theme-text-muted text-[10px] text-center uppercase tracking-wider">Kwamamaza</p>
           </div>
           <div className="p-4">
-            <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center h-[120px] hover:border-[#fcd535]/50 transition-colors">
-              <div className="text-center">
-                <span className="text-3xl mb-2 block">🎯</span>
-                <p className="theme-text-tertiary text-sm font-medium">Leaderboard Banner</p>
-                <p className="text-[#fcd535] text-xs font-bold">970 x 120 px</p>
-              </div>
-            </div>
+            <AdBanner 
+              placement="leaderboard_top" 
+              ads={ads} 
+              height="h-[120px]" 
+              fallbackText="Leaderboard Banner"
+              fallbackSize="970 x 120 px"
+            />
           </div>
-                </div>
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -452,15 +552,15 @@ const Home = () => {
                 <p className="theme-text-muted text-[10px] text-center uppercase tracking-wider">Kwamamaza</p>
               </div>
               <div className="p-3">
-                <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center h-[200px] hover:border-[#fcd535]/50 transition-colors">
-                  <div className="text-center">
-                    <span className="text-3xl mb-2 block">🎬</span>
-                    <p className="theme-text-tertiary text-xs font-medium">GIF / Banner</p>
-                    <p className="text-[#fcd535] text-[10px] font-bold">300 x 250 px</p>
-                  </div>
-                </div>
+                <AdBanner 
+                  placement="sidebar_rectangle" 
+                  ads={ads} 
+                  height="h-[200px]" 
+                  fallbackText="GIF / Banner"
+                  fallbackSize="300 x 250 px"
+                />
               </div>
-                      </div>
+            </div>
 
             {/* Categories List */}
             <div className="theme-bg-secondary rounded-lg overflow-hidden">
@@ -493,13 +593,13 @@ const Home = () => {
                 <p className="theme-text-muted text-[10px] text-center uppercase tracking-wider">Kwamamaza</p>
               </div>
               <div className="p-3">
-                <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center aspect-square hover:border-[#fcd535]/50 transition-colors">
-                  <div className="text-center">
-                    <span className="text-3xl mb-2 block">📢</span>
-                    <p className="theme-text-tertiary text-xs font-medium">Square Ad</p>
-                    <p className="text-[#fcd535] text-[10px] font-bold">300 x 300 px</p>
-            </div>
-          </div>
+                <AdBanner 
+                  placement="sidebar_square" 
+                  ads={ads} 
+                  height="aspect-square" 
+                  fallbackText="Square Ad"
+                  fallbackSize="300 x 300 px"
+                />
               </div>
             </div>
 
@@ -538,15 +638,15 @@ const Home = () => {
             <div className="theme-bg-secondary rounded-lg overflow-hidden">
               <div className="p-2 border-b theme-border-primary">
                 <p className="theme-text-muted text-[10px] text-center uppercase tracking-wider">Kwamamaza</p>
-                    </div>
+              </div>
               <div className="p-3">
-                <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center h-[400px] hover:border-[#fcd535]/50 transition-colors">
-                  <div className="text-center">
-                    <span className="text-3xl mb-2 block">🎯</span>
-                    <p className="theme-text-tertiary text-xs font-medium">Skyscraper Ad</p>
-                    <p className="text-[#fcd535] text-[10px] font-bold">300 x 600 px</p>
-                  </div>
-                </div>
+                <AdBanner 
+                  placement="sidebar_skyscraper" 
+                  ads={ads} 
+                  height="h-[400px]" 
+                  fallbackText="Skyscraper Ad"
+                  fallbackSize="300 x 600 px"
+                />
               </div>
             </div>
           </div>
@@ -619,13 +719,13 @@ const Home = () => {
             <p className="theme-text-muted text-[10px] text-center uppercase tracking-wider">Kwamamaza</p>
           </div>
           <div className="p-4">
-            <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center h-[120px] hover:border-[#fcd535]/50 transition-colors">
-              <div className="text-center">
-                <span className="text-3xl mb-2 block">📢</span>
-                <p className="theme-text-tertiary text-sm font-medium">Leaderboard Banner</p>
-                <p className="text-[#fcd535] text-xs font-bold">970 x 120 px</p>
-              </div>
-            </div>
+            <AdBanner 
+              placement="leaderboard_bottom" 
+              ads={ads} 
+              height="h-[120px]" 
+              fallbackText="Leaderboard Banner"
+              fallbackSize="970 x 120 px"
+            />
           </div>
         </div>
 

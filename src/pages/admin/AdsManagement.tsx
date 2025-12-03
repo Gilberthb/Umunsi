@@ -1,39 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Megaphone, Plus, Edit, Trash2, Eye, EyeOff, Search,
+  Megaphone, Plus, Edit, Trash2, Eye, Search,
   RefreshCw, Image, Link as LinkIcon, Calendar, DollarSign,
-  BarChart3, TrendingUp, MousePointer, ExternalLink, Copy,
-  CheckCircle, XCircle, Clock, Pause, Play, Settings,
-  Monitor, Smartphone, Layout, SidebarClose, Square, RectangleVertical,
-  Upload, AlertTriangle, Info, ImagePlus, X
+  TrendingUp, MousePointer, ExternalLink, Copy,
+  CheckCircle, XCircle, Clock, Pause, Play,
+  Monitor, Square, RectangleVertical, Layout,
+  AlertTriangle, ImagePlus, X
 } from 'lucide-react';
-
-// Ad Types
-export interface Ad {
-  id: string;
-  name: string;
-  placement: AdPlacement;
-  type: 'image' | 'gif' | 'html';
-  imageUrl: string;
-  targetUrl: string;
-  status: 'active' | 'paused' | 'scheduled' | 'expired';
-  startDate: string;
-  endDate: string;
-  impressions: number;
-  clicks: number;
-  revenue: number;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { apiClient, Ad } from '../../services/api';
 
 export type AdPlacement = 
-  | 'leaderboard_top'      // 970x120 - Top of page
-  | 'leaderboard_bottom'   // 970x120 - Bottom of content
-  | 'content_banner'       // 728x250 - In content area
-  | 'sidebar_rectangle'    // 300x250 - Sidebar rectangle
-  | 'sidebar_square'       // 300x300 - Sidebar square
-  | 'sidebar_skyscraper';  // 300x600 - Sidebar tall
+  | 'leaderboard_top'
+  | 'leaderboard_bottom'
+  | 'content_banner'
+  | 'sidebar_rectangle'
+  | 'sidebar_square'
+  | 'sidebar_skyscraper';
 
 export const AD_PLACEMENTS = {
   leaderboard_top: {
@@ -86,49 +68,9 @@ export const AD_PLACEMENTS = {
   }
 };
 
-// Local Storage Key
-const ADS_STORAGE_KEY = 'umunsi_ads_data';
-
-// Helper functions for localStorage
-const loadAdsFromStorage = (): Ad[] => {
-  try {
-    const stored = localStorage.getItem(ADS_STORAGE_KEY);
-    if (stored) {
-      const ads = JSON.parse(stored);
-      // Update status based on dates
-      return ads.map((ad: Ad) => ({
-        ...ad,
-        status: getAdStatus(ad)
-      }));
-    }
-  } catch (error) {
-    console.error('Error loading ads from storage:', error);
-  }
-  return [];
-};
-
-const saveAdsToStorage = (ads: Ad[]): void => {
-  try {
-    localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(ads));
-  } catch (error) {
-    console.error('Error saving ads to storage:', error);
-  }
-};
-
-const getAdStatus = (ad: Ad): Ad['status'] => {
-  if (ad.status === 'paused') return 'paused';
-  
-  const now = new Date();
-  const startDate = new Date(ad.startDate);
-  const endDate = new Date(ad.endDate);
-  
-  if (now < startDate) return 'scheduled';
-  if (now > endDate) return 'expired';
-  return 'active';
-};
-
-const generateId = (): string => {
-  return `ad_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const getServerBaseUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
+  return apiUrl.replace('/api', '');
 };
 
 const AdsManagement: React.FC = () => {
@@ -144,6 +86,8 @@ const AdsManagement: React.FC = () => {
   const [deletingAd, setDeletingAd] = useState<Ad | null>(null);
   const [previewAd, setPreviewAd] = useState<Ad | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     placement: 'leaderboard_top' as AdPlacement,
@@ -161,37 +105,48 @@ const AdsManagement: React.FC = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load ads from localStorage on mount
+  // Stats
+  const [stats, setStats] = useState({
+    totalAds: 0,
+    activeAds: 0,
+    totalImpressions: 0,
+    totalClicks: 0,
+    totalRevenue: 0
+  });
+
   useEffect(() => {
-    const loadAds = async () => {
+    fetchAds();
+    fetchStats();
+  }, []);
+
+  const fetchAds = async () => {
+    try {
       setLoading(true);
-      // Simulate network delay for UX
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const storedAds = loadAdsFromStorage();
-      setAds(storedAds);
+      setError(null);
+      const response = await apiClient.getAds({ limit: 100 });
+      setAds(response.data || []);
+    } catch (err) {
+      console.error('Error fetching ads:', err);
+      setError('Failed to load ads. Please try again.');
+    } finally {
       setLoading(false);
-    };
-    loadAds();
-  }, []);
-
-  // Save ads to localStorage whenever ads change
-  useEffect(() => {
-    if (!loading && ads.length >= 0) {
-      saveAdsToStorage(ads);
     }
-  }, [ads, loading]);
+  };
 
-  // Update ad statuses periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAds(prevAds => prevAds.map(ad => ({
-        ...ad,
-        status: ad.status === 'paused' ? 'paused' : getAdStatus(ad)
-      })));
-    }, 60000); // Check every minute
-    
-    return () => clearInterval(interval);
-  }, []);
+  const fetchStats = async () => {
+    try {
+      const statsData = await apiClient.getAdStats();
+      setStats({
+        totalAds: statsData.totalAds,
+        activeAds: statsData.activeAds,
+        totalImpressions: statsData.totalImpressions,
+        totalClicks: statsData.totalClicks,
+        totalRevenue: statsData.totalRevenue
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  };
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -237,15 +192,13 @@ const AdsManagement: React.FC = () => {
   const handleFileSelect = async (file: File) => {
     if (!file) return;
 
-    // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setFormErrors(prev => ({ ...prev, imageUrl: 'Please upload a valid image (JPG, PNG, GIF, or WebP)' }));
       return;
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       setFormErrors(prev => ({ ...prev, imageUrl: 'Image size must be less than 5MB' }));
       return;
@@ -255,7 +208,6 @@ const AdsManagement: React.FC = () => {
     setFormErrors(prev => ({ ...prev, imageUrl: '' }));
 
     try {
-      // Convert to base64 for localStorage storage
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
@@ -309,39 +261,32 @@ const AdsManagement: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
-    const now = new Date().toISOString();
-    
-    if (editingAd) {
-      // Update existing ad
-      const updatedAd: Ad = {
-        ...editingAd,
-        ...formData,
-        updatedAt: now,
-        status: getAdStatus({ ...editingAd, ...formData } as Ad)
-      };
-      setAds(prevAds => prevAds.map(ad => ad.id === editingAd.id ? updatedAd : ad));
-    } else {
-      // Create new ad
-      const newAd: Ad = {
-        id: generateId(),
-        ...formData,
-        status: getAdStatus({ startDate: formData.startDate, endDate: formData.endDate, status: 'active' } as Ad),
-        impressions: 0,
-        clicks: 0,
-        createdAt: now,
-        updatedAt: now
-      };
-      setAds(prevAds => [newAd, ...prevAds]);
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      if (editingAd) {
+        await apiClient.updateAd(editingAd.id, formData);
+      } else {
+        await apiClient.createAd(formData);
+      }
+      
+      await fetchAds();
+      await fetchStats();
+      resetForm();
+      setShowModal(false);
+      showSuccessMessage();
+    } catch (err: any) {
+      console.error('Error saving ad:', err);
+      setError(err.message || 'Failed to save ad');
+    } finally {
+      setSubmitting(false);
     }
-    
-    resetForm();
-    setShowModal(false);
-    showSuccessMessage();
   };
 
   const handleEdit = (ad: Ad) => {
@@ -357,7 +302,11 @@ const AdsManagement: React.FC = () => {
       priority: ad.priority,
       revenue: ad.revenue
     });
-    setImagePreview(ad.imageUrl || null);
+    // Set image preview - check if it's a relative URL
+    const imageUrl = ad.imageUrl.startsWith('/') 
+      ? `${getServerBaseUrl()}${ad.imageUrl}` 
+      : ad.imageUrl;
+    setImagePreview(imageUrl);
     setFormErrors({});
     setShowModal(true);
   };
@@ -367,24 +316,30 @@ const AdsManagement: React.FC = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    if (deletingAd) {
-      setAds(prevAds => prevAds.filter(ad => ad.id !== deletingAd.id));
+  const confirmDelete = async () => {
+    if (!deletingAd) return;
+    
+    try {
+      await apiClient.deleteAd(deletingAd.id);
+      await fetchAds();
+      await fetchStats();
       setShowDeleteModal(false);
       setDeletingAd(null);
       showSuccessMessage();
+    } catch (err) {
+      console.error('Error deleting ad:', err);
+      setError('Failed to delete ad');
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    setAds(prevAds => prevAds.map(ad => {
-      if (ad.id === id) {
-        const newStatus = ad.status === 'active' ? 'paused' : 
-                          ad.status === 'paused' ? getAdStatus(ad) : ad.status;
-        return { ...ad, status: newStatus, updatedAt: new Date().toISOString() };
-      }
-      return ad;
-    }));
+  const handleToggleStatus = async (ad: Ad) => {
+    try {
+      const newStatus = ad.status === 'active' ? 'paused' : 'active';
+      await apiClient.updateAd(ad.id, { status: newStatus });
+      await fetchAds();
+    } catch (err) {
+      console.error('Error toggling ad status:', err);
+    }
   };
 
   const handlePreview = (ad: Ad) => {
@@ -392,22 +347,24 @@ const AdsManagement: React.FC = () => {
     setShowPreviewModal(true);
   };
 
-  const simulateClick = (id: string) => {
-    setAds(prevAds => prevAds.map(ad => {
-      if (ad.id === id) {
-        return { ...ad, clicks: ad.clicks + 1, updatedAt: new Date().toISOString() };
-      }
-      return ad;
-    }));
-  };
-
-  const simulateImpression = (id: string, count: number = 1) => {
-    setAds(prevAds => prevAds.map(ad => {
-      if (ad.id === id) {
-        return { ...ad, impressions: ad.impressions + count, updatedAt: new Date().toISOString() };
-      }
-      return ad;
-    }));
+  const duplicateAd = async (ad: Ad) => {
+    try {
+      await apiClient.createAd({
+        name: `${ad.name} (Copy)`,
+        placement: ad.placement,
+        type: ad.type,
+        imageUrl: ad.imageUrl,
+        targetUrl: ad.targetUrl,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        priority: ad.priority,
+        revenue: 0
+      });
+      await fetchAds();
+      showSuccessMessage();
+    } catch (err) {
+      console.error('Error duplicating ad:', err);
+    }
   };
 
   const resetForm = () => {
@@ -435,49 +392,23 @@ const AdsManagement: React.FC = () => {
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
-  const duplicateAd = (ad: Ad) => {
-    const now = new Date().toISOString();
-    const duplicatedAd: Ad = {
-      ...ad,
-      id: generateId(),
-      name: `${ad.name} (Copy)`,
-      impressions: 0,
-      clicks: 0,
-      status: 'paused',
-      createdAt: now,
-      updatedAt: now
-    };
-    setAds(prevAds => [duplicatedAd, ...prevAds]);
-    showSuccessMessage();
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-      case 'paused':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-      case 'scheduled':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
-      case 'expired':
-        return 'bg-red-500/10 text-red-400 border-red-500/30';
-      default:
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
+      case 'active': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+      case 'paused': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+      case 'scheduled': return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+      case 'expired': return 'bg-red-500/10 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active':
-        return <CheckCircle className="w-3.5 h-3.5" />;
-      case 'paused':
-        return <Pause className="w-3.5 h-3.5" />;
-      case 'scheduled':
-        return <Clock className="w-3.5 h-3.5" />;
-      case 'expired':
-        return <XCircle className="w-3.5 h-3.5" />;
-      default:
-        return null;
+      case 'active': return <CheckCircle className="w-3.5 h-3.5" />;
+      case 'paused': return <Pause className="w-3.5 h-3.5" />;
+      case 'scheduled': return <Clock className="w-3.5 h-3.5" />;
+      case 'expired': return <XCircle className="w-3.5 h-3.5" />;
+      default: return null;
     }
   };
 
@@ -500,18 +431,19 @@ const AdsManagement: React.FC = () => {
     return ((clicks / impressions) * 100).toFixed(2) + '%';
   };
 
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('data:')) return url;
+    if (url.startsWith('http')) return url;
+    return `${getServerBaseUrl()}${url}`;
+  };
+
   const filteredAds = ads.filter(ad => {
     const matchesSearch = ad.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || ad.status === statusFilter;
     const matchesPlacement = placementFilter === 'all' || ad.placement === placementFilter;
     return matchesSearch && matchesStatus && matchesPlacement;
   });
-
-  // Calculate totals
-  const totalImpressions = ads.reduce((sum, ad) => sum + ad.impressions, 0);
-  const totalClicks = ads.reduce((sum, ad) => sum + ad.clicks, 0);
-  const totalRevenue = ads.reduce((sum, ad) => sum + ad.revenue, 0);
-  const activeAds = ads.filter(ad => ad.status === 'active').length;
 
   if (loading) {
     return (
@@ -538,6 +470,17 @@ const AdsManagement: React.FC = () => {
         </div>
       )}
 
+      {/* Error Toast */}
+      {error && (
+        <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2">
+          <AlertTriangle className="w-5 h-5" />
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="ml-2">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -546,9 +489,16 @@ const AdsManagement: React.FC = () => {
               <Megaphone className="w-7 h-7 mr-2 text-[#fcd535]" />
               Ads Management
             </h1>
-            <p className="theme-text-tertiary mt-1">Gucunga ibyamamazo ku rubuga • {ads.length} ads total</p>
+            <p className="theme-text-tertiary mt-1">Gucunga ibyamamazo ku rubuga • {ads.length} ads in database</p>
           </div>
           <div className="flex items-center space-x-3">
+            <button
+              onClick={() => { fetchAds(); fetchStats(); }}
+              className="flex items-center px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary hover:border-[#fcd535]/50 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </button>
             <button
               onClick={() => { resetForm(); setShowModal(true); }}
               className="flex items-center px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
@@ -566,7 +516,7 @@ const AdsManagement: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm theme-text-tertiary">Active Ads</p>
-              <p className="text-2xl font-bold theme-text-primary">{activeAds}</p>
+              <p className="text-2xl font-bold theme-text-primary">{stats.activeAds}</p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-xl">
               <Play className="w-6 h-6 text-emerald-400" />
@@ -577,7 +527,7 @@ const AdsManagement: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm theme-text-tertiary">Total Impressions</p>
-              <p className="text-2xl font-bold theme-text-primary">{formatNumber(totalImpressions)}</p>
+              <p className="text-2xl font-bold theme-text-primary">{formatNumber(stats.totalImpressions)}</p>
             </div>
             <div className="p-3 bg-blue-500/10 rounded-xl">
               <Eye className="w-6 h-6 text-blue-400" />
@@ -588,7 +538,7 @@ const AdsManagement: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm theme-text-tertiary">Total Clicks</p>
-              <p className="text-2xl font-bold theme-text-primary">{formatNumber(totalClicks)}</p>
+              <p className="text-2xl font-bold theme-text-primary">{formatNumber(stats.totalClicks)}</p>
             </div>
             <div className="p-3 bg-purple-500/10 rounded-xl">
               <MousePointer className="w-6 h-6 text-purple-400" />
@@ -599,7 +549,7 @@ const AdsManagement: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm theme-text-tertiary">Total Revenue</p>
-              <p className="text-2xl font-bold theme-text-primary">{formatCurrency(totalRevenue)}</p>
+              <p className="text-2xl font-bold theme-text-primary">{formatCurrency(stats.totalRevenue)}</p>
             </div>
             <div className="p-3 bg-[#fcd535]/10 rounded-xl">
               <DollarSign className="w-6 h-6 text-[#fcd535]" />
@@ -612,7 +562,7 @@ const AdsManagement: React.FC = () => {
       <div className="mb-6 theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
         <div className="px-6 py-4 border-b theme-border-primary">
           <h2 className="text-lg font-semibold theme-text-primary">Ad Placements</h2>
-          <p className="text-sm theme-text-muted">Available ad positions on the website</p>
+          <p className="text-sm theme-text-muted">Click to filter by placement</p>
         </div>
         <div className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {Object.entries(AD_PLACEMENTS).map(([key, placement]) => {
@@ -685,20 +635,28 @@ const AdsManagement: React.FC = () => {
       <div className="theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
         <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
           <h2 className="text-lg font-semibold theme-text-primary">{filteredAds.length} Ads</h2>
-          <span className="text-xs theme-text-muted">Data stored locally</span>
+          <span className="text-xs theme-text-muted">Stored in database</span>
         </div>
 
         <div className="divide-y theme-border-primary">
           {filteredAds.length > 0 ? (
             filteredAds.map((ad) => {
               const placementInfo = AD_PLACEMENTS[ad.placement];
-              const PlacementIcon = placementInfo.icon;
+              const PlacementIcon = placementInfo?.icon || Layout;
               return (
                 <div key={ad.id} className="p-4 hover:theme-bg-tertiary transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4">
-                      <div className={`p-3 ${placementInfo.bgColor} rounded-xl`}>
-                        <PlacementIcon className={`w-6 h-6 ${placementInfo.color}`} />
+                      {/* Ad Thumbnail */}
+                      <div className="w-24 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                        <img
+                          src={getImageUrl(ad.imageUrl)}
+                          alt={ad.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/96x64?text=No+Image';
+                          }}
+                        />
                       </div>
                       <div>
                         <div className="flex items-center space-x-3 mb-1">
@@ -709,11 +667,12 @@ const AdsManagement: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex items-center space-x-4 text-sm theme-text-muted mb-2">
-                          <span>{placementInfo.name}</span>
+                          <span className="flex items-center space-x-1">
+                            <PlacementIcon className={`w-4 h-4 ${placementInfo?.color || 'text-gray-400'}`} />
+                            <span>{placementInfo?.name || ad.placement}</span>
+                          </span>
                           <span>•</span>
-                          <span>{placementInfo.dimensions}</span>
-                          <span>•</span>
-                          <span className="capitalize">{ad.type}</span>
+                          <span>{placementInfo?.dimensions}</span>
                         </div>
                         <div className="flex items-center space-x-4 text-sm">
                           <span className="flex items-center space-x-1 theme-text-tertiary">
@@ -741,24 +700,8 @@ const AdsManagement: React.FC = () => {
                     </div>
 
                     <div className="flex items-center space-x-1">
-                      {/* Simulate stats buttons */}
                       <button
-                        onClick={() => simulateImpression(ad.id, 100)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                        title="Add 100 Impressions"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => simulateClick(ad.id)}
-                        className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors"
-                        title="Add 1 Click"
-                      >
-                        <MousePointer className="w-4 h-4" />
-                      </button>
-                      <div className="w-px h-6 theme-bg-tertiary mx-1"></div>
-                      <button
-                        onClick={() => handleToggleStatus(ad.id)}
+                        onClick={() => handleToggleStatus(ad)}
                         className={`p-2 rounded-lg transition-colors ${
                           ad.status === 'active' 
                             ? 'text-emerald-400 hover:bg-emerald-500/10' 
@@ -898,7 +841,6 @@ const AdsManagement: React.FC = () => {
                   </span>
                 </label>
                 
-                {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -907,7 +849,6 @@ const AdsManagement: React.FC = () => {
                   className="hidden"
                 />
                 
-                {/* Image preview or upload area */}
                 {imagePreview ? (
                   <div className="relative">
                     <div className="theme-bg-tertiary border theme-border-primary rounded-xl p-4">
@@ -1035,12 +976,8 @@ const AdsManagement: React.FC = () => {
                     max="10"
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 1 })}
-                    className={`w-full px-4 py-2.5 theme-bg-tertiary border rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50 ${
-                      formErrors.priority ? 'border-red-500' : 'theme-border-primary'
-                    }`}
+                    className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                   />
-                  {formErrors.priority && <p className="text-red-400 text-xs mt-1">{formErrors.priority}</p>}
-                  <p className="text-xs theme-text-muted mt-1">Higher priority ads are shown first</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium theme-text-secondary mb-2">Revenue (RWF)</label>
@@ -1050,9 +987,7 @@ const AdsManagement: React.FC = () => {
                     value={formData.revenue}
                     onChange={(e) => setFormData({ ...formData, revenue: parseInt(e.target.value) || 0 })}
                     className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
-                    placeholder="0"
                   />
-                  <p className="text-xs theme-text-muted mt-1">Expected revenue from this ad</p>
                 </div>
               </div>
 
@@ -1066,19 +1001,17 @@ const AdsManagement: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all flex items-center space-x-2"
+                  disabled={submitting}
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all disabled:opacity-50 flex items-center space-x-2"
                 >
-                  {editingAd ? (
-                    <>
-                      <Edit className="w-4 h-4" />
-                      <span>Update Ad</span>
-                    </>
+                  {submitting ? (
+                    <div className="w-4 h-4 border-2 border-[#0b0e11]/30 border-t-[#0b0e11] rounded-full animate-spin" />
+                  ) : editingAd ? (
+                    <Edit className="w-4 h-4" />
                   ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      <span>Create Ad</span>
-                    </>
+                    <Plus className="w-4 h-4" />
                   )}
+                  <span>{editingAd ? 'Update Ad' : 'Create Ad'}</span>
                 </button>
               </div>
             </form>
@@ -1086,7 +1019,7 @@ const AdsManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {showDeleteModal && deletingAd && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-md overflow-hidden">
@@ -1103,7 +1036,7 @@ const AdsManagement: React.FC = () => {
               
               <div className="theme-bg-tertiary rounded-xl p-4 mb-4">
                 <p className="theme-text-primary font-medium">{deletingAd.name}</p>
-                <p className="text-sm theme-text-muted">{AD_PLACEMENTS[deletingAd.placement].name}</p>
+                <p className="text-sm theme-text-muted">{AD_PLACEMENTS[deletingAd.placement]?.name}</p>
               </div>
               
               <div className="flex space-x-3">
@@ -1140,25 +1073,20 @@ const AdsManagement: React.FC = () => {
             </div>
             <div className="p-6">
               <div className="mb-4">
-                <p className="text-sm theme-text-muted mb-2">{AD_PLACEMENTS[previewAd.placement].name} • {AD_PLACEMENTS[previewAd.placement].dimensions}</p>
+                <p className="text-sm theme-text-muted mb-2">
+                  {AD_PLACEMENTS[previewAd.placement]?.name} • {AD_PLACEMENTS[previewAd.placement]?.dimensions}
+                </p>
                 <h4 className="font-semibold theme-text-primary">{previewAd.name}</h4>
               </div>
               <div className="theme-bg-tertiary rounded-xl p-4 flex items-center justify-center" style={{ minHeight: '200px' }}>
-                {previewAd.imageUrl ? (
-                  <img 
-                    src={previewAd.imageUrl} 
-                    alt={previewAd.name}
-                    className="max-w-full max-h-[400px] object-contain rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/728x250?text=Image+Not+Found';
-                    }}
-                  />
-                ) : (
-                  <div className="text-center theme-text-muted">
-                    <Image className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p>No image URL provided</p>
-                  </div>
-                )}
+                <img 
+                  src={getImageUrl(previewAd.imageUrl)} 
+                  alt={previewAd.name}
+                  className="max-w-full max-h-[400px] object-contain rounded-lg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/728x250?text=Image+Not+Found';
+                  }}
+                />
               </div>
               <div className="mt-4 flex items-center justify-between">
                 <a
@@ -1180,21 +1108,12 @@ const AdsManagement: React.FC = () => {
         </div>
       )}
 
-      {/* CSS for animation */}
       <style>{`
         @keyframes slide-in {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
-        }
+        .animate-slide-in { animation: slide-in 0.3s ease-out; }
       `}</style>
     </div>
   );
