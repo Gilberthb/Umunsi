@@ -42,6 +42,8 @@ interface RecentPost {
   id: string;
   title: string;
   author: string;
+  authorAvatar?: string;
+  featuredImage?: string;
   views: number;
   likes: number;
   comments: number;
@@ -56,12 +58,32 @@ interface RecentUser {
   role: string;
   lastActive: string;
   status: string;
+  avatar?: string;
 }
 
 interface SystemStatus {
   database: string;
   server: string;
 }
+
+// Helper function to get server base URL
+const getServerBaseUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
+  return apiUrl.replace('/api', '');
+};
+
+// Helper function to get image URL
+const getImageUrl = (imagePath?: string) => {
+  if (!imagePath) return null;
+  let fixedPath = imagePath;
+  if (imagePath.includes('/api/uploads/')) {
+    fixedPath = imagePath.replace('/api/uploads/', '/uploads/');
+  }
+  if (fixedPath.startsWith('http://') || fixedPath.startsWith('https://')) {
+    return fixedPath;
+  }
+  return `${getServerBaseUrl()}${fixedPath}`;
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -127,6 +149,8 @@ const AdminDashboard = () => {
           author: post.author 
             ? `${post.author.firstName || ''} ${post.author.lastName || ''}`.trim() || post.author.username || 'Unknown'
             : 'Unknown Author',
+          authorAvatar: post.author?.avatar || post.author?.profileImage || undefined,
+          featuredImage: post.featuredImage || post.thumbnail || post.image || undefined,
           views: post.viewCount || 0,
           likes: post.likeCount || 0,
           comments: post.commentCount || post._count?.comments || 0,
@@ -148,7 +172,8 @@ const AdminDashboard = () => {
           email: user.email || '',
           role: user.role || 'USER',
           lastActive: user.lastLogin || user.createdAt || new Date().toISOString(),
-          status: user.isActive !== false ? 'active' : 'inactive'
+          status: user.isActive !== false ? 'active' : 'inactive',
+          avatar: user.avatar || user.profileImage || undefined
         }));
         setRecentUsers(formattedUsers);
       }
@@ -400,22 +425,64 @@ const AdminDashboard = () => {
                   style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => navigate(`/admin/posts/${post.id}`)}
                 >
-                    <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-start space-x-4">
+                    {/* Featured Image */}
+                    <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 theme-bg-tertiary">
+                      {post.featuredImage ? (
+                        <img 
+                          src={getImageUrl(post.featuredImage) || ''} 
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <FileText className="w-6 h-6 theme-text-muted" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
                       <h4 className="theme-text-primary font-medium group-hover:text-[#fcd535] transition-colors line-clamp-1 mb-2">
                         {post.title}
                       </h4>
                       <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm">
-                        <span className="flex items-center space-x-1.5 theme-text-muted">
-                          <User className="w-3.5 h-3.5" />
+                        {/* Author with Avatar */}
+                        <span className="flex items-center space-x-2 theme-text-muted">
+                          <div className="w-5 h-5 rounded-full overflow-hidden theme-bg-tertiary flex-shrink-0">
+                            {post.authorAvatar ? (
+                              <img 
+                                src={getImageUrl(post.authorAvatar) || ''} 
+                                alt={post.author}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `<span class="text-[10px] font-medium theme-text-tertiary">${post.author[0]?.toUpperCase() || 'U'}</span>`;
+                                    parent.classList.add('flex', 'items-center', 'justify-center');
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#fcd535]/20 to-[#f0b90b]/20">
+                                <span className="text-[10px] font-medium theme-text-primary">{post.author[0]?.toUpperCase() || 'U'}</span>
+                              </div>
+                            )}
+                          </div>
                           <span>{post.author}</span>
-                          </span>
+                        </span>
                         <span className="flex items-center space-x-1.5 theme-text-muted">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>{formatDate(post.publishedAt)}</span>
-                          </span>
-                        </div>
+                        </span>
+                      </div>
                     </div>
+                    
                     <div className="flex items-center space-x-4">
                       <div className="hidden sm:flex items-center space-x-4 text-sm theme-text-muted">
                           <span className="flex items-center space-x-1">
@@ -486,10 +553,26 @@ const AdminDashboard = () => {
                     onClick={() => navigate(`/admin/users/${user.id}`)}
                   >
                     <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-br from-[var(--bg-tertiary)] to-[var(--border-primary)] rounded-xl flex items-center justify-center">
-                        <span className="text-sm font-semibold theme-text-primary">
-                          {user.username[0].toUpperCase()}
-                        </span>
+                      <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-gradient-to-br from-[var(--bg-tertiary)] to-[var(--border-primary)]">
+                        {user.avatar ? (
+                          <img 
+                            src={getImageUrl(user.avatar) || ''} 
+                            alt={user.username}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `<span class="text-sm font-semibold theme-text-primary">${user.username[0]?.toUpperCase() || 'U'}</span>`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold theme-text-primary">
+                            {user.username[0]?.toUpperCase() || 'U'}
+                          </span>
+                        )}
                       </div>
                       <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--bg-secondary)] ${user.status === 'active' ? 'bg-emerald-500' : 'bg-gray-500'}`}></div>
                       </div>
