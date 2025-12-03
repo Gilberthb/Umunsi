@@ -135,7 +135,7 @@ const AdminDashboard = () => {
         totalComments: dashboardResponse?.totalComments || 0,
         totalViews: dashboardResponse?.totalViews || 0,
         totalLikes: dashboardResponse?.totalLikes || 0
-      });
+        });
 
       let postsData = dashboardResponse?.recentArticles || [];
       if (postsData.length === 0 && postsResponse?.data) {
@@ -520,8 +520,8 @@ const AdminDashboard = () => {
                 >
                   Create First Post
                 </button>
-              </div>
-            )}
+                </div>
+              )}
               </div>
             </div>
 
@@ -571,7 +571,7 @@ const AdminDashboard = () => {
                         ) : (
                           <span className="text-sm font-semibold theme-text-primary">
                             {user.username[0]?.toUpperCase() || 'U'}
-                          </span>
+                        </span>
                         )}
                       </div>
                       <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--bg-secondary)] ${user.status === 'active' ? 'bg-emerald-500' : 'bg-gray-500'}`}></div>
@@ -585,10 +585,10 @@ const AdminDashboard = () => {
                     <div className="flex items-center space-x-1.5 px-2 py-1 theme-bg-tertiary rounded-lg">
                       {getRoleIcon(user.role)}
                       <span className="text-xs font-medium theme-text-tertiary">{user.role}</span>
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
+                  ))
+                ) : (
                 <div className="py-8 text-center">
                   <Users className="w-10 h-10 theme-text-muted mx-auto mb-3" />
                   <p className="theme-text-muted text-sm">No users found</p>

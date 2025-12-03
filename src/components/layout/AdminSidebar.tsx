@@ -132,9 +132,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           path: '/admin/posts',
           icon: FileText,
           badge: countsLoading ? '...' : dbCounts.posts,
-          color: 'from-blue-500 to-blue-600'
-        },
-        { 
+      color: 'from-blue-500 to-blue-600'
+    },
+    { 
           name: 'Add New',
           path: '/admin/posts/add',
           icon: Plus,
@@ -192,10 +192,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           badge: countsLoading ? '...' : dbCounts.users,
           color: 'from-cyan-500 to-cyan-600'
         },
-        { 
+    { 
           name: 'Roles',
-          path: '/admin/roles', 
-          icon: Shield, 
+      path: '/admin/roles', 
+      icon: Shield, 
           color: 'from-rose-500 to-rose-600',
           adminOnly: true
         }
@@ -215,17 +215,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           path: '/admin/analytics',
           icon: BarChart3,
           color: 'from-violet-500 to-violet-600'
-        },
-        { 
-          name: 'Reports', 
-          path: '/admin/reports', 
-          icon: PieChart, 
+    },
+    { 
+      name: 'Reports', 
+      path: '/admin/reports', 
+      icon: PieChart, 
           color: 'from-pink-500 to-pink-600'
-        },
-        { 
-          name: 'Performance', 
-          path: '/admin/performance', 
-          icon: Target, 
+    },
+    { 
+      name: 'Performance', 
+      path: '/admin/performance', 
+      icon: Target, 
           color: 'from-amber-500 to-amber-600'
         }
       ]
@@ -245,23 +245,23 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
           path: '/admin/settings',
           icon: Settings,
           color: 'from-gray-500 to-gray-600'
-        },
-        { 
-          name: 'Security', 
-          path: '/admin/security', 
+    },
+    { 
+      name: 'Security', 
+      path: '/admin/security', 
           icon: Shield, 
           color: 'from-red-500 to-red-600'
-        },
-        { 
-          name: 'Backup', 
-          path: '/admin/backup', 
-          icon: Cloud, 
+    },
+    { 
+      name: 'Backup', 
+      path: '/admin/backup', 
+      icon: Cloud, 
           color: 'from-sky-500 to-sky-600'
-        },
-        { 
-          name: 'Logs', 
-          path: '/admin/logs', 
-          icon: Activity, 
+    },
+    { 
+      name: 'Logs', 
+      path: '/admin/logs', 
+      icon: Activity, 
           color: 'from-emerald-500 to-emerald-600'
         }
       ]
@@ -368,10 +368,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
       }
     } catch (error) {
       console.error('Error fetching breakdown data:', error);
-      setBreakdownData({
+        setBreakdownData({
         title: 'Error',
         data: [{ label: 'Unable to load data', count: 0, color: 'red' }]
-      });
+        });
     } finally {
       setBreakdownLoading(false);
     }
@@ -493,13 +493,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                       <div key={item.path}>
                         {/* Main Item */}
                         <div
-                          className={`
+                        className={`
                             group flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 relative cursor-pointer
                             ${isItemActive && !hasSubItems
                               ? 'theme-bg-tertiary text-[#fcd535]' 
                               : 'theme-text-tertiary hover:theme-bg-tertiary hover:theme-text-primary'
-                            }
-                          `}
+                          }
+                        `}
                           onClick={() => {
                             if (hasSubItems) {
                               toggleExpanded(item.name);
@@ -507,12 +507,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                               navigate(item.path);
                             }
                           }}
-                        >
-                          {/* Active indicator */}
+                      >
+                        {/* Active indicator */}
                           {isItemActive && !hasSubItems && (
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#fcd535] rounded-r-full" />
-                          )}
-                          
+                        )}
+                        
                           {/* Icon */}
                           <div className={`p-2 rounded-lg transition-all duration-200 ${
                             isItemActive && !hasSubItems
@@ -520,32 +520,32 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                               : 'theme-bg-secondary theme-text-tertiary group-hover:theme-bg-tertiary group-hover:theme-text-primary'
                           }`}>
                             <Icon className="w-4 h-4" />
-                          </div>
-                          
-                          {!isCollapsed && (
-                            <div className="ml-3 flex-1 flex items-center justify-between">
+                        </div>
+                        
+                        {!isCollapsed && (
+                          <div className="ml-3 flex-1 flex items-center justify-between">
                               <span className="text-sm font-medium">{item.name}</span>
-                              <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2">
                                 {item.badge && !hasSubItems && (
-                                  <button
-                                    onClick={(e) => handleBadgeClick(item, e)}
+                                <button
+                                  onClick={(e) => handleBadgeClick(item, e)}
                                     className={`px-2 py-0.5 text-xs font-semibold rounded-md transition-all ${
-                                      isItemActive 
+                                    isItemActive 
                                         ? 'bg-[#fcd535]/20 text-[#fcd535]' 
                                         : 'theme-bg-secondary theme-text-tertiary hover:theme-bg-tertiary'
-                                    }`}
-                                  >
-                                    {item.badge}
-                                  </button>
-                                )}
+                                  }`}
+                                >
+                                  {item.badge}
+                                </button>
+                              )}
                                 {hasSubItems && (
                                   <div className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
                                     <ChevronDown className="w-4 h-4 theme-text-muted" />
                                   </div>
                                 )}
-                              </div>
                             </div>
-                          )}
+                          </div>
+                        )}
                         </div>
 
                         {/* Sub Items */}
@@ -573,20 +573,20 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isCollapsed, onToggleCollap
                                   
                                   <SubIcon className={`w-3.5 h-3.5 transition-all ${
                                     isSubItemActive ? 'text-[#fcd535]' : 'theme-text-muted group-hover:theme-text-primary'
-                                  }`} />
+                                    }`} />
                                   
                                   <span className="ml-3 text-xs font-medium">{subItem.name}</span>
                                   
-                                  {subItem.badge && (
+                                    {subItem.badge && (
                                     <span className={`ml-auto px-1.5 py-0.5 text-[10px] font-semibold rounded ${
-                                      isSubItemActive 
+                                        isSubItemActive 
                                         ? 'bg-[#fcd535]/20 text-[#fcd535]' 
                                         : 'theme-bg-secondary theme-text-muted'
-                                    }`}>
-                                      {subItem.badge}
-                                    </span>
-                                  )}
-                                </Link>
+                                      }`}>
+                                        {subItem.badge}
+                                      </span>
+                                    )}
+                      </Link>
                               );
                             })}
                           </div>
