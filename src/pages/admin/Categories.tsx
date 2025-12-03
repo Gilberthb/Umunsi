@@ -427,17 +427,17 @@ const Categories = () => {
       </div>
 
       {/* Search and Controls */}
-      <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] p-4 mb-6">
+      <div className="theme-bg-secondary rounded-xl border theme-border-primary p-4 mb-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex-1 max-w-md w-full">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4 group-focus-within:text-[#fcd535]" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 theme-text-muted w-4 h-4 group-focus-within:text-[#fcd535]" />
               <input
                 type="text"
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50"
+                className="w-full pl-10 pr-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50"
               />
             </div>
           </div>
@@ -452,7 +452,7 @@ const Categories = () => {
             <button
               onClick={fetchCategories}
               disabled={loading}
-              className="p-2.5 bg-[#2b2f36] text-gray-400 rounded-xl hover:bg-[#363a45] hover:text-white disabled:opacity-50 transition-all"
+              className="p-2.5 theme-bg-tertiary theme-text-tertiary rounded-xl hover:theme-bg-card-hover hover:theme-text-primary disabled:opacity-50 transition-all"
             >
               <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -461,60 +461,60 @@ const Categories = () => {
       </div>
 
       {/* Categories Table */}
-      <div className="bg-[#181a20] rounded-xl border border-[#2b2f36] overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#2b2f36] flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">{filteredCategories.length} Categories</h2>
-          <span className="text-xs text-gray-500">Last updated: {new Date().toLocaleTimeString()}</span>
+      <div className="theme-bg-secondary rounded-xl border theme-border-primary overflow-hidden">
+        <div className="px-6 py-4 border-b theme-border-primary flex items-center justify-between">
+          <h2 className="text-lg font-semibold theme-text-primary">{filteredCategories.length} Categories</h2>
+          <span className="text-xs theme-text-muted">Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
               <div className="w-10 h-10 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-400">Loading categories...</p>
+              <p className="theme-text-tertiary">Loading categories...</p>
             </div>
           </div>
         ) : filteredCategories.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-[#2b2f36] rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FolderOpen className="w-8 h-8 text-gray-500" />
+            <div className="w-16 h-16 theme-bg-tertiary rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <FolderOpen className="w-8 h-8 theme-text-muted" />
             </div>
-            <h3 className="text-lg font-medium text-white mb-2">No categories found</h3>
-            <p className="text-gray-400 mb-4">{searchTerm ? 'Try adjusting your search.' : 'Create your first category.'}</p>
+            <h3 className="text-lg font-medium theme-text-primary mb-2">No categories found</h3>
+            <p className="theme-text-tertiary mb-4">{searchTerm ? 'Try adjusting your search.' : 'Create your first category.'}</p>
           </div>
         ) : (
           <table className="w-full">
-            <thead className="bg-[#1e2329] border-b border-[#2b2f36]">
+            <thead className="theme-bg-tertiary border-b theme-border-primary">
                 <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Articles</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Created</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Articles</th>
+                <th className="px-6 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Actions</th>
                 </tr>
               </thead>
-            <tbody className="divide-y divide-[#2b2f36]">
+            <tbody className="divide-y theme-border-primary">
                 {filteredCategories.map((category) => (
-                <tr key={category.id} className="hover:bg-[#1e2329] transition-colors">
+                <tr key={category.id} className="hover:theme-bg-tertiary transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-[#fcd535] to-[#f0b90b] rounded-xl flex items-center justify-center">
                         <span className="text-[#0b0e11] font-bold text-sm">{category.name.charAt(0)}</span>
                         </div>
                         <div>
-                        <p className="text-sm font-medium text-white">{category.name}</p>
-                        <p className="text-xs text-gray-500">/{category.slug}</p>
+                        <p className="text-sm font-medium theme-text-primary">{category.name}</p>
+                        <p className="text-xs theme-text-muted">/{category.slug}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                    <p className="text-sm text-gray-400 max-w-xs truncate">{category.description}</p>
+                    <p className="text-sm theme-text-tertiary max-w-xs truncate">{category.description}</p>
                     </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <FileText className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm text-white">{category.articleCount}</span>
+                      <FileText className="w-4 h-4 theme-text-muted" />
+                      <span className="text-sm theme-text-primary">{category.articleCount}</span>
                       </div>
                     </td>
                   <td className="px-6 py-4">
@@ -526,25 +526,25 @@ const Categories = () => {
                         {category.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">{category.createdAt ? formatDate(category.createdAt) : 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm theme-text-tertiary">{category.createdAt ? formatDate(category.createdAt) : 'N/A'}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-1">
                         <button 
                           onClick={() => openViewModal(category)}
-                        className="p-1.5 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg transition-colors"
+                        className="p-1.5 theme-text-muted hover:text-[#fcd535] hover:theme-bg-tertiary rounded-lg transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => openEditModal(category)}
-                        className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
+                        className="p-1.5 theme-text-muted hover:text-blue-400 hover:theme-bg-tertiary rounded-lg transition-colors"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleToggleStatus(category.id, category.isActive ?? true)}
                           disabled={togglingStatusId === category.id}
-                          className={`p-1.5 hover:bg-[#2b2f36] rounded-lg transition-colors disabled:opacity-50 ${
+                          className={`p-1.5 hover:theme-bg-tertiary rounded-lg transition-colors disabled:opacity-50 ${
                             category.isActive ? 'text-emerald-400' : 'text-red-400'
                           }`}
                           title={category.isActive ? 'Click to deactivate' : 'Click to activate'}
@@ -557,7 +557,7 @@ const Categories = () => {
                         </button>
                         <button 
                           onClick={() => openDeleteModal(category)}
-                        className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
+                        className="p-1.5 theme-text-muted hover:text-red-400 hover:theme-bg-tertiary rounded-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -573,10 +573,10 @@ const Categories = () => {
       {/* Add Category Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] w-full max-w-lg">
-            <div className="flex items-center justify-between p-6 border-b border-[#2b2f36]">
-              <h2 className="text-xl font-bold text-white">Add New Category</h2>
-              <button onClick={closeAddModal} className="text-gray-400 hover:text-white">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-lg">
+            <div className="flex items-center justify-between p-6 border-b theme-border-primary">
+              <h2 className="text-xl font-bold theme-text-primary">Add New Category</h2>
+              <button onClick={closeAddModal} className="theme-text-tertiary hover:theme-text-primary">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -590,27 +590,27 @@ const Categories = () => {
               )}
 
                 <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Category Name *</label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Category Name *</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                   onChange={handleInputChange}
                     required
-                  className="w-full px-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50"
+                  className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50"
                     placeholder="Enter category name"
                   />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Description *</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     required
                     rows={3}
-                  className="w-full px-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd535]/50 resize-none"
+                  className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50 resize-none"
                   placeholder="Describe this category..."
                   />
               </div>
@@ -622,13 +622,13 @@ const Categories = () => {
                   name="isActive"
                   checked={formData.isActive}
                   onChange={handleInputChange}
-                  className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535] focus:ring-[#fcd535]/50"
+                  className="w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535] focus:ring-[#fcd535]/50"
                 />
-                <label htmlFor="isActive" className="ml-2 text-sm text-gray-300">Category is active</label>
+                <label htmlFor="isActive" className="ml-2 text-sm theme-text-secondary">Category is active</label>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t border-[#2b2f36]">
-                <button type="button" onClick={closeAddModal} className="px-4 py-2 text-gray-400 hover:text-white transition-colors">
+              <div className="flex justify-end space-x-3 pt-4 border-t theme-border-primary">
+                <button type="button" onClick={closeAddModal} className="px-4 py-2 theme-text-tertiary hover:theme-text-primary transition-colors">
                   Cancel
                 </button>
                 <button
@@ -651,10 +651,10 @@ const Categories = () => {
       {/* Edit Category Modal */}
       {showEditModal && editingCategory && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] w-full max-w-lg">
-            <div className="flex items-center justify-between p-6 border-b border-[#2b2f36]">
-              <h2 className="text-xl font-bold text-white">Edit Category</h2>
-              <button onClick={closeEditModal} className="text-gray-400 hover:text-white">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-lg">
+            <div className="flex items-center justify-between p-6 border-b theme-border-primary">
+              <h2 className="text-xl font-bold theme-text-primary">Edit Category</h2>
+              <button onClick={closeEditModal} className="theme-text-tertiary hover:theme-text-primary">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -668,26 +668,26 @@ const Categories = () => {
               )}
 
                 <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Category Name *</label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Category Name *</label>
                   <input
                     type="text"
                     name="name"
                     value={editFormData.name}
                     onChange={handleEditInputChange}
                     required
-                  className="w-full px-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50"
+                  className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50"
                   />
                 </div>
 
                 <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
+                <label className="block text-sm font-medium theme-text-secondary mb-2">Description *</label>
                   <textarea
                     name="description"
                     value={editFormData.description}
                     onChange={handleEditInputChange}
                     required
                     rows={3}
-                  className="w-full px-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white focus:outline-none focus:border-[#fcd535]/50 resize-none"
+                  className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50 resize-none"
                   />
               </div>
 
@@ -698,13 +698,13 @@ const Categories = () => {
                   name="isActive"
                   checked={editFormData.isActive}
                   onChange={handleEditInputChange}
-                  className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
+                  className="w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535]"
                 />
-                <label htmlFor="edit-isActive" className="ml-2 text-sm text-gray-300">Category is active</label>
+                <label htmlFor="edit-isActive" className="ml-2 text-sm theme-text-secondary">Category is active</label>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t border-[#2b2f36]">
-                <button type="button" onClick={closeEditModal} className="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+              <div className="flex justify-end space-x-3 pt-4 border-t theme-border-primary">
+                <button type="button" onClick={closeEditModal} className="px-4 py-2 theme-text-tertiary hover:theme-text-primary">Cancel</button>
                 <button type="submit" disabled={editFormLoading} className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center space-x-2">
                   {editFormLoading ? <><div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div><span>Updating...</span></> : <><Save className="w-4 h-4" /><span>Update</span></>}
                 </button>
@@ -717,23 +717,23 @@ const Categories = () => {
       {/* View Category Modal */}
       {showViewModal && viewingCategory && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-[#2b2f36]">
-              <h2 className="text-xl font-bold text-white">Category Details</h2>
-              <button onClick={closeViewModal} className="text-gray-400 hover:text-white">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b theme-border-primary">
+              <h2 className="text-xl font-bold theme-text-primary">Category Details</h2>
+              <button onClick={closeViewModal} className="theme-text-tertiary hover:theme-text-primary">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6 space-y-6">
-              <div className="bg-[#1e2329] rounded-xl p-6 border border-[#2b2f36]">
+              <div className="theme-bg-tertiary rounded-xl p-6 border theme-border-primary">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-[#fcd535] to-[#f0b90b] rounded-xl flex items-center justify-center">
                     <FolderOpen className="w-8 h-8 text-[#0b0e11]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">{viewingCategory.name}</h3>
-                    <p className="text-gray-400 mt-1">{viewingCategory.description}</p>
+                    <h3 className="text-xl font-bold theme-text-primary">{viewingCategory.name}</h3>
+                    <p className="theme-text-tertiary mt-1">{viewingCategory.description}</p>
                     <div className="flex items-center space-x-3 mt-3">
                       <span className={`px-2.5 py-1 text-xs font-medium rounded-md border ${viewingCategory.isActive ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>
                         {viewingCategory.isActive ? 'Active' : 'Inactive'}
@@ -747,25 +747,25 @@ const Categories = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#1e2329] rounded-xl p-4 border border-[#2b2f36]">
-                  <p className="text-xs text-gray-500 mb-1">Category ID</p>
-                  <p className="text-sm text-white font-mono">{viewingCategory.id}</p>
+                <div className="theme-bg-tertiary rounded-xl p-4 border theme-border-primary">
+                  <p className="text-xs theme-text-muted mb-1">Category ID</p>
+                  <p className="text-sm theme-text-primary font-mono">{viewingCategory.id}</p>
                   </div>
-                <div className="bg-[#1e2329] rounded-xl p-4 border border-[#2b2f36]">
-                  <p className="text-xs text-gray-500 mb-1">Slug</p>
-                  <p className="text-sm text-white font-mono">{viewingCategory.slug}</p>
+                <div className="theme-bg-tertiary rounded-xl p-4 border theme-border-primary">
+                  <p className="text-xs theme-text-muted mb-1">Slug</p>
+                  <p className="text-sm theme-text-primary font-mono">{viewingCategory.slug}</p>
                   </div>
-                <div className="bg-[#1e2329] rounded-xl p-4 border border-[#2b2f36]">
-                  <p className="text-xs text-gray-500 mb-1">Created</p>
-                  <p className="text-sm text-white">{viewingCategory.createdAt ? formatDate(viewingCategory.createdAt) : 'N/A'}</p>
+                <div className="theme-bg-tertiary rounded-xl p-4 border theme-border-primary">
+                  <p className="text-xs theme-text-muted mb-1">Created</p>
+                  <p className="text-sm theme-text-primary">{viewingCategory.createdAt ? formatDate(viewingCategory.createdAt) : 'N/A'}</p>
                   </div>
-                <div className="bg-[#1e2329] rounded-xl p-4 border border-[#2b2f36]">
-                  <p className="text-xs text-gray-500 mb-1">Updated</p>
-                  <p className="text-sm text-white">{viewingCategory.updatedAt ? formatDate(viewingCategory.updatedAt) : 'N/A'}</p>
+                <div className="theme-bg-tertiary rounded-xl p-4 border theme-border-primary">
+                  <p className="text-xs theme-text-muted mb-1">Updated</p>
+                  <p className="text-sm theme-text-primary">{viewingCategory.updatedAt ? formatDate(viewingCategory.updatedAt) : 'N/A'}</p>
                     </div>
                   </div>
                   
-              <div className="flex items-center space-x-3 pt-4 border-t border-[#2b2f36]">
+              <div className="flex items-center space-x-3 pt-4 border-t theme-border-primary">
                 <button onClick={() => { closeViewModal(); openEditModal(viewingCategory); }} className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 flex items-center space-x-2">
                   <Edit className="w-4 h-4" /><span>Edit</span>
                   </button>
@@ -781,18 +781,18 @@ const Categories = () => {
       {/* Delete Category Modal */}
       {showDeleteModal && deletingCategory && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] w-full max-w-lg">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary w-full max-w-lg">
             <div className="flex items-center justify-between p-6 border-b border-red-500/30 bg-red-500/5">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
                   <AlertCircle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">Delete Category</h2>
+                  <h2 className="text-lg font-bold theme-text-primary">Delete Category</h2>
                   <p className="text-xs text-red-400">This action cannot be undone</p>
                 </div>
               </div>
-              <button onClick={closeDeleteModal} className="text-gray-400 hover:text-white">
+              <button onClick={closeDeleteModal} className="theme-text-tertiary hover:theme-text-primary">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -814,18 +814,18 @@ const Categories = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Type "DELETE" to confirm</label>
+                  <label className="block text-sm font-medium theme-text-secondary mb-2">Type "DELETE" to confirm</label>
                   <input
                     type="text"
                     value={deleteText}
                     onChange={(e) => setDeleteText(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-[#2b2f36] border border-[#2b2f36] rounded-xl text-white text-center font-mono tracking-wider focus:outline-none focus:border-red-500/50"
+                    className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary text-center font-mono tracking-wider focus:outline-none focus:border-red-500/50"
                     placeholder="DELETE"
                   />
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-[#2b2f36]">
-                  <button type="button" onClick={closeDeleteModal} className="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+                <div className="flex justify-end space-x-3 pt-4 border-t theme-border-primary">
+                  <button type="button" onClick={closeDeleteModal} className="px-4 py-2 theme-text-tertiary hover:theme-text-primary">Cancel</button>
                   <button
                     type="submit"
                     disabled={deleteFormLoading || deleteText !== 'DELETE'}
