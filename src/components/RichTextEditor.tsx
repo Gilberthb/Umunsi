@@ -456,8 +456,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       type="button"
       onClick={onClick}
       title={title}
-      className={`p-2 rounded hover:bg-[#2b2f36] transition-colors ${
-        isActive ? 'bg-[#2b2f36] text-[#fcd535]' : 'text-gray-400 hover:text-white'
+      className={`p-2 rounded hover:theme-bg-card-hover transition-colors ${
+        isActive ? 'theme-bg-tertiary text-[#fcd535]' : 'theme-text-muted hover:theme-text-primary'
       }`}
     >
       {icon}
@@ -465,11 +465,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   );
 
   return (
-    <div className={`rich-text-editor border border-[#2b2f36] rounded-xl bg-[#0b0e11] ${className}`}>
+    <div className={`rich-text-editor border theme-border-primary rounded-xl theme-bg-tertiary ${className}`}>
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-[#2b2f36] bg-[#1e2329] rounded-t-xl">
+      <div className="flex items-center gap-1 p-2 border-b theme-border-primary theme-bg-secondary rounded-t-xl">
         {/* Text Formatting */}
-        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
+        <div className="flex items-center gap-1 border-r theme-border-primary pr-2">
           <ToolbarButton
             onClick={() => execCommand('bold')}
             icon={<Bold className="w-4 h-4" />}
@@ -488,7 +488,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
 
         {/* Lists */}
-        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
+        <div className="flex items-center gap-1 border-r theme-border-primary pr-2">
           <ToolbarButton
             onClick={() => execCommand('insertUnorderedList')}
             icon={<List className="w-4 h-4" />}
@@ -502,7 +502,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
 
         {/* Alignment */}
-        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
+        <div className="flex items-center gap-1 border-r theme-border-primary pr-2">
           <ToolbarButton
             onClick={() => execCommand('justifyLeft')}
             icon={<AlignLeft className="w-4 h-4" />}
@@ -521,7 +521,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </div>
 
         {/* Insert */}
-        <div className="flex items-center gap-1 border-r border-[#2b2f36] pr-2">
+        <div className="flex items-center gap-1 border-r theme-border-primary pr-2">
           <ToolbarButton
             onClick={insertLink}
             icon={<Link className="w-4 h-4" />}
@@ -565,17 +565,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`min-h-[300px] p-4 focus:outline-none text-white bg-[#0b0e11] rounded-b-xl ${
+        className={`min-h-[300px] p-4 focus:outline-none theme-text-primary theme-bg-tertiary rounded-b-xl ${
           isFocused ? 'ring-2 ring-[#fcd535]/50' : ''
         }`}
-        style={{ minHeight: '300px', color: 'white' }}
+        style={{ minHeight: '300px' }}
         data-placeholder={placeholder}
         suppressContentEditableWarning={true}
       />
 
       {/* Placeholder */}
       {!value && (
-        <div className="absolute top-16 left-4 text-gray-500 pointer-events-none">
+        <div className="absolute top-16 left-4 theme-text-muted pointer-events-none">
           {placeholder}
         </div>
       )}

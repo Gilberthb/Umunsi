@@ -274,10 +274,10 @@ const EditPost: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="p-6 bg-[#0b0e11] min-h-screen flex items-center justify-center">
+      <div className="p-6 theme-bg-primary min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading article...</p>
+          <p className="theme-text-muted">Loading article...</p>
         </div>
       </div>
     );
@@ -285,11 +285,11 @@ const EditPost: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="p-6 bg-[#0b0e11] min-h-screen flex items-center justify-center">
+      <div className="p-6 theme-bg-primary min-h-screen flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Article Not Found</h2>
-          <p className="text-gray-400 mb-4">The article you're looking for doesn't exist.</p>
+          <h2 className="text-xl font-semibold theme-text-primary mb-2">Article Not Found</h2>
+          <p className="theme-text-muted mb-4">The article you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate('/admin/posts')}
             className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-xl hover:from-[#f0b90b] hover:to-[#d4a00a] transition-all"
@@ -303,14 +303,14 @@ const EditPost: React.FC = () => {
   }
 
   return (
-    <div className="p-6 bg-[#0b0e11] min-h-screen">
+    <div className="p-6 theme-bg-primary min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/admin/posts')}
-              className="flex items-center text-gray-400 hover:text-[#fcd535] transition-colors"
+              className="flex items-center theme-text-muted hover:text-[#fcd535] transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Back to Posts
@@ -321,8 +321,8 @@ const EditPost: React.FC = () => {
                   <Edit3 className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Edit Article</h1>
-                  <p className="text-gray-400 mt-1">Update your news article</p>
+                  <h1 className="text-2xl font-bold theme-text-primary">Edit Article</h1>
+                  <p className="theme-text-muted mt-1">Update your news article</p>
                 </div>
               </div>
             </div>
@@ -331,7 +331,7 @@ const EditPost: React.FC = () => {
             <button
               type="button"
               onClick={() => setPreviewMode(!previewMode)}
-              className="flex items-center px-4 py-2.5 text-gray-300 border border-[#2b2f36] rounded-xl hover:bg-[#1e2329] transition-colors"
+              className="flex items-center px-4 py-2.5 theme-text-secondary border theme-border-primary rounded-xl hover:theme-bg-tertiary transition-colors"
             >
               <Eye className="w-4 h-4 mr-2" />
               {previewMode ? 'Edit' : 'Preview'}
@@ -364,11 +364,11 @@ const EditPost: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36]">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary">
             <form id="post-form" onSubmit={handleSubmit} className="p-6">
               {/* Title */}
               <div className="mb-6">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="title" className="block text-sm font-medium theme-text-primary mb-2">
                   Article Title *
                 </label>
                 <input
@@ -377,8 +377,8 @@ const EditPost: React.FC = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-[#0b0e11] border rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-lg ${
-                    errors.title ? 'border-red-500' : 'border-[#2b2f36]'
+                  className={`w-full px-4 py-3 theme-bg-tertiary border rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary placeholder:theme-text-muted text-lg ${
+                    errors.title ? 'border-red-500' : 'theme-border-primary'
                   }`}
                   placeholder="Enter article title..."
                   maxLength={200}
@@ -386,14 +386,14 @@ const EditPost: React.FC = () => {
                 {errors.title && (
                   <p className="mt-1 text-sm text-red-400">{errors.title}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm theme-text-muted">
                   {formData.title.length}/200 characters
                 </p>
               </div>
 
               {/* Content */}
               <div className="mb-6">
-                <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="content" className="block text-sm font-medium theme-text-primary mb-2">
                   Content *
                 </label>
                 <RichTextEditor
@@ -410,7 +410,7 @@ const EditPost: React.FC = () => {
               {/* Excerpt */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="excerpt" className="block text-sm font-medium text-gray-300">
+                  <label htmlFor="excerpt" className="block text-sm font-medium theme-text-primary">
                     Excerpt
                   </label>
                   <button
@@ -427,8 +427,8 @@ const EditPost: React.FC = () => {
                   value={formData.excerpt}
                   onChange={handleInputChange}
                   rows={3}
-                  className={`w-full px-4 py-3 bg-[#0b0e11] border rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 ${
-                    errors.excerpt ? 'border-red-500' : 'border-[#2b2f36]'
+                  className={`w-full px-4 py-3 theme-bg-tertiary border rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary placeholder:theme-text-muted ${
+                    errors.excerpt ? 'border-red-500' : 'theme-border-primary'
                   }`}
                   placeholder="Brief description of your article..."
                   maxLength={500}
@@ -436,14 +436,14 @@ const EditPost: React.FC = () => {
                 {errors.excerpt && (
                   <p className="mt-1 text-sm text-red-400">{errors.excerpt}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm theme-text-muted">
                   {formData.excerpt.length}/500 characters
                 </p>
               </div>
 
               {/* Featured Image */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium theme-text-primary mb-2">
                   Featured Image
                 </label>
                 
@@ -453,7 +453,7 @@ const EditPost: React.FC = () => {
                       <img
                         src={`${import.meta.env.VITE_API_URL || ''}${selectedFeaturedImage.url}`}
                         alt="Featured image preview"
-                        className="w-full h-48 object-cover rounded-xl border border-[#2b2f36]"
+                        className="w-full h-48 object-cover rounded-xl border theme-border-primary"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
                         }}
@@ -466,10 +466,10 @@ const EditPost: React.FC = () => {
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36]">
+                    <div className="flex items-center justify-between p-3 theme-bg-tertiary rounded-xl border theme-border-primary">
                       <div>
-                        <p className="text-sm font-medium text-white">{selectedFeaturedImage.originalName}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm font-medium theme-text-primary">{selectedFeaturedImage.originalName}</p>
+                        <p className="text-xs theme-text-muted">
                           {(selectedFeaturedImage.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
@@ -483,9 +483,9 @@ const EditPost: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-[#2b2f36] rounded-xl p-6 text-center hover:border-[#fcd535]/50 transition-colors bg-[#0b0e11]">
-                    <ImageIcon className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400 mb-2">No featured image selected</p>
+                  <div className="border-2 border-dashed theme-border-primary rounded-xl p-6 text-center hover:border-[#fcd535]/50 transition-colors theme-bg-tertiary">
+                    <ImageIcon className="w-12 h-12 theme-text-muted mx-auto mb-4" />
+                    <p className="theme-text-muted mb-2">No featured image selected</p>
                     <button
                       type="button"
                       onClick={() => setShowMediaLibrary(true)}
@@ -504,8 +504,8 @@ const EditPost: React.FC = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Publish Settings */}
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary p-6">
+            <h3 className="text-lg font-semibold theme-text-primary mb-4 flex items-center">
               <FileText className="w-5 h-5 mr-2 text-[#fcd535]" />
               Publish Settings
             </h3>
@@ -513,7 +513,7 @@ const EditPost: React.FC = () => {
             <div className="space-y-4">
               {/* Status */}
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="status" className="block text-sm font-medium theme-text-primary mb-2">
                   Status
                 </label>
                 <select
@@ -521,7 +521,7 @@ const EditPost: React.FC = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary"
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="PUBLISHED">Published</option>
@@ -531,7 +531,7 @@ const EditPost: React.FC = () => {
 
               {/* Category */}
               <div>
-                <label htmlFor="categoryId" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="categoryId" className="block text-sm font-medium theme-text-primary mb-2">
                   Category
                 </label>
                 <select
@@ -539,7 +539,7 @@ const EditPost: React.FC = () => {
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary"
                 >
                   <option value="">Select a category</option>
                   {categories.map(category => (
@@ -552,48 +552,48 @@ const EditPost: React.FC = () => {
 
               {/* Options */}
               <div className="space-y-3 pt-2">
-                <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
+                <label className="flex items-center p-3 theme-bg-tertiary rounded-xl border theme-border-primary cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                   <input
                     type="checkbox"
                     name="isFeatured"
                     checked={formData.isFeatured}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
+                    className="w-4 h-4 text-[#fcd535] theme-bg-tertiary theme-border-primary rounded focus:ring-[#fcd535]"
                   />
                   <Star className="w-4 h-4 ml-3 text-yellow-500" />
-                  <span className="ml-2 text-sm text-gray-300">Featured Article</span>
+                  <span className="ml-2 text-sm theme-text-primary">Featured Article</span>
                 </label>
 
-                <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
+                <label className="flex items-center p-3 theme-bg-tertiary rounded-xl border theme-border-primary cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                   <input
                     type="checkbox"
                     name="isPinned"
                     checked={formData.isPinned}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
+                    className="w-4 h-4 text-[#fcd535] theme-bg-tertiary theme-border-primary rounded focus:ring-[#fcd535]"
                   />
                   <Pin className="w-4 h-4 ml-3 text-blue-500" />
-                  <span className="ml-2 text-sm text-gray-300">Pinned Article</span>
+                  <span className="ml-2 text-sm theme-text-primary">Pinned Article</span>
                 </label>
 
-                <label className="flex items-center p-3 bg-[#0b0e11] rounded-xl border border-[#2b2f36] cursor-pointer hover:border-[#fcd535]/50 transition-colors">
+                <label className="flex items-center p-3 theme-bg-tertiary rounded-xl border theme-border-primary cursor-pointer hover:border-[#fcd535]/50 transition-colors">
                   <input
                     type="checkbox"
                     name="allowComments"
                     checked={formData.allowComments}
                     onChange={handleInputChange}
-                    className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
+                    className="w-4 h-4 text-[#fcd535] theme-bg-tertiary theme-border-primary rounded focus:ring-[#fcd535]"
                   />
                   <MessageCircle className="w-4 h-4 ml-3 text-emerald-500" />
-                  <span className="ml-2 text-sm text-gray-300">Allow Comments</span>
+                  <span className="ml-2 text-sm theme-text-primary">Allow Comments</span>
                 </label>
               </div>
             </div>
           </div>
 
           {/* Tags */}
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary p-6">
+            <h3 className="text-lg font-semibold theme-text-primary mb-4 flex items-center">
               <Tag className="w-5 h-5 mr-2 text-[#fcd535]" />
               Tags
             </h3>
@@ -605,7 +605,7 @@ const EditPost: React.FC = () => {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-sm"
+                  className="flex-1 px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary placeholder:theme-text-muted text-sm"
                   placeholder="Add a tag..."
                 />
                 <button
@@ -628,7 +628,7 @@ const EditPost: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="ml-2 text-[#fcd535] hover:text-white"
+                        className="ml-2 text-[#fcd535] hover:text-[#f0b90b]"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -640,8 +640,8 @@ const EditPost: React.FC = () => {
           </div>
 
           {/* SEO Settings */}
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary p-6">
+            <h3 className="text-lg font-semibold theme-text-primary mb-4 flex items-center">
               <Globe className="w-5 h-5 mr-2 text-[#fcd535]" />
               SEO Settings
             </h3>
@@ -650,7 +650,7 @@ const EditPost: React.FC = () => {
               {/* Meta Title */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="metaTitle" className="block text-sm font-medium text-gray-300">
+                  <label htmlFor="metaTitle" className="block text-sm font-medium theme-text-primary">
                     Meta Title
                   </label>
                   <button
@@ -667,7 +667,7 @@ const EditPost: React.FC = () => {
                   name="metaTitle"
                   value={formData.metaTitle}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-sm"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary placeholder:theme-text-muted text-sm"
                   placeholder="SEO title for search engines..."
                 />
               </div>
@@ -675,7 +675,7 @@ const EditPost: React.FC = () => {
               {/* Meta Description */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="metaDescription" className="block text-sm font-medium text-gray-300">
+                  <label htmlFor="metaDescription" className="block text-sm font-medium theme-text-primary">
                     Meta Description
                   </label>
                   <button
@@ -692,7 +692,7 @@ const EditPost: React.FC = () => {
                   value={formData.metaDescription}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] text-white placeholder-gray-500 text-sm"
+                  className="w-full px-3 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535] theme-text-primary placeholder:theme-text-muted text-sm"
                   placeholder="SEO description for search engines..."
                 />
               </div>
