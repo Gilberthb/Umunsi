@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Megaphone, Plus, Edit, Trash2, Eye, EyeOff, Search,
   RefreshCw, Image, Link as LinkIcon, Calendar, DollarSign,
   BarChart3, TrendingUp, MousePointer, ExternalLink, Copy,
   CheckCircle, XCircle, Clock, Pause, Play, Settings,
   Monitor, Smartphone, Layout, SidebarClose, Square, RectangleVertical,
-  Upload, AlertTriangle, Info
+  Upload, AlertTriangle, Info, ImagePlus, X
 } from 'lucide-react';
 
 // Ad Types
@@ -156,6 +156,10 @@ const AdsManagement: React.FC = () => {
     revenue: 0
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load ads from localStorage on mount
   useEffect(() => {
@@ -196,9 +200,7 @@ const AdsManagement: React.FC = () => {
       errors.name = 'Ad name is required';
     }
     if (!formData.imageUrl.trim()) {
-      errors.imageUrl = 'Image URL is required';
-    } else if (!isValidUrl(formData.imageUrl)) {
-      errors.imageUrl = 'Please enter a valid URL';
+      errors.imageUrl = 'Please upload an image';
     }
     if (!formData.targetUrl.trim()) {
       errors.targetUrl = 'Target URL is required';
@@ -228,6 +230,82 @@ const AdsManagement: React.FC = () => {
       return true;
     } catch {
       return false;
+    }
+  };
+
+  // File upload handlers
+  const handleFileSelect = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setFormErrors(prev => ({ ...prev, imageUrl: 'Please upload a valid image (JPG, PNG, GIF, or WebP)' }));
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setFormErrors(prev => ({ ...prev, imageUrl: 'Image size must be less than 5MB' }));
+      return;
+    }
+
+    setUploadingImage(true);
+    setFormErrors(prev => ({ ...prev, imageUrl: '' }));
+
+    try {
+      // Convert to base64 for localStorage storage
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImagePreview(base64String);
+        setFormData(prev => ({ ...prev, imageUrl: base64String }));
+        setUploadingImage(false);
+      };
+      reader.onerror = () => {
+        setFormErrors(prev => ({ ...prev, imageUrl: 'Failed to read file' }));
+        setUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      setFormErrors(prev => ({ ...prev, imageUrl: 'Failed to process image' }));
+      setUploadingImage(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -279,6 +357,7 @@ const AdsManagement: React.FC = () => {
       priority: ad.priority,
       revenue: ad.revenue
     });
+    setImagePreview(ad.imageUrl || null);
     setFormErrors({});
     setShowModal(true);
   };
@@ -345,6 +424,10 @@ const AdsManagement: React.FC = () => {
     });
     setFormErrors({});
     setEditingAd(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const showSuccessMessage = () => {
@@ -811,22 +894,90 @@ const AdsManagement: React.FC = () => {
                 <label className="block text-sm font-medium theme-text-secondary mb-2">
                   <span className="flex items-center space-x-2">
                     <Image className="w-4 h-4" />
-                    <span>Image URL *</span>
+                    <span>Ad Image *</span>
                   </span>
                 </label>
+                
+                {/* Hidden file input */}
                 <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className={`w-full px-4 py-2.5 theme-bg-tertiary border rounded-xl theme-text-primary focus:outline-none focus:border-[#fcd535]/50 ${
-                    formErrors.imageUrl ? 'border-red-500' : 'theme-border-primary'
-                  }`}
-                  placeholder="https://example.com/ad-image.jpg"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handleFileInputChange}
+                  className="hidden"
                 />
-                {formErrors.imageUrl && <p className="text-red-400 text-xs mt-1">{formErrors.imageUrl}</p>}
-                <p className="text-xs theme-text-muted mt-1">
-                  Recommended size: {AD_PLACEMENTS[formData.placement].dimensions}
-                </p>
+                
+                {/* Image preview or upload area */}
+                {imagePreview ? (
+                  <div className="relative">
+                    <div className="theme-bg-tertiary border theme-border-primary rounded-xl p-4">
+                      <div className="relative inline-block">
+                        <img
+                          src={imagePreview}
+                          alt="Ad preview"
+                          className="max-h-48 rounded-lg object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="mt-3 flex items-center space-x-3">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-1.5 theme-bg-secondary border theme-border-primary rounded-lg text-sm theme-text-secondary hover:border-[#fcd535]/50 transition-colors"
+                        >
+                          Change Image
+                        </button>
+                        <span className="text-xs theme-text-muted">
+                          Recommended: {AD_PLACEMENTS[formData.placement].dimensions}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`cursor-pointer border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                      isDragging
+                        ? 'border-[#fcd535] bg-[#fcd535]/10'
+                        : formErrors.imageUrl
+                        ? 'border-red-500 hover:border-red-400'
+                        : 'theme-border-primary hover:border-[#fcd535]/50'
+                    }`}
+                  >
+                    {uploadingImage ? (
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mb-3"></div>
+                        <p className="theme-text-secondary text-sm">Processing image...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-[#fcd535]/10 flex items-center justify-center">
+                          <ImagePlus className="w-8 h-8 text-[#fcd535]" />
+                        </div>
+                        <p className="theme-text-primary font-medium mb-1">
+                          {isDragging ? 'Drop image here' : 'Click to upload or drag and drop'}
+                        </p>
+                        <p className="text-sm theme-text-muted mb-2">
+                          JPG, PNG, GIF or WebP (max 5MB)
+                        </p>
+                        <p className="text-xs text-[#fcd535]">
+                          Recommended size: {AD_PLACEMENTS[formData.placement].dimensions}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+                
+                {formErrors.imageUrl && <p className="text-red-400 text-xs mt-2">{formErrors.imageUrl}</p>}
               </div>
 
               <div>
