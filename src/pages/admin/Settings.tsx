@@ -334,7 +334,7 @@ const Settings = () => {
                   <div>
                     <h2 className="text-lg font-semibold theme-text-primary">Appearance</h2>
                     <p className="text-sm theme-text-muted">Customize the look and feel</p>
-                  </div>
+                </div>
               </div>
 
                 <div className="space-y-6">
@@ -558,8 +558,8 @@ const Settings = () => {
                       placeholder="Umunsi News"
                       className="w-full px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:outline-none focus:border-[#fcd535]/50"
                   />
-                  </div>
                 </div>
+              </div>
 
                 <button className="px-4 py-2 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary hover:border-blue-500/50 transition-colors">
                   Test Email Connection
@@ -630,7 +630,7 @@ const Settings = () => {
                         settings.notifications.newsletterEnabled ? 'translate-x-7' : 'translate-x-1'
                       }`}></div>
                     </button>
-                  </div>
+                </div>
               </div>
             </div>
           )}

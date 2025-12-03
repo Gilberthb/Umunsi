@@ -255,7 +255,7 @@ const Home = () => {
                 }`}
               >
                 {cat.name}
-              </button>
+                </button>
             ))}
           </div>
         </div>
@@ -274,7 +274,7 @@ const Home = () => {
               </div>
             </div>
           </div>
-        </div>
+                </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -335,7 +335,7 @@ const Home = () => {
               <div className="p-2 border-b theme-border-primary">
                 <p className="theme-text-muted text-xs text-center uppercase tracking-wider">Kwamamaza</p>
               </div>
-              <div className="p-4">
+                    <div className="p-4">
                 <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center h-[250px] hover:border-[#fcd535]/50 transition-colors">
                   <div className="text-center">
                     <div className="w-16 h-16 mx-auto mb-3 rounded-full theme-bg-tertiary flex items-center justify-center">
@@ -460,7 +460,7 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-            </div>
+                      </div>
 
             {/* Categories List */}
             <div className="theme-bg-secondary rounded-lg overflow-hidden">
@@ -469,7 +469,7 @@ const Home = () => {
                   <Zap className="w-5 h-5 text-[#fcd535]" />
                   Ibyiciro
                 </h2>
-              </div>
+                    </div>
 
               <div className="p-2">
                 {categories.map((category) => (
@@ -498,8 +498,8 @@ const Home = () => {
                     <span className="text-3xl mb-2 block">📢</span>
                     <p className="theme-text-tertiary text-xs font-medium">Square Ad</p>
                     <p className="text-[#fcd535] text-[10px] font-bold">300 x 300 px</p>
-                  </div>
-                </div>
+            </div>
+          </div>
               </div>
             </div>
 
@@ -528,7 +528,7 @@ const Home = () => {
                         <Heart className="w-3 h-3 text-emerald-500 fill-emerald-500" />
                         {post.likeCount || 0}
                       </div>
-                    </div>
+                  </div>
                   </Link>
                 ))}
               </div>
@@ -538,7 +538,7 @@ const Home = () => {
             <div className="theme-bg-secondary rounded-lg overflow-hidden">
               <div className="p-2 border-b theme-border-primary">
                 <p className="theme-text-muted text-[10px] text-center uppercase tracking-wider">Kwamamaza</p>
-              </div>
+                    </div>
               <div className="p-3">
                 <div className="theme-bg-primary rounded-lg border-2 border-dashed theme-border-primary flex flex-col items-center justify-center h-[400px] hover:border-[#fcd535]/50 transition-colors">
                   <div className="text-center">

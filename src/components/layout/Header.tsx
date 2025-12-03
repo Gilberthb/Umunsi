@@ -61,11 +61,11 @@ const Header = () => {
                 <div className="flex items-center space-x-1.5">
                   <Calendar size={14} className="text-[#fcd535]" />
                   <span>{new Date().toLocaleDateString('rw-RW', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                </div>
+            </div>
                 <div className="h-3 w-px theme-bg-tertiary"></div>
                 <div className="flex items-center space-x-1.5">
                   <Thermometer size={14} className="text-[#fcd535]" />
-                  <span>22°C Kigali</span>
+              <span>22°C Kigali</span>
                 </div>
               </div>
 
@@ -142,7 +142,7 @@ const Header = () => {
                           >
                             <Settings size={14} />
                             <span>Admin Dashboard</span>
-                          </Link>
+            </Link>
                         )}
                         <button 
                           onClick={() => { logout(); setIsUserMenuOpen(false); navigate('/'); }}
@@ -160,9 +160,9 @@ const Header = () => {
                   to="/login" 
                   className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] font-semibold rounded-lg hover:from-[#f0b90b] hover:to-[#fcd535] transition-all transform hover:scale-105"
                 >
-                  <User size={14} />
-                  <span>Kwinjira</span>
-                </Link>
+              <User size={14} />
+              <span>Kwinjira</span>
+            </Link>
               )}
             </div>
           </div>
@@ -216,15 +216,15 @@ const Header = () => {
                     {isMoreOpen && (
                       <div className="absolute right-0 top-full mt-2 w-56 theme-bg-card shadow-2xl rounded-xl border theme-border-primary py-2 z-50">
                         {moreCategories.map((cat) => (
-                          <Link
+              <Link
                             key={cat.id}
                             to={`/category/${cat.slug}`}
                             onClick={() => setIsMoreOpen(false)}
                             className="block px-4 py-2.5 theme-text-secondary hover:theme-bg-tertiary hover:text-[#fcd535] transition-colors text-sm"
                           >
                             {cat.name}
-                          </Link>
-                        ))}
+              </Link>
+            ))}
                       </div>
                     )}
                   </div>
@@ -240,7 +240,7 @@ const Header = () => {
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="p-2.5 theme-text-tertiary hover:text-[#fcd535] transition-colors hover:theme-bg-tertiary rounded-lg"
-              >
+ >
                 <Search size={20} />
               </button>
 
@@ -249,21 +249,21 @@ const Header = () => {
                   <form onSubmit={handleSearch}>
                     <div className="flex items-center space-x-3 theme-bg-tertiary rounded-lg p-3 border theme-border-primary focus-within:border-[#fcd535]/50 transition-colors">
                       <Search size={18} className="theme-text-muted" />
-                      <input
-                        type="text"
+                    <input
+                      type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Shakisha amakuru..."
+                      placeholder="Shakisha amakuru..."
                         className="flex-1 outline-none text-sm bg-transparent theme-text-primary placeholder:theme-text-muted"
                         autoFocus
-                      />
+ />
                       <button 
                         type="submit"
                         className="bg-gradient-to-r from-[#fcd535] to-[#f0b90b] text-[#0b0e11] px-4 py-2 rounded-lg text-sm font-semibold hover:from-[#f0b90b] hover:to-[#fcd535] transition-all transform hover:scale-105"
                       >
-                        Shakisha
-                      </button>
-                    </div>
+                      Shakisha
+                    </button>
+                  </div>
                   </form>
                   {categories.length > 0 && (
                     <div className="mt-3 space-y-2">
@@ -290,7 +290,7 @@ const Header = () => {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden p-2.5 theme-text-tertiary hover:text-[#fcd535] transition-colors hover:theme-bg-tertiary rounded-lg"
-            >
+ >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -313,16 +313,16 @@ const Header = () => {
                     All Categories ({categories.length})
                   </div>
                   {categories.map((cat) => (
-                    <Link
+                <Link
                       key={cat.id}
                       to={`/category/${cat.slug}`}
                       className="flex items-center px-4 py-3 theme-text-secondary hover:theme-bg-tertiary hover:theme-text-primary transition-colors font-medium rounded-xl group"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
+                  onClick={() => setIsMenuOpen(false)}
+                >
                       <span>{cat.name}</span>
                       <ChevronDown size={16} className="ml-auto theme-text-muted group-hover:text-[#fcd535] transform -rotate-90" />
-                    </Link>
-                  ))}
+                </Link>
+              ))}
                 </>
               )}
             </nav>
