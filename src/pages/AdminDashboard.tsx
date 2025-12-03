@@ -250,8 +250,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen theme-bg-primary p-6 lg:p-8">
       {/* Welcome Banner */}
-      <div className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-tertiary)] to-[var(--bg-secondary)] border theme-border-primary">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmIyZjM2IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+      <div className="relative mb-8 overflow-hidden rounded-2xl theme-bg-secondary border theme-border-primary">
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#fcd535]/10 to-transparent rounded-full blur-3xl"></div>
         <div className="relative px-8 py-10">
           <div className="flex items-center justify-between">
