@@ -328,7 +328,7 @@ const MediaLibrary: React.FC = () => {
   const docCount = mediaFiles.filter(f => f.mimeType.includes('pdf') || f.mimeType.includes('document')).length;
 
   return (
-    <div className="p-6 bg-[#0b0e11] min-h-screen">
+    <div className="p-6 theme-bg-primary min-h-screen">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
@@ -337,14 +337,14 @@ const MediaLibrary: React.FC = () => {
               <Database className="w-6 h-6 text-orange-400" />
             </div>
           <div>
-              <h1 className="text-2xl font-bold text-white">Media Library</h1>
-              <p className="text-gray-400 mt-1">Manage your media files and assets</p>
+              <h1 className="text-2xl font-bold theme-text-primary">Media Library</h1>
+              <p className="theme-text-tertiary mt-1">Manage your media files and assets</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <button 
               onClick={() => setShowMediaLibraryModal(true)}
-              className="inline-flex items-center px-4 py-2.5 text-gray-300 border border-[#2b2f36] rounded-xl hover:bg-[#1e2329] transition-colors"
+              className="inline-flex items-center px-4 py-2.5 theme-text-secondary border theme-border-primary rounded-xl hover:theme-bg-tertiary transition-colors"
             >
               <Eye className="w-4 h-4 mr-2" />
               Browse Library
@@ -362,44 +362,44 @@ const MediaLibrary: React.FC = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+        <div className="theme-bg-secondary p-5 rounded-2xl border theme-border-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Total Files</p>
-              <p className="text-2xl font-bold text-white mt-1">{totalFiles}</p>
+              <p className="text-sm theme-text-tertiary">Total Files</p>
+              <p className="text-2xl font-bold theme-text-primary mt-1">{totalFiles}</p>
             </div>
             <div className="p-3 bg-blue-500/10 rounded-xl">
               <Database className="w-6 h-6 text-blue-400" />
             </div>
           </div>
         </div>
-        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+        <div className="theme-bg-secondary p-5 rounded-2xl border theme-border-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Images</p>
-              <p className="text-2xl font-bold text-white mt-1">{imageCount}</p>
+              <p className="text-sm theme-text-tertiary">Images</p>
+              <p className="text-2xl font-bold theme-text-primary mt-1">{imageCount}</p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-xl">
               <ImageIcon className="w-6 h-6 text-emerald-400" />
             </div>
           </div>
         </div>
-        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+        <div className="theme-bg-secondary p-5 rounded-2xl border theme-border-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Videos</p>
-              <p className="text-2xl font-bold text-white mt-1">{videoCount}</p>
+              <p className="text-sm theme-text-tertiary">Videos</p>
+              <p className="text-2xl font-bold theme-text-primary mt-1">{videoCount}</p>
             </div>
             <div className="p-3 bg-purple-500/10 rounded-xl">
               <Video className="w-6 h-6 text-purple-400" />
             </div>
           </div>
         </div>
-        <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36]">
+        <div className="theme-bg-secondary p-5 rounded-2xl border theme-border-primary">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">Documents</p>
-              <p className="text-2xl font-bold text-white mt-1">{docCount}</p>
+              <p className="text-sm theme-text-tertiary">Documents</p>
+              <p className="text-2xl font-bold theme-text-primary mt-1">{docCount}</p>
             </div>
             <div className="p-3 bg-orange-500/10 rounded-xl">
               <FileText className="w-6 h-6 text-orange-400" />
@@ -409,17 +409,17 @@ const MediaLibrary: React.FC = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-[#181a20] p-5 rounded-2xl border border-[#2b2f36] mb-6">
+      <div className="theme-bg-secondary p-5 rounded-2xl border theme-border-primary mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 theme-text-muted w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search files..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
+                className="w-full pl-10 pr-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-primary placeholder:theme-text-muted focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
               />
             </div>
           </div>
@@ -427,7 +427,7 @@ const MediaLibrary: React.FC = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2.5 bg-[#0b0e11] border border-[#2b2f36] rounded-xl text-gray-300 focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
+              className="px-4 py-2.5 theme-bg-tertiary border theme-border-primary rounded-xl theme-text-secondary focus:ring-2 focus:ring-[#fcd535]/50 focus:border-[#fcd535]"
             >
               {categories.map(category => (
                 <option key={category.value} value={category.value}>
@@ -435,16 +435,16 @@ const MediaLibrary: React.FC = () => {
                 </option>
               ))}
             </select>
-            <div className="flex border border-[#2b2f36] rounded-xl overflow-hidden">
+            <div className="flex border theme-border-primary rounded-xl overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2.5 ${viewMode === 'grid' ? 'bg-[#fcd535]/10 text-[#fcd535]' : 'bg-[#0b0e11] text-gray-400 hover:bg-[#1e2329]'}`}
+                className={`p-2.5 ${viewMode === 'grid' ? 'bg-[#fcd535]/10 text-[#fcd535]' : 'theme-bg-tertiary theme-text-tertiary hover:theme-bg-card-hover'}`}
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2.5 ${viewMode === 'list' ? 'bg-[#fcd535]/10 text-[#fcd535]' : 'bg-[#0b0e11] text-gray-400 hover:bg-[#1e2329]'}`}
+                className={`p-2.5 ${viewMode === 'list' ? 'bg-[#fcd535]/10 text-[#fcd535]' : 'theme-bg-tertiary theme-text-tertiary hover:theme-bg-card-hover'}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -470,7 +470,7 @@ const MediaLibrary: React.FC = () => {
               </button>
               <button
                 onClick={clearSelection}
-                className="px-4 py-2 bg-[#1e2329] text-gray-300 rounded-xl hover:bg-[#2b2f36] transition-colors"
+                className="px-4 py-2 theme-bg-tertiary theme-text-secondary rounded-xl hover:theme-bg-card-hover transition-colors"
               >
                 Clear
               </button>
@@ -485,12 +485,12 @@ const MediaLibrary: React.FC = () => {
           <div className="w-8 h-8 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36]">
+        <div className="theme-bg-secondary rounded-2xl border theme-border-primary">
           {filteredFiles.length === 0 ? (
             <div className="text-center py-12">
-              <FolderOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No files found</h3>
-              <p className="text-gray-500 mb-4">
+              <FolderOpen className="w-16 h-16 theme-text-muted mx-auto mb-4" />
+              <h3 className="text-lg font-medium theme-text-primary mb-2">No files found</h3>
+              <p className="theme-text-muted mb-4">
                 {searchTerm || selectedCategory !== 'all' 
                   ? 'Try adjusting your search or filter criteria'
                   : 'Upload your first media file to get started'
@@ -517,7 +517,7 @@ const MediaLibrary: React.FC = () => {
                         className={`relative group cursor-pointer rounded-xl border-2 transition-all ${
                           selectedFiles.includes(file.id) 
                             ? 'border-[#fcd535] bg-[#fcd535]/5' 
-                            : 'border-[#2b2f36] hover:border-[#fcd535]/50 bg-[#0b0e11]'
+                            : 'theme-border-primary hover:border-[#fcd535]/50 theme-bg-tertiary'
                         }`}
                         onClick={(e) => handleMediaItemClick(file, e)}
                       >
@@ -535,14 +535,14 @@ const MediaLibrary: React.FC = () => {
                             />
                           ) : null}
                           <div className={`w-full h-full flex items-center justify-center ${file.mimeType.startsWith('image/') ? 'hidden' : 'flex'}`}>
-                            <FileIcon className="w-10 h-10 text-gray-500" />
+                            <FileIcon className="w-10 h-10 theme-text-muted" />
                           </div>
                         </div>
-                        <div className="p-3 border-t border-[#2b2f36]">
-                          <p className="text-xs font-medium text-white truncate">
+                        <div className="p-3 border-t theme-border-primary">
+                          <p className="text-xs font-medium theme-text-primary truncate">
                             {file.originalName}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs theme-text-muted mt-1">
                             {formatFileSize(file.size)}
                           </p>
                         </div>
@@ -552,13 +552,13 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               handleMediaItemClick(file, e);
                             }}
-                            className="p-1.5 bg-[#181a20] rounded-lg shadow-lg hover:bg-[#2b2f36] border border-[#2b2f36]"
+                            className="p-1.5 theme-bg-secondary rounded-lg shadow-lg hover:theme-bg-card-hover border theme-border-primary"
                             title={isDocument(file.mimeType) ? "Read" : "View"}
                           >
                             {isDocument(file.mimeType) ? (
                               <FileText className="w-3 h-3 text-blue-400" />
                             ) : (
-                              <Eye className="w-3 h-3 text-gray-300" />
+                              <Eye className="w-3 h-3 theme-text-secondary" />
                             )}
                           </button>
                           <button 
@@ -566,7 +566,7 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               handleDeleteFiles([file.id]);
                             }}
-                            className="p-1.5 bg-[#181a20] rounded-lg shadow-lg hover:bg-red-500/10 border border-[#2b2f36]"
+                            className="p-1.5 theme-bg-secondary rounded-lg shadow-lg hover:bg-red-500/10 border theme-border-primary"
                             title="Delete"
                           >
                             <Trash2 className="w-3 h-3 text-red-400" />
@@ -580,7 +580,7 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               toggleFileSelection(file.id);
                             }}
-                            className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535]"
+                            className="w-4 h-4 text-[#fcd535] theme-bg-tertiary theme-border-primary rounded focus:ring-[#fcd535]"
                           />
                         </div>
                       </div>
@@ -597,7 +597,7 @@ const MediaLibrary: React.FC = () => {
                         className={`flex items-center p-4 rounded-xl border transition-all cursor-pointer ${
                           selectedFiles.includes(file.id) 
                             ? 'border-[#fcd535] bg-[#fcd535]/5' 
-                            : 'border-[#2b2f36] hover:border-[#fcd535]/50 bg-[#0b0e11]'
+                            : 'theme-border-primary hover:border-[#fcd535]/50 theme-bg-tertiary'
                         }`}
                         onClick={(e) => handleMediaItemClick(file, e)}
                       >
@@ -608,16 +608,16 @@ const MediaLibrary: React.FC = () => {
                             e.stopPropagation();
                             toggleFileSelection(file.id);
                           }}
-                          className="w-4 h-4 text-[#fcd535] bg-[#0b0e11] border-[#2b2f36] rounded focus:ring-[#fcd535] mr-4"
+                          className="w-4 h-4 text-[#fcd535] theme-bg-tertiary theme-border-primary rounded focus:ring-[#fcd535] mr-4"
                         />
-                        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-[#181a20] rounded-xl border border-[#2b2f36]">
-                          <FileIcon className="w-6 h-6 text-gray-500" />
+                        <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center theme-bg-secondary rounded-xl border theme-border-primary">
+                          <FileIcon className="w-6 h-6 theme-text-muted" />
                         </div>
                         <div className="flex-1 ml-4 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">
+                          <p className="text-sm font-medium theme-text-primary truncate">
                             {file.originalName}
                           </p>
-                          <div className="flex items-center text-xs text-gray-500 mt-1">
+                          <div className="flex items-center text-xs theme-text-muted mt-1">
                             <span>{formatFileSize(file.size)}</span>
                             <span className="mx-2">•</span>
                             <span>{new Date(file.createdAt).toLocaleDateString()}</span>
@@ -634,13 +634,13 @@ const MediaLibrary: React.FC = () => {
                               e.stopPropagation();
                               handleMediaItemClick(file, e);
                             }}
-                            className="p-2 hover:bg-[#1e2329] rounded-lg transition-colors"
+                            className="p-2 hover:theme-bg-tertiary rounded-lg transition-colors"
                             title={isDocument(file.mimeType) ? "Read" : "View"}
                           >
                             {isDocument(file.mimeType) ? (
                               <FileText className="w-4 h-4 text-blue-400" />
                             ) : (
-                              <Eye className="w-4 h-4 text-gray-400" />
+                              <Eye className="w-4 h-4 theme-text-tertiary" />
                             )}
                           </button>
                           <button 
@@ -667,12 +667,12 @@ const MediaLibrary: React.FC = () => {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl w-full max-w-md border border-[#2b2f36]">
+          <div className="theme-bg-secondary rounded-2xl w-full max-w-md border theme-border-primary">
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Upload Files</h3>
-              <div className="border-2 border-dashed border-[#2b2f36] rounded-xl p-8 text-center hover:border-[#fcd535]/50 transition-colors bg-[#0b0e11]">
-                <Upload className="w-10 h-10 text-gray-500 mx-auto mb-4" />
-                <p className="text-sm text-gray-400 mb-4">
+              <h3 className="text-lg font-semibold theme-text-primary mb-4">Upload Files</h3>
+              <div className="border-2 border-dashed theme-border-primary rounded-xl p-8 text-center hover:border-[#fcd535]/50 transition-colors theme-bg-tertiary">
+                <Upload className="w-10 h-10 theme-text-muted mx-auto mb-4" />
+                <p className="text-sm theme-text-tertiary mb-4">
                   Drag and drop files here, or click to select
                 </p>
                 <input
@@ -693,14 +693,14 @@ const MediaLibrary: React.FC = () => {
               {uploading && (
                 <div className="mt-4 text-center">
                   <div className="w-6 h-6 border-2 border-[#fcd535]/20 border-t-[#fcd535] rounded-full animate-spin mx-auto"></div>
-                  <p className="text-sm text-gray-400 mt-2">Uploading files...</p>
+                  <p className="text-sm theme-text-tertiary mt-2">Uploading files...</p>
                 </div>
               )}
             </div>
-            <div className="px-6 py-4 bg-[#0b0e11] rounded-b-2xl flex justify-end border-t border-[#2b2f36]">
+            <div className="px-6 py-4 theme-bg-tertiary rounded-b-2xl flex justify-end border-t theme-border-primary">
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                className="px-4 py-2 theme-text-tertiary hover:theme-text-primary transition-colors"
               >
                 Cancel
               </button>
@@ -846,23 +846,23 @@ const MediaLibrary: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl p-6 max-w-md w-full border border-[#2b2f36]">
+          <div className="theme-bg-secondary rounded-2xl p-6 max-w-md w-full border theme-border-primary">
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0 w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
                 <Trash2 className="w-6 h-6 text-red-400" />
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold theme-text-primary">
                   Delete {filesToDelete.length === 1 ? 'File' : 'Files'}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm theme-text-muted">
                   This action cannot be undone.
                 </p>
               </div>
             </div>
             
             <div className="mb-6">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm theme-text-tertiary">
                 Are you sure you want to delete {filesToDelete.length === 1 ? 'this file' : `these ${filesToDelete.length} files`}? 
                 This will permanently remove {filesToDelete.length === 1 ? 'it' : 'them'} from the server.
               </p>
@@ -871,7 +871,7 @@ const MediaLibrary: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2.5 text-sm font-medium text-gray-300 bg-[#0b0e11] border border-[#2b2f36] rounded-xl hover:bg-[#1e2329] transition-colors"
+                className="px-4 py-2.5 text-sm font-medium theme-text-secondary theme-bg-tertiary border theme-border-primary rounded-xl hover:theme-bg-card-hover transition-colors"
               >
                 Cancel
               </button>

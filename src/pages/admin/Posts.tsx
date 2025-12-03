@@ -284,12 +284,12 @@ const Posts: React.FC = () => {
 
       {/* Posts Grid/List */}
       {posts.length === 0 ? (
-        <div className="text-center py-16 bg-[#181a20] rounded-2xl border border-[#2b2f36]">
-          <div className="w-16 h-16 bg-[#2b2f36] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-gray-500" />
+        <div className="text-center py-16 theme-bg-secondary rounded-2xl border theme-border-primary">
+          <div className="w-16 h-16 theme-bg-tertiary rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 theme-text-muted" />
         </div>
-          <h3 className="text-lg font-medium text-white mb-2">No posts found</h3>
-          <p className="text-gray-400 mb-4">Get started by creating your first post.</p>
+          <h3 className="text-lg font-medium theme-text-primary mb-2">No posts found</h3>
+          <p className="theme-text-tertiary mb-4">Get started by creating your first post.</p>
           <button
             onClick={() => navigate('/admin/posts/add')}
             className="px-4 py-2 bg-[#fcd535] text-[#0b0e11] font-medium rounded-lg hover:bg-[#f0b90b] transition-all"
@@ -302,10 +302,10 @@ const Posts: React.FC = () => {
           {posts.map((post) => (
             <div
               key={post.id}
-              className={`bg-[#181a20] rounded-xl border-2 transition-all cursor-pointer group ${
+              className={`theme-bg-secondary rounded-xl border-2 transition-all cursor-pointer group ${
                 selectedPosts.includes(post.id) 
                   ? 'border-[#fcd535]' 
-                  : 'border-[#2b2f36] hover:border-[#fcd535]/30'
+                  : 'theme-border-primary hover:border-[#fcd535]/30'
               }`}
               onClick={(e) => {
                 if ((e.target as HTMLElement).closest('input[type="checkbox"]') || 
@@ -320,7 +320,7 @@ const Posts: React.FC = () => {
                       type="checkbox"
                       checked={selectedPosts.includes(post.id)}
                       onChange={() => togglePostSelection(post.id)}
-                      className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535] focus:ring-[#fcd535]/50"
+                      className="w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535] focus:ring-[#fcd535]/50"
                     />
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-md border ${getStatusBadge(post.status)}`}>
                       {post.status}
@@ -332,7 +332,7 @@ const Posts: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mb-3 relative overflow-hidden rounded-lg aspect-video bg-[#2b2f36]">
+                <div className="mb-3 relative overflow-hidden rounded-lg aspect-video theme-bg-tertiary">
                     {post.featuredImage ? (
                       <img
                         src={getImageUrl(post.featuredImage)}
@@ -350,11 +350,11 @@ const Posts: React.FC = () => {
                   )}
                 </div>
 
-                <h3 className="text-sm font-semibold text-white mb-2 line-clamp-2 group-hover:text-[#fcd535] transition-colors">
+                <h3 className="text-sm font-semibold theme-text-primary mb-2 line-clamp-2 group-hover:text-[#fcd535] transition-colors">
                   {post.title}
                 </h3>
 
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                <div className="flex items-center justify-between text-xs theme-text-muted mb-3">
                   <div className="flex items-center space-x-1">
                       <User className="w-3 h-3" />
                     <span>{post.author.firstName} {post.author.lastName}</span>
@@ -365,9 +365,9 @@ const Posts: React.FC = () => {
                     </div>
                   </div>
                   
-                <div className="flex items-center justify-between text-xs text-gray-500">
+                <div className="flex items-center justify-between text-xs theme-text-muted">
                     {post.category && (
-                    <span className="px-2 py-0.5 bg-[#2b2f36] rounded text-gray-400">
+                    <span className="px-2 py-0.5 theme-bg-tertiary rounded theme-text-tertiary">
                           {post.category.name}
                         </span>
                   )}
@@ -377,23 +377,23 @@ const Posts: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#2b2f36]">
+                <div className="flex items-center justify-between mt-3 pt-3 border-t theme-border-primary">
                   <div className="flex items-center space-x-1">
                     <button 
                       onClick={() => navigate(`/admin/posts/${post.id}`)}
-                      className="p-1.5 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg transition-colors"
+                      className="p-1.5 theme-text-muted hover:text-[#fcd535] hover:theme-bg-tertiary rounded-lg transition-colors"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                      className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
+                      className="p-1.5 theme-text-muted hover:text-blue-400 hover:theme-bg-tertiary rounded-lg transition-colors"
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleDeletePosts([post.id])}
-                      className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg transition-colors"
+                      className="p-1.5 theme-text-muted hover:text-red-400 hover:theme-bg-tertiary rounded-lg transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -404,32 +404,32 @@ const Posts: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] overflow-hidden">
+        <div className="theme-bg-secondary rounded-2xl border theme-border-primary overflow-hidden">
             <table className="w-full">
-            <thead className="bg-[#1e2329] border-b border-[#2b2f36]">
+            <thead className="theme-bg-tertiary border-b theme-border-primary">
                 <tr>
                 <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
                     checked={selectedPosts.length === posts.length && posts.length > 0}
                     onChange={selectedPosts.length === posts.length ? clearSelection : selectAllPosts}
-                    className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
+                    className="w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535]"
                     />
                   </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Post</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Author</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Stats</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Post</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Author</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Stats</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium theme-text-tertiary uppercase">Actions</th>
                 </tr>
               </thead>
-            <tbody className="divide-y divide-[#2b2f36]">
+            <tbody className="divide-y theme-border-primary">
               {posts.map((post) => (
                   <tr 
                     key={post.id} 
-                  className="hover:bg-[#1e2329] cursor-pointer transition-colors"
+                  className="hover:theme-bg-tertiary cursor-pointer transition-colors"
                     onClick={(e) => {
                       if ((e.target as HTMLElement).closest('input[type="checkbox"]') || 
                         (e.target as HTMLElement).closest('button')) return;
@@ -441,26 +441,26 @@ const Posts: React.FC = () => {
                         type="checkbox"
                         checked={selectedPosts.includes(post.id)}
                         onChange={() => togglePostSelection(post.id)}
-                      className="w-4 h-4 rounded bg-[#2b2f36] border-[#2b2f36] text-[#fcd535]"
+                      className="w-4 h-4 rounded theme-bg-tertiary theme-border-primary text-[#fcd535]"
                       />
                     </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-[#2b2f36] rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-12 h-12 theme-bg-tertiary rounded-lg overflow-hidden flex-shrink-0">
                           {post.featuredImage ? (
                           <img src={getImageUrl(post.featuredImage)} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-gray-600" />
+                            <FileText className="w-5 h-5 theme-text-muted" />
                             </div>
                           )}
                         </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate flex items-center">
+                        <p className="text-sm font-medium theme-text-primary truncate flex items-center">
                           {post.title}
                           {post.isFeatured && <Star className="w-3 h-3 text-[#fcd535] ml-2" />}
                         </p>
-                        {post.excerpt && <p className="text-xs text-gray-500 truncate">{post.excerpt}</p>}
+                        {post.excerpt && <p className="text-xs theme-text-muted truncate">{post.excerpt}</p>}
                       </div>
                       </div>
                     </td>
@@ -469,38 +469,38 @@ const Posts: React.FC = () => {
                       {post.status}
                     </span>
                     </td>
-                  <td className="px-4 py-3 text-sm text-gray-300">{post.author.firstName} {post.author.lastName}</td>
+                  <td className="px-4 py-3 text-sm theme-text-secondary">{post.author.firstName} {post.author.lastName}</td>
                   <td className="px-4 py-3">
                       {post.category ? (
-                      <span className="px-2 py-1 bg-[#2b2f36] rounded text-xs text-gray-400">{post.category.name}</span>
+                      <span className="px-2 py-1 theme-bg-tertiary rounded text-xs theme-text-tertiary">{post.category.name}</span>
                       ) : (
-                      <span className="text-gray-600 text-xs">No category</span>
+                      <span className="theme-text-muted text-xs">No category</span>
                       )}
                     </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center space-x-3 text-xs text-gray-500">
+                    <div className="flex items-center space-x-3 text-xs theme-text-muted">
                       <span className="flex items-center"><Eye className="w-3 h-3 mr-1" />{post.viewCount}</span>
                       <span className="flex items-center"><MessageCircle className="w-3 h-3 mr-1" />{post.commentCount}</span>
                       </div>
                     </td>
-                  <td className="px-4 py-3 text-sm text-gray-400">{formatDate(post.createdAt)}</td>
+                  <td className="px-4 py-3 text-sm theme-text-tertiary">{formatDate(post.createdAt)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center space-x-1">
                         <button 
                           onClick={() => navigate(`/admin/posts/${post.id}`)}
-                        className="p-1.5 text-gray-500 hover:text-[#fcd535] hover:bg-[#2b2f36] rounded-lg"
+                        className="p-1.5 theme-text-muted hover:text-[#fcd535] hover:theme-bg-tertiary rounded-lg"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => navigate(`/admin/posts/edit/${post.id}`)}
-                        className="p-1.5 text-gray-500 hover:text-blue-400 hover:bg-[#2b2f36] rounded-lg"
+                        className="p-1.5 theme-text-muted hover:text-blue-400 hover:theme-bg-tertiary rounded-lg"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => handleDeletePosts([post.id])}
-                        className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-[#2b2f36] rounded-lg"
+                        className="p-1.5 theme-text-muted hover:text-red-400 hover:theme-bg-tertiary rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -515,15 +515,15 @@ const Posts: React.FC = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6 bg-[#181a20] rounded-xl border border-[#2b2f36] p-4">
-          <div className="text-sm text-gray-400">
+        <div className="flex items-center justify-between mt-6 theme-bg-secondary rounded-xl border theme-border-primary p-4">
+          <div className="text-sm theme-text-tertiary">
             Page {currentPage} of {totalPages}
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 bg-[#2b2f36] text-gray-400 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#363a45] hover:text-white transition-colors flex items-center"
+              className="px-3 py-1.5 theme-bg-tertiary theme-text-tertiary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:theme-bg-card-hover hover:theme-text-primary transition-colors flex items-center"
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
@@ -531,7 +531,7 @@ const Posts: React.FC = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 bg-[#2b2f36] text-gray-400 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#363a45] hover:text-white transition-colors flex items-center"
+              className="px-3 py-1.5 theme-bg-tertiary theme-text-tertiary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:theme-bg-card-hover hover:theme-text-primary transition-colors flex items-center"
             >
               Next
               <ChevronRight className="w-4 h-4 ml-1" />
@@ -543,27 +543,27 @@ const Posts: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#181a20] rounded-2xl border border-[#2b2f36] p-6 max-w-md w-full">
+          <div className="theme-bg-secondary rounded-2xl border theme-border-primary p-6 max-w-md w-full">
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mr-4">
                 <Trash2 className="w-6 h-6 text-red-400" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold theme-text-primary">
                   Delete {postsToDelete.length === 1 ? 'Post' : 'Posts'}
                 </h3>
-                <p className="text-sm text-gray-400">This action cannot be undone.</p>
+                <p className="text-sm theme-text-tertiary">This action cannot be undone.</p>
               </div>
             </div>
             
-            <p className="text-sm text-gray-300 mb-6">
+            <p className="text-sm theme-text-secondary mb-6">
                 Are you sure you want to delete {postsToDelete.length === 1 ? 'this post' : `these ${postsToDelete.length} posts`}? 
               </p>
             
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white hover:bg-[#2b2f36] rounded-lg transition-colors"
+                className="px-4 py-2 theme-text-tertiary hover:theme-text-primary hover:theme-bg-tertiary rounded-lg transition-colors"
               >
                 Cancel
               </button>
