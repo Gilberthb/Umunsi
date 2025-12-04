@@ -9,12 +9,12 @@
 :root,
 :root.light,
 .light {
-  /* Light Mode Colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
+  /* Light Mode Colors - Clean White Theme */
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f3f4f6;
   --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
+  --bg-card-hover: #f9fafb;
   --bg-input: #ffffff;
   --bg-dropdown: #ffffff;
   
@@ -26,9 +26,9 @@
   --text-inverse: #ffffff;
   
   /* Border Colors - Light Mode */
-  --border-primary: #e2e8f0;
-  --border-secondary: #cbd5e1;
-  --border-hover: #94a3b8;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --border-hover: #9ca3af;
   
   /* Accent Colors */
   --accent-primary: #fcd535;
@@ -787,6 +787,27 @@ textarea:focus {
 .news-card:hover {
   border-color: var(--border-hover);
   box-shadow: var(--shadow-md);
+}
+
+/* Light Mode - Clean White Content Boxes */
+.light .theme-bg-secondary,
+html.light .theme-bg-secondary,
+:root.light .theme-bg-secondary {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+}
+
+.light .theme-bg-tertiary,
+html.light .theme-bg-tertiary,
+:root.light .theme-bg-tertiary {
+  background-color: #f9fafb;
+}
+
+/* Light mode specific improvements */
+.light .theme-border-primary,
+html.light .theme-border-primary,
+:root.light .theme-border-primary {
+  border-color: #e5e7eb;
 }
 
 /* Input Styles */
