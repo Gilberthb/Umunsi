@@ -69,7 +69,7 @@ export const AD_PLACEMENTS = {
 };
 
 const getServerBaseUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://fggg.space/api';
+  const apiUrl = import.meta.env.VITE_API_URL || 'fgggg.space/api';
   return apiUrl.replace('/api', '');
 };
 

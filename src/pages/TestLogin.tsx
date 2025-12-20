@@ -11,7 +11,7 @@ const TestLogin = () => {
     setResult('Starting login...\n');
 
     try {
-      const apiUrl = `${import.meta.env.VITE_API_URL || 'https://fggg.space/api'}/auth/login`;
+      const apiUrl = `${import.meta.env.VITE_API_URL || 'fgggg.space/api'}/auth/login`;
       setResult(prev => prev + `Calling: ${apiUrl}\n`);
       setResult(prev => prev + `Email: ${email}\n`);
       setResult(prev => prev + `Password: ${password}\n\n`);
