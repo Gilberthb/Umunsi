@@ -4,10 +4,7 @@ import { Clock, Eye, ChevronRight, Loader2, Heart, TrendingUp, Zap, AlertCircle,
 import { apiClient, Post, Category, Ad } from '../services/api';
 
 const getServerBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    return (import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api').replace('/api', '');
-  }
-  return (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  return (import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api').replace('/api', '');
 };
 
 // Ad Placement Types
@@ -34,10 +31,7 @@ const AdBanner: React.FC<AdBannerProps> = ({
   const [hasError, setHasError] = useState(false);
   
   const getServerBaseUrl = () => {
-    if (import.meta.env.DEV) {
-      return (import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api').replace('/api', '');
-    }
-    return (import.meta.env.VITE_API_URL || '').replace('/api', '');
+    return (import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api').replace('/api', '');
   };
 
   // Find active ad for this placement (highest priority first)

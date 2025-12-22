@@ -4,10 +4,7 @@ import { Clock, Eye, Heart, ChevronRight, ArrowLeft, Loader2, TrendingUp, Calend
 import { apiClient, Post, Category } from '../services/api';
 
 const getServerBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    return (import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api').replace('/api', '');
-  }
-  return (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  return (import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api').replace('/api', '');
 };
 
 const CategoryPage = () => {
