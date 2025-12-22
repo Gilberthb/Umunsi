@@ -12,6 +12,7 @@ interface User {
   avatar?: string;
   isActive: boolean;
   lastLogin?: string;
+  twoFactorEnabled?: boolean;
 }
 
 // Auth context interface
