@@ -1,5 +1,5 @@
 // API Base Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'fgggg.space/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api';
 
 // API Response Types
 export interface ApiResponse<T = any> {

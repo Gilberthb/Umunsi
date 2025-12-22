@@ -103,7 +103,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     console.log('🖼️ InsertImage called with:', media);
     
     const getServerBaseUrl = () => {
-      const apiUrl = import.meta.env.VITE_API_URL || 'fgggg.space/api';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api';
       return apiUrl.replace('/api', '');
     };
     

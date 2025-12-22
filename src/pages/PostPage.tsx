@@ -23,7 +23,7 @@ import { apiClient, Post } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const getServerBaseUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'fgggg.space/api';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://motoinvestment2.space/api';
   return apiUrl.replace('/api', '');
 };
 
